@@ -1,0 +1,51 @@
+/* Company Name Styling */
+.company-name {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+.brand-name {
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(145deg, #f3f3f3, #ffffff);
+    padding: 15px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.brand-name:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.main-text {
+    color: #d4af37; /* Gold color for RISI RASA */
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.sub-text {
+    color: #555;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-text {
+        font-size: 1.8rem;
+    }
+    
+    .sub-text {
+        font-size: 1rem;
+    }
+}

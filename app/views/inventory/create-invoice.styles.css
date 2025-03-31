@@ -664,3 +664,27 @@
 .held-invoice-delete-icon:hover {
   color: darkred;
 }
+
+/* Pay to Supplier Modal Table Styles */
+.pay-now-supplier-table thead tr th,
+.pay-supplier-stocks-table thead tr th,
+.supplier-payments-table thead tr th {
+  /* background-color: #eef1f5;
+  color: white; */
+  font-family: "Poppins", serif;
+  padding: 10px;
+  text-align: center;
+}
+
+.pay-now-supplier-table thead tr,
+.pay-supplier-stocks-table thead tr,
+.supplier-payments-table thead tr {
+  border-bottom: 2px solid #b36161;
+}
+
+.pay-now-supplier-table tbody tr:hover,
+.pay-supplier-stocks-table tbody tr:hover,
+.supplier-payments-table tbody tr:hover {
+  background-color: #f06161;
+  cursor: pointer;
+}

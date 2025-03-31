@@ -51,14 +51,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_branch'])) {
         <div class="header-container">
             <!-- Left Section: Inventory Image -->
             <div class="inventory-image">
-                <img src="../../assets/images/spices.png" alt="Inventory" />
+                <img src="../../assets/images/loli.png" alt="Inventory" />
             </div>
 
             <!-- Middle Section: Company Name -->
             <div class="company-name">
                 <div class="brand-name">
                     <h1 class="main-text">RISI RASA</h1>
-                    <h2 class="sub-text">PRODUCTS</h2>
+                    <h2 class="sub-text" style="font-size: 1em; letter-spacing: 1px; margin-top: -5px; font-weight: 400;">PRODUCTS</h2>
                 </div>
             </div>
 

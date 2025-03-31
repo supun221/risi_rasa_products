@@ -90,7 +90,7 @@ form button:hover, .delete-button:hover, #stock-buttons button:hover, #add-suppl
 }
 
 /* Table styling */
-table th {
+/* table th {
     background-color: var(--primary-color);
     color: white;
 }
@@ -104,7 +104,7 @@ table {
     overflow: hidden;
     box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
-}
+} */
 
 /* Footer styling */
 .footer {
