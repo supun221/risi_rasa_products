@@ -1,14 +1,26 @@
+:root {
+    --primary-color: #e05b5b;
+    --secondary-color: #e47f7f;
+    --bg-color: #fcf5f5;
+    --text-color: #483535;
+    --button-bg-color: #f7c4c4;
+    --button-hover-color: #e9a8a8;
+}
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #f8f8f8;
+    background-color: var(--bg-color);
     text-align: center;
+    color: var(--text-color);
 }
 
 h1 {
     text-align: center;
     margin-bottom: 15px;
+    color: var(--primary-color);
 }
+
 .table-container {
     display: flex;
     justify-content: center;
@@ -33,8 +45,8 @@ table th, table td {
 }
 
 table th {
-    background-color:hsl(229, 98%, 81%);
-    border: none;;
+    background-color: var(--primary-color);
+    border: none;
     color: white;
 }
 
@@ -56,9 +68,8 @@ table tr:hover {
 }
 
 .action-buttons .edit {
-    background-color: #302bc9; 
-
-    color: #ddd;
+    background-color: var(--primary-color); 
+    color: white;
 }
 
 .action-buttons .delete {
@@ -66,41 +77,35 @@ table tr:hover {
     color: #f1f1f1;
     border-radius: 10%;
 }
+
 .action-buttons .delete:hover {
-    
     color: #fff3f3; 
     background-color: #73020d; /* Red */
     transform: scale(1.05);
 }
 
 .action-buttons .edit:hover {
-    background-color: #0a3981; 
+    background-color: var(--secondary-color); 
     color: #ffffff; 
     transform: scale(1.05);
 }
+
 .add-customer {
-    background-color: rgb(30, 21, 203);
+    background-color: var(--primary-color);
     margin-left: 20px;
     color: #ffffff;
-   
     border: none;
     border-radius: 4px;
-   
     padding: 10px 20px;
-   
     font-size: 16px;
-    /* Text size */
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
-   
 }
 
 .add-customer:hover {
-    background-color: rgb(46, 26, 180);
-      transform: scale(1.05);
-  
+    background-color: var(--secondary-color);
+    transform: scale(1.05);
 }
-
 
 .add-user-form {
     background-color: #fff;
@@ -122,7 +127,7 @@ table tr:hover {
 .add-user-form button {
     width: 100%;
     padding: 10px;
-    background-color: #007bff;
+    background-color: var(--primary-color);
     color: white;
     border: none;
     border-radius: 4px;
@@ -131,5 +136,5 @@ table tr:hover {
 }
 
 .add-user-form button:hover {
-    background-color: #0056b3;
+    background-color: var(--secondary-color);
 }

@@ -1,10 +1,10 @@
 <?php
-require_once '../header1.php';
 session_start();
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../auth/login.php");
     exit();
 }
+require_once '../header1.php';
 ?>
 
 <!DOCTYPE html>

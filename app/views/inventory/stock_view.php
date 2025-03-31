@@ -111,26 +111,7 @@ if (isset($_GET['action'])) {
 </head>
 
 <body>
-
-
-    <div class="header-container-rmaster">
-        <div class="text-partition-cont">
-            <!-- first content row -->
-            <div class="content-row">
-
-                <div class="timer-container">
-                    <span id="current-date">November 21, 2024</span>
-                    <span id="current-time">7:28:50 AM</span>
-                </div>
-
-                <div class="company-info">
-                    <!-- <span class="heading-sinhala">එග්ලන්ඩ් සුපර්</span> -->
-                    <span class="heading-english">Ameena Chilies</span>
-                    <span class="company-motto">The Best Spicy</span>
-                </div>
-            </div>
-        </div>
-    </div>
+<?php require_once '../header1.php'; ?>
 
     <h1>Manage Stock Entries</h1>
     <div id="searchWrapper">
@@ -954,33 +935,35 @@ if (isset($_GET['action'])) {
                 }
             });
         }
-        document.addEventListener('DOMContentLoaded', () => {
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
-        });
-
-        function updateDateTime() {
-            const now = new Date();
-            const timeElement = document.getElementById('current-time');
-            timeElement.textContent = now.toLocaleTimeString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true
-            });
-
-            const dateElement = document.getElementById('current-date');
-            dateElement.textContent = now.toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
-        });
+        
+        // Remove duplicate datetime update code - already in header1.php
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     updateDateTime();
+        //     setInterval(updateDateTime, 1000);
+        // });
+        // 
+        // function updateDateTime() {
+        //     const now = new Date();
+        //     const timeElement = document.getElementById('current-time');
+        //     timeElement.textContent = now.toLocaleTimeString('en-US', {
+        //         hour: 'numeric',
+        //         minute: '2-digit',
+        //         second: '2-digit',
+        //         hour12: true
+        //     });
+        // 
+        //     const dateElement = document.getElementById('current-date');
+        //     dateElement.textContent = now.toLocaleDateString('en-US', {
+        //         month: 'long',
+        //         day: 'numeric',
+        //         year: 'numeric'
+        //     });
+        // }
+        // 
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     updateDateTime();
+        //     setInterval(updateDateTime, 1000);
+        // });
 
         document.getElementById("addPromoBtn").addEventListener("click", function() {
             document.getElementById("promotionModal").style.display = "block";

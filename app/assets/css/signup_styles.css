@@ -1,8 +1,18 @@
 /* Scoped Signup Page Styles */
+:root {
+    --primary-color: #e05b5b;
+    --secondary-color: #e47f7f;
+    --bg-color: #fcf5f5;
+    --text-color: #483535;
+    --button-bg-color: #f7c4c4;
+    --button-hover-color: #e9a8a8;
+}
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #f8f8f8;
+    background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
 /* Container for Signup */
@@ -56,19 +66,19 @@ body {
 .signup-form input:focus,
 .signup-form select:focus,
 .signup-form button:focus {
-    border-color: #007bff; /* Highlight on focus */
+    border-color: var(--primary-color); /* Highlight on focus */
     outline: none;
-    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+    box-shadow: 0 0 4px rgba(224, 91, 91, 0.5);
 }
 
 .signup-form button {
-    background-color: #007bff; /* Button color */
+    background-color: var(--primary-color); /* Button color */
     color: #fff;
     cursor: pointer;
 }
 
 .signup-form button:hover {
-    background-color: #0056b3; /* Darker shade on hover */
+    background-color: var(--secondary-color); /* Darker shade on hover */
 }
 
 /* Signup Form Footer Text */
@@ -79,7 +89,7 @@ body {
 }
 
 .signup-container p a {
-    color: #007bff;
+    color: var(--primary-color);
     text-decoration: none;
 }
 

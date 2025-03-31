@@ -1,5 +1,5 @@
 <?php
-require_once '../header1.php';
+
 include '../../models/Database.php';
 session_start();
 $user_name = $_SESSION['username'];
@@ -9,6 +9,7 @@ $user_branch = $_SESSION['store'];
 if($user_role !== 'admin'){
     header('Location:../unauthorized/unauthorized_access.php');
 }
+require_once '../header1.php';
 ?>
 
 <!DOCTYPE html>

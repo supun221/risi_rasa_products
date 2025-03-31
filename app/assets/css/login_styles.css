@@ -1,13 +1,22 @@
 /* Global Styles */
+:root {
+    --primary-color: #e05b5b;
+    --secondary-color: #e47f7f;
+    --bg-color: #fcf5f5;
+    --text-color: #483535;
+    --form-bg: #ffebeb;
+}
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #f8f8f8;
+    background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
 /* Login Form Styles */
 .login-form {
-    background-color: #4fafc0;
+    background-color: var(--form-bg);
     padding: 20px 30px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -15,6 +24,7 @@ body {
     max-width: 350px;
     text-align: center;
     margin: 20px auto;
+    border: 1px solid #e9a8a8;
 }
 
 /* Input and Select Field Styles */
@@ -35,7 +45,7 @@ body {
 .login-form button {
     width: 80%;
     padding: 10px;
-    background-color: #007bff; /* Button color */
+    background-color: var(--primary-color); /* Button color */
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -44,16 +54,16 @@ body {
 }
 
 .login-form button:hover {
-    background-color: #0056b3; /* Darker shade on hover */
+    background-color: var(--secondary-color); /* Darker shade on hover */
 }
 
 /* Focus Styles */
 .login-form input:focus,
 .login-form select:focus,
 .login-form button:focus {
-    border-color: #007bff; /* Highlight on focus */
+    border-color: var(--primary-color); /* Highlight on focus */
     outline: none;
-    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+    box-shadow: 0 0 4px rgba(224, 91, 91, 0.5);
 }
 
 /* Select Field Specific Styles */
@@ -72,7 +82,7 @@ p {
 }
 
 p a {
-    color: #007bff;
+    color: var(--primary-color);
     text-decoration: none;
 }
 

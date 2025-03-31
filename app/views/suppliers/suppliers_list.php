@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-<?php require_once '../header.php'; ?>
+<?php require_once '../header1.php'; ?>
 <div class="container mt-5">
     <!-- Button to open the Add Supplier modal -->
     <button class="btn btn-primary mb-4" id="addSupplierBtn">+ Add Supplier</button>

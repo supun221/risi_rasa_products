@@ -1,50 +1,60 @@
 /* Base Styles */
+:root {
+    --primary-color: #e05b5b;
+    --secondary-color: #e47f7f;
+    --bg-color: #fcf5f5;
+    --text-color: #483535;
+    --button-bg-color: #f7c4c4;
+    --button-hover-color: #e9a8a8;
+    --button-text-color: #483535;
+}
+
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f8f8f8;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
     text-align: center;
+    color: var(--text-color);
 }
 
 h1 {
     margin: 20px 0;
     font-size: 24px;
+    color: var(--primary-color);
 }
 
 /* Button Bar Layout */
 .button-bar {
     display: flex;
-    flex-wrap: wrap; /* Allow buttons to wrap to the next row */
-    justify-content: center; /* Center align buttons */
-    gap: 7px; /* Add space between buttons */
-    margin-top: 20px;
-    padding: 0 8px; /* Ensure padding for smaller screens */
-    max-width: 100%; /* Prevent overflow */
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 7px;
     margin: 7px;
     padding: 7px;
-
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    border: 1px solid #e9a8a8;
+    border-radius: 8px;
     cursor: pointer;
+    background-color: #fff0f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Button Styling */
 .button-bar button {
     display: flex;
-    flex-direction: column; /* Stack icon and text vertically */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 78px;
     height: 78px;
-    background-color: hsl(229, 98%, 81%);
-    border: none;
+    background-color: var(--button-bg-color);
+    border: 1px solid #e9a8a8;
     border-radius: 8px;
-    color: white;
+    color: var(--button-text-color);
     font-size: 14px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
     text-align: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .button-bar button img {
@@ -60,7 +70,7 @@ h1 {
 
 /* Button Hover Effects */
 .button-bar button:hover {
-    background-color: #ac8ef7;
+    background-color: var(--button-hover-color);
     transform: translateY(-10px);
 }
 
@@ -110,28 +120,26 @@ h1 {
         font-size: 9px;
     }
 }
+
 /* Base Styles for Links */
 a {
-    text-decoration: none; /* Remove underline */
-    color: inherit; /* Inherit text color from the parent */
- 
-    font-weight: bold; /* Optional: make the text bold */
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: bold;
     transition: color 0.3s ease; 
 }
-       /* Basic styles for buttons and section */
-       .button-bar button {
-        margin: 8px;
-        padding: 8px;
 
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        cursor: pointer;
-    }
+a:hover {
+    color: var(--secondary-color);
+}
 
-    #dynamic-section {
-        margin-top: 20px;
-        padding: 20px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        background-color: #fafafa;
-    }
+/* Dynamic Section Styling */
+#dynamic-section {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #e9a8a8;
+    border-radius: 8px;
+    background-color: #fff0f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+}

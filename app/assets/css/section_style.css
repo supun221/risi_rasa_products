@@ -1,16 +1,26 @@
+:root {
+    --primary-color: #e05b5b;
+    --secondary-color: #e47f7f;
+    --bg-color: #fcf5f5;
+    --text-color: #483535;
+}
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #f8f8f8;
+    background-color: var(--bg-color);
     text-align: center;
+    color: var(--text-color);
 }
 
 h2 {
     margin-top: -15px;
     text-align: center;
     font-size: 20px;
+    color: var(--primary-color);
     /* margin-bottom: -501px; */
 }
+
 .table-container {
     display: flex;
     justify-content: center;
@@ -36,8 +46,8 @@ table th, table td {
 }
 
 table th {
-    background-color:hsl(229, 98%, 81%);
-    border: none;;
+    background-color: var(--primary-color);
+    border: none;
     color: white;
 }
 

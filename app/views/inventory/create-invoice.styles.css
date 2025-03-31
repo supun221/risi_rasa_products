@@ -36,17 +36,6 @@
   background-color: #192a56;
 }
 
-.header-container-rmaster {
-  width: 100%;
-  min-height: 180px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #2980b9;
-  position: relative;
-  /* background-image: url("../../assets/images/sample-back.png"); */
-  background-size: contain;
-}
 
 .text-partition-cont {
   height: 100%;
@@ -66,57 +55,6 @@
 
 .first-row {
   margin-bottom: 40px;
-}
-
-.company-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  margin-left: 300px;
-}
-
-.heading-english {
-  font-family: "Poppins", serif;
-  font-size: 2.4em;
-  margin-top: 6px;
-  letter-spacing: 3px;
-  font-weight: 500;
-}
-
-.heading-sinhala {
-  font-family: "Maname", serif;
-  font-size: 2.8em;
-  letter-spacing: 3px;
-  font-weight: 600;
-}
-
-.company-motto {
-  font-family: "Yaldevi", serif;
-  font-size: 1.3em;
-}
-
-.timer-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-left: 50px;
-  width: 250px;
-}
-
-#current-date {
-  font-size: 1.1em;
-  color: white;
-  font-family: "Poppins", serif;
-}
-
-#current-time {
-  font-size: 1.3em;
-  color: white;
-  font-family: "Poppins", serif;
-  letter-spacing: 3px;
 }
 
 .bill-values-container-main {
