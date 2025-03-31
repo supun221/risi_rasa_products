@@ -1,43 +1,47 @@
 <?php
-    session_start();
-    $user_name = $_SESSION['username'];
-    $user_role = $_SESSION['job_role'];
-    $user_branch = $_SESSION['store'];
-    
-    if(!$user_name && !$user_branch){
-        header("Location: ../unauthorized/unauthorized_access.php");
-        exit();
-    }
+session_start();
+$user_name = $_SESSION['username'];
+$user_role = $_SESSION['job_role'];
+$user_branch = $_SESSION['store'];
 
-    // Handle branch switch request
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_branch'])) {
-        if ($user_role === 'admin') {
-            $_SESSION['store'] = $_POST['new_branch'];
-            $user_branch = $_POST['new_branch'];
-        }
+if (!$user_name && !$user_branch) {
+    header("Location: ../unauthorized/unauthorized_access.php");
+    exit();
+}
+
+// Handle branch switch request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_branch'])) {
+    if ($user_role === 'admin') {
+        $_SESSION['store'] = $_POST['new_branch'];
+        $user_branch = $_POST['new_branch'];
     }
-    
+}
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Management</title>
 
-     <!-- JsBarcode Library -->
-     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-     <link rel="stylesheet" href="./create-invoice.styles.css">
+    <!-- JsBarcode Library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="./create-invoice.styles.css">
 
 
     <link rel="stylesheet" href="../../assets/css/inventory_style.css">
+    <!-- New theme styles that override the base styles -->
+    <link rel="stylesheet" href="../../assets/css/inventory_theme.css">
 </head>
+
 <body>
-    
+
     <div class="container">
-        <input type="text" class="eland-input" id="current_branch" value="<?php echo $user_branch?>" disabled hidden>
+        <input type="text" class="eland-input" id="current_branch" value="<?php echo $user_branch ?>" disabled hidden>
         <!-- Header -->
         <!-- <div class="header">
             <h1>GRN / Purchasing / Suppliers / Item Registration</h1>
@@ -49,14 +53,15 @@
             <div class="inventory-image">
                 <img src="../../assets/images/spices.png" alt="Inventory" />
             </div>
-            
+
             <!-- Middle Section: Company Name -->
             <div class="company-name">
-                <!-- <span class="heading-sinhala">එග්ලන්ඩ් සුපර්</span> -->
-                <span class="heading-english">Ameena Chilies</span>
-                <span class="company-motto">The Best Spicy</span>
+                <div class="brand-name">
+                    <h1 class="main-text">RISI RASA</h1>
+                    <h2 class="sub-text">PRODUCTS</h2>
+                </div>
             </div>
-            
+
             <!-- Right Section: Date, Time, User, and Store Switcher -->
             <div class="date-time-container">
                 <div class="date">
@@ -67,22 +72,22 @@
                 </div>
                 <div class="user-info">
                     <label style="font-weight:500; ">User: </label>
-                    <span id="user" style="color:  #facf00 ; font-weight:500; " ><?php echo htmlspecialchars($user_name); ?></span>
+                    <span id="user" style="color:  #facf00 ; font-weight:500; "><?php echo htmlspecialchars($user_name); ?></span>
                     <label style="font-weight:500; ">Branch: </label>
                     <span id="user" style="color:  #facf00 ; font-weight:500; "><?php echo htmlspecialchars($user_branch); ?></span>
                 </div>
 
                 <?php if ($user_role === 'admin') : ?>
-                <div class="store-switcher">
-                    <form method="POST" style="display:flex;">
-                        <select name="new_branch" style="width:fit-content; padding:8px 15px">
-                            <option value="Main Store" <?php echo ($user_branch === "Main Store") ? "selected" : ""; ?>>Main Store</option>
-                            <option value="Branch Store" <?php echo ($user_branch === "Branch Store") ? "selected" : ""; ?>>Branch Store</option>
-                            <!-- <option value="Kurunegala Store" <?php echo ($user_branch === "Kurunegala Store") ? "selected" : ""; ?>>Kurunegala Store</option> -->
-                        </select>
-                        <button type="submit" style="width:fit-content; padding:8px 15px">Switch</button>
-                    </form>
-                </div>
+                    <div class="store-switcher">
+                        <form method="POST" style="display:flex;">
+                            <select name="new_branch" style="width:fit-content; padding:8px 15px">
+                                <option value="Main Store" <?php echo ($user_branch === "Main Store") ? "selected" : ""; ?>>Main Store</option>
+                                <option value="Branch Store" <?php echo ($user_branch === "Branch Store") ? "selected" : ""; ?>>Branch Store</option>
+                                <!-- <option value="Kurunegala Store" <?php echo ($user_branch === "Kurunegala Store") ? "selected" : ""; ?>>Kurunegala Store</option> -->
+                            </select>
+                            <button type="submit" style="width:fit-content; padding:8px 15px">Switch</button>
+                        </form>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -102,9 +107,9 @@
                     </div>
 
                     <div class="form-group" id="category-group">
-                        <label for="category-select" id="category-label" >Category:</label>
+                        <label for="category-select" id="category-label">Category:</label>
                         <select id="category-select" name="category" required>
-                            
+
                         </select>
                         <!-- Plus Button -->
                         <button type="button" id="add-category-btn">+</button>
@@ -152,23 +157,23 @@
 
                     <div id="manual-item-list">
                         <h3>Manual Item Code List</h2>
-                        <div class="scrollable-table">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Code</th>
-                                        <th>Product Name</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="product-list">
-                                    
-                                </tbody>
-                            </table>
-                        </div>
+                            <div class="scrollable-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Product Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="product-list">
+
+                                    </tbody>
+                                </table>
+                            </div>
                     </div>
-                    
+
                 </form>
-      
+
                 <!-- Category Management Modal -->
                 <div id="category-modal" class="category-modal">
                     <div id="category-container">
@@ -204,13 +209,13 @@
                             <!-- Right Section: New Category Form -->
                             <div id="category-right-section">
                                 <div id="new-category-section">
-                                    
+
                                     <label for="new-category-radio"><b>New Category</b></label>
 
                                     <div id="category-form">
-                                        
+
                                         <input type="text" id="category-name" class="cat-input-field" placeholder="Category Name">
-                                        
+
                                         <input type="text" id="category-key" class="cat-input-field" placeholder="Key Ex: CA">
                                     </div>
                                 </div>
@@ -275,28 +280,28 @@
             <div class="create-stock">
                 <h2 class="form-topic">Create Stock / GRN</h2>
                 <form id="stock-form">
-                    
+
                     <!-- Supplier Information -->
                     <div class="supplier-info">
                         <label for="supplier-id">Supplier ID:</label>
                         <input type="text" id="supplier-id" name="supplier-id" class="supplier-input-field" value="" readonly />
-                        
+
                         <label for="supplier">Supplier Information:</label>
                         <select id="supplier-select" name="supplier" class="supplier-input-field" onchange="setSupplierId()">
-  
+
                         </select>
-                        
+
                         <!-- Add Supplier Button -->
                         <button type="button" id="add-supplier-btn">+ Add Supplier</button>
                     </div>
 
                     <!-- Checkbox Options -->
-                    <div class="checkbox-options" >
+                    <div class="checkbox-options">
                         <div class="checkbox-container"><input type="checkbox" name="free-item"><label>Free Item</label></div>
                         <div class="checkbox-container"><input type="checkbox" name="combine-with-stock" id="combineStockCheckbox"><label>Combine With Stock</label></div>
                         <div class="checkbox-container"><input type="checkbox" name="gift"> <label>Gift</label></div>
                         <div class="checkbox-container"><input type="checkbox" name="voucher"> <label>Voucher</label></div>
-                        <div class="checkbox-container"><input type="checkbox" name="search-with-product" id="searchWithProductCheckbox"> <label>Search With Product #</label></div>   
+                        <div class="checkbox-container"><input type="checkbox" name="search-with-product" id="searchWithProductCheckbox"> <label>Search With Product #</label></div>
                     </div>
 
                     <div class="form-row">
@@ -315,7 +320,7 @@
                             <input type="number" id="stock-bulkcount" name="bulk-count" value=1>
                         </div>
 
-                        <div class="form-group2" >
+                        <div class="form-group2">
                             <label for="unit-count">Unit Count:</label>
                             <input type="number" id="stock-unitcount" name="unit-count" value=1>
                         </div>
@@ -324,9 +329,9 @@
                             <label for="purchase-qty">Total Quantity:</label>
                             <div id="qty-unit-group">
                                 <input style="margin-top: -15px;" type="number" id="purchase-qty" name="purchase-qty" value=1 style="margin-top: 0px;">
-                                <div class="form-group" id="unit-group" >
+                                <div class="form-group" id="unit-group">
                                     <select id="unit-select" name="unit">
-                                        
+
                                     </select>
                                     <!-- Plus Button -->
                                     <button type="button" id="add-unit-btn">+</button>
@@ -356,7 +361,7 @@
                             <label for="super-customer-genuine-price">Super Customer Price:</label>
                             <input type="text" id="super-customer-genuine-price" name="super-customer-genuine-price">
                         </div>
-                        
+
                         <div class="form-group2">
                             <label for="our-price">Our Price:</label>
                             <input type="text" id="our-price" name="our-price">
@@ -366,44 +371,44 @@
                     </div>
 
                     <!-- Discount and Profit -->
-                        <div class="form-row"  style="margin-top:-8px;">
+                    <div class="form-row" style="margin-top:-8px;">
 
-                            <div class="form-group2">
-                                <label for="discount-percent">Discount %:</label>
-                                <input type="text" id="discount-percent" name="discount-percent">
-                                <span id="discount-txt">Value : <span id="discount-value">0.00</span></span>    
-                            </div>
-                            <div class="form-group2">
-                                <label for="expire-date">Expire Date:</label>
-                                <input type="date" id="expire-date" name="expire-date">
-                            </div>
-                            <div class="form-group2">
-                                <label for="low-stock">Low Stock:</label>
-                                <input type="text" id="low-stock" name="low-stock">
-                            </div>
-
-
+                        <div class="form-group2">
+                            <label for="discount-percent">Discount %:</label>
+                            <input type="text" id="discount-percent" name="discount-percent">
+                            <span id="discount-txt">Value : <span id="discount-value">0.00</span></span>
+                        </div>
+                        <div class="form-group2">
+                            <label for="expire-date">Expire Date:</label>
+                            <input type="date" id="expire-date" name="expire-date">
+                        </div>
+                        <div class="form-group2">
+                            <label for="low-stock">Low Stock:</label>
+                            <input type="text" id="low-stock" name="low-stock">
                         </div>
 
-                        <div class="form-group-row">
-                            <span id="net-amount-text">Net Amount : <span id="net-amount">0.00</span></span>
-                            
-                            <div id="profit">
-                                <span id="profit-percent-txt">Profit(%) : <span class="profit-numbers" id="profit-percentage">0.00%</span></span>
-                                <span id="unit-profit-value-txt">Unit Profit Value : <span class="profit-numbers" id="unit-profit-value">0.00</span></span>
-                                <span id="profit-value-txt">Stock Profit Value : <span class="profit-numbers" id="profit-value">0.00</span></span>
-                            </div>
 
-                            <span id="unit-cost-text">Unit Cost : <span id="unit-cost">0.00</span></span>
+                    </div>
+
+                    <div class="form-group-row">
+                        <span id="net-amount-text">Net Amount : <span id="net-amount">0.00</span></span>
+
+                        <div id="profit">
+                            <span id="profit-percent-txt">Profit(%) : <span class="profit-numbers" id="profit-percentage">0.00%</span></span>
+                            <span id="unit-profit-value-txt">Unit Profit Value : <span class="profit-numbers" id="unit-profit-value">0.00</span></span>
+                            <span id="profit-value-txt">Stock Profit Value : <span class="profit-numbers" id="profit-value">0.00</span></span>
                         </div>
 
-                        <div class="success-error-msg" id="error-message-stock" style="display:none; background-color:#ffcccb; color:#d8000c; padding:10px; border-radius:5px; margin-top:10px;"></div>
-                        <div class="success-error-msg" id="success-message-stock" style="display:none; background-color:#d4edda; color:#155724; padding:10px; border-radius:5px; margin-top:10px;"></div>
+                        <span id="unit-cost-text">Unit Cost : <span id="unit-cost">0.00</span></span>
+                    </div>
+
+                    <div class="success-error-msg" id="error-message-stock" style="display:none; background-color:#ffcccb; color:#d8000c; padding:10px; border-radius:5px; margin-top:10px;"></div>
+                    <div class="success-error-msg" id="success-message-stock" style="display:none; background-color:#d4edda; color:#155724; padding:10px; border-radius:5px; margin-top:10px;"></div>
                     <div id="stock-buttons">
                         <button type="button" id="save-stock"><i class="fa fa-save save-icon"></i>Save</button>
                         <button type="button" id="print-barcode-show-stock"><i class="fa fa-print print-icon"></i>Print Barcode</button>
                     </div>
-                    <input type="text" class="eland-input" id="current_branch_stock" name="current_branch_stock" value="<?php echo $user_branch?>" hidden>
+                    <input type="text" class="eland-input" id="current_branch_stock" name="current_branch_stock" value="<?php echo $user_branch ?>" hidden>
                 </form>
 
                 <table class="search-stock-table">
@@ -424,13 +429,13 @@
                             <!-- <th>Free</th> -->
                             <th>Total Amount</th>
                         </tr>
-                        
+
                     </thead>
                     <tbody id="searchStockTableBody">
-                        
+
                     </tbody>
                 </table>
-                
+
 
                 <!-- <h3 id="all-stocks-text">All Stocks</h3>
                 <table class="search-stock-table">
@@ -440,18 +445,18 @@
                             <th>Stock ID</th>
                             <th>Item Code</th>
                             <th>Product</th> -->
-                            <!-- <th>Cost Price</th> -->
-                            <!-- <th>Maximum Retail Price</th>
+                <!-- <th>Cost Price</th> -->
+                <!-- <th>Maximum Retail Price</th>
                             <th>Wholesale Price</th>
                             <th>Super Customer Price</th>
                             <th>Our Price</th>
                             <th>Quantity</th>
                             <th>Available Stock</th> -->
-                            <!-- <th>Discount (%)</th>
+                <!-- <th>Discount (%)</th>
                             <th>Discount value</th> -->
-                            <!-- <th>Free</th> -->
-                            <!-- <th>Total Amount</th> -->
-                        <!-- </tr>
+                <!-- <th>Free</th> -->
+                <!-- <th>Total Amount</th> -->
+                <!-- </tr>
                         
                     </thead>
                     <tbody id="allStockTableBody">
@@ -487,7 +492,7 @@
                 </div>
 
                 <div style="margin-left:10px; padding:5px;">
-                    <div style=" padding:5px;" class="footer-balance-value">:  0.00</div>
+                    <div style=" padding:5px;" class="footer-balance-value">: 0.00</div>
                     <!-- <div style=" padding:5px;" class="footer-balance-value">:  0.00</div>
                     <div style=" padding:5px;" class="footer-total-balance">:  0.00</div> -->
                 </div>
@@ -500,10 +505,10 @@
                     <div style=" padding:5px;">Supplier Payment Amount</div>
                 </div>
 
-                <div style="margin-left:10px; padding:5px;"> 
-                    <div style=" padding:5px;" class="footer-amount-value" id="footer-total-amount-value">:  0.00</div>
-                    <div style=" padding:5px;" class="footer-amount-value" id="footer-return-amount-value">:  0.00</div>
-                    <div style=" padding:5px;" class="footer-amount-value" id="footer-supplier-payment-amount-value">:  0.00</div>
+                <div style="margin-left:10px; padding:5px;">
+                    <div style=" padding:5px;" class="footer-amount-value" id="footer-total-amount-value">: 0.00</div>
+                    <div style=" padding:5px;" class="footer-amount-value" id="footer-return-amount-value">: 0.00</div>
+                    <div style=" padding:5px;" class="footer-amount-value" id="footer-supplier-payment-amount-value">: 0.00</div>
                 </div>
             </div>
 
@@ -512,9 +517,9 @@
             </div>
         </div>
     </div>
-    
 
- 
+
+
 
     <!-- Modal for All Products -->
     <div id="all-products-modal" class="modal">
@@ -555,7 +560,7 @@
                         <table id="unit-table">
                             <thead>
                                 <tr>
-                                    <th>Unit Type</th>    
+                                    <th>Unit Type</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -606,7 +611,7 @@
                         <input type="text" id="existing-unit-name" class="unit-input-field" disabled>
                     </div>
                 </div>
-                
+
                 <!-- New Name and Key Input Fields -->
                 <div class="form-group">
                     <label for="update-unit-name">New Name:</label>
@@ -622,7 +627,7 @@
         </div>
     </div>
 
-    
+
     <!-- Barcode Display -->
     <div id="barcode-container">
         <h4>Generated Barcode</h4>
@@ -636,7 +641,7 @@
         <div class="supplier-modal-content">
             <!-- Close Button -->
             <span class="close" id="close-supplier-modal">&times;</span>
-            
+
             <!-- Supplier Form Section -->
             <div id="supplier-form-section">
                 <h3>Register Suppliers</h3>
@@ -657,7 +662,7 @@
                         <button type="button" id="save-supplier">Save</button>
                     </div>
                 </form>
-                
+
                 <!-- Additional Buttons -->
                 <!-- <div id="extra-buttons">
                     <button id="area-manager-details" class="extra-btn">Area Manager Details</button>
@@ -684,7 +689,7 @@
                         </tbody>
                     </table>
                 </div>
-                
+
                 <!-- Table Control Buttons -->
                 <div id="supplier-table-buttons">
                     <button id="hide-details">Hide Details</button>
@@ -721,9 +726,9 @@
                     <div class="form-group">
                         <label for="existing-supplier-company">Existing Company Name:</label>
                         <input type="text" id="existing-supplier-company" class="sup-input-field" disabled>
-                    </div>         
+                    </div>
                 </div>
-                
+
                 <div id="new-supplier-column">
                     <!-- New Name and Key Input Fields -->
                     <div class="form-group">
@@ -738,7 +743,7 @@
                         <label for="update-supplier-company">New Company Name:</label>
                         <input type="text" id="update-supplier-company" class="sup-input-field" placeholder="Enter New Company">
                     </div>
-                    
+
                 </div>
             </div>
 
@@ -767,12 +772,12 @@
                         <option value="product_id">Product No</option>
                         <option value="product_name">Product Name</option>
                     </select>
-                    <input type="text" id="stock-search-input" placeholder="Search..."> 
+                    <input type="text" id="stock-search-input" placeholder="Search...">
                 </div>
                 <div class="stock-print-barcode-btn-container">
                     <button id="stock-print-barcode-btn">Print Barcode</button>
                 </div>
-            </div>    
+            </div>
 
             <div class="print-barcode-stock-table-container">
                 <table id="print-barcode-stock-table">
@@ -794,7 +799,7 @@
                 </table>
             </div>
 
-            
+
         </div>
     </div>
 
@@ -802,18 +807,18 @@
     <!-- Barcode Modal Overlay -->
     <div class="barcode-modal-overlay" id="barcode-modal">
         <div class="barcode-modal-content">
-            
+
             <div>
                 <span class="close" id="barcode-close-modal">&times;</span>
-                <div class="barcode-modal-header">Barcode Print</div> 
+                <div class="barcode-modal-header">Barcode Print</div>
             </div>
             <div class="barcode-modal-body">
                 <!-- Barcode Preview -->
                 <div class="barcode-preview">
                     <canvas id="barcodeCanvas">
-                        
+
                     </canvas>
-                
+
                 </div>
 
                 <!-- Form Inputs -->
@@ -850,10 +855,10 @@
                         <div>
                             <label for="printQty">Print Qty</label>
                             <input type="number" id="printQty" placeholder="Enter Quantity">
-                        </div> 
+                        </div>
                         <div>
                             <button type="button" id="generateStockBarcode" class="print-form-button">Generate</button>
-                        </div> 
+                        </div>
                         <div>
                             <button type="button" id="printBarcode" class="print-form-button">Print</button>
                         </div>
@@ -871,7 +876,7 @@
                 <h2>Item to Item Discount</h2>
                 <button class="close" id="mergeItemsCloseModalButton">&times;</button>
             </div>
-            <div class="merge-items-modal-body">             
+            <div class="merge-items-modal-body">
                 <div class="merge-items-form-group">
                     <label for="autoItemCode">Item Code</label>
                     <input type="text" id="autoItemCode" placeholder="Auto No" />
@@ -914,7 +919,7 @@
                     <button id="mergeItemsSaveButton">Save</button>
                     <button id="mergeItemsCloseButton">Exit</button>
                 </div>
-                
+
             </div>
         </div>
     </div>
@@ -926,7 +931,7 @@
         <div class="pay-now-modal-content">
             <div class="pay-now-modal-header">
                 <h2>Pay to Supplier</h2>
-                <button id="payNowCloseModal" class="close-button" >&times;</button>
+                <button id="payNowCloseModal" class="close-button">&times;</button>
             </div>
             <div class="pay-now-modal-body">
                 <div class="pay-now-sidebar">
@@ -952,16 +957,16 @@
                     <div class="pay-now-supplier-details">
                         <table class="pay-now-supplier-table" id="pay-now-supplier-table">
                             <thead>
-                            <tr>
-                                <th>Supplier No</th>
-                                <th>Supplier Name</th>
-                                <th>Telephone</th>
-                                <th>Company</th>
-                                <th>Credit Balance</th>
-                            </tr>
+                                <tr>
+                                    <th>Supplier No</th>
+                                    <th>Supplier Name</th>
+                                    <th>Telephone</th>
+                                    <th>Company</th>
+                                    <th>Credit Balance</th>
+                                </tr>
                             </thead>
                             <tbody id="paySupplierTableBody">
-                            
+
                             </tbody>
                         </table>
                     </div>
@@ -976,7 +981,7 @@
                                             <th>Stock</th>
                                             <th>Date</th>
                                             <th>Item Code</th>
-                                            <th>Product Name</th> 
+                                            <th>Product Name</th>
                                             <th>Qty</th>
                                             <th>Amount</th>
                                         </tr>
@@ -1030,7 +1035,7 @@
         <div id="payment-modal-content">
             <div class="payment-modal-header">
                 <h3>Create Payment to Supplier </h3>
-                <button id="paymentCloseModal" class="close-button" style="margin-top:-15px;">&times;</button>                
+                <button id="paymentCloseModal" class="close-button" style="margin-top:-15px;">&times;</button>
             </div>
 
             <div style="display: flex;">
@@ -1052,60 +1057,60 @@
             </div>
 
             <form id="payment-form">
-                    <div class="payment-radio-buttons">
-                        <label>
-                            <input type="radio" name="payment-type" value="single" id="single-payment" checked> Single Payment
-                        </label>
-                        <label>
-                            <input type="radio" name="payment-type" value="multiple" id="multiple-payment"> Multiple Payment
-                        </label>
-                    </div>
-       
-                    <div class="blue-box" id="blue-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: rgb(236, 236, 236); padding: 20px; width: fit-content; border-radius: 5px; margin: 0 auto;">
-                        <div class="payment-form-group" id="payment-method-group">
-                            <label for="payment-method">Select Payment Method</label>
-                            <select id="payment-method">
-                                <option value="">-- Select Method --</option>
-                                <option value="cash">Cash</option>
-                                <option value="cheque">Cheque</option>
-                                <option value="online">Online</option>
-                            </select>
-                        </div>
-                        <div id="payment-details"></div>
-                    </div>
+                <div class="payment-radio-buttons">
+                    <label>
+                        <input type="radio" name="payment-type" value="single" id="single-payment" checked> Single Payment
+                    </label>
+                    <label>
+                        <input type="radio" name="payment-type" value="multiple" id="multiple-payment"> Multiple Payment
+                    </label>
+                </div>
 
-                    <form id="multi-payment-form" style="margin-top:20px;">
-                        <div id="payment-container" style="justify-content: center;">
-                            <div class="multi-payment-box">
-                                <div class="multi-payment-form-group" id="multi-payment-method-group" >
-                                    <label for="multi-payment-method-0">Select Payment Method</label>
-                                    <select id="multi-payment-method-0" class="multi-payment-method" data-index="0">
-                                        <option value="">-- Select Method--</option>
-                                        <option value="cash">Cash</option>
-                                        <option value="cheque">Cheque</option>
-                                        <option value="online">Online</option>
-                                    </select>
-                                </div>
-                                <div id="multi-payment-details-0" class="multi-payment-details"></div>
-                                <button type="button" class="delete-payment-row" data-index="0" style="margin-top: 10px;">
-                                    <i class="fa fa-trash delete-icon delete-payment-row-icon"></i>
-                                </button>
+                <div class="blue-box" id="blue-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: rgb(236, 236, 236); padding: 20px; width: fit-content; border-radius: 5px; margin: 0 auto;">
+                    <div class="payment-form-group" id="payment-method-group">
+                        <label for="payment-method">Select Payment Method</label>
+                        <select id="payment-method">
+                            <option value="">-- Select Method --</option>
+                            <option value="cash">Cash</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="online">Online</option>
+                        </select>
+                    </div>
+                    <div id="payment-details"></div>
+                </div>
+
+                <form id="multi-payment-form" style="margin-top:20px;">
+                    <div id="payment-container" style="justify-content: center;">
+                        <div class="multi-payment-box">
+                            <div class="multi-payment-form-group" id="multi-payment-method-group">
+                                <label for="multi-payment-method-0">Select Payment Method</label>
+                                <select id="multi-payment-method-0" class="multi-payment-method" data-index="0">
+                                    <option value="">-- Select Method--</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="cheque">Cheque</option>
+                                    <option value="online">Online</option>
+                                </select>
                             </div>
-                        </div>                    
+                            <div id="multi-payment-details-0" class="multi-payment-details"></div>
+                            <button type="button" class="delete-payment-row" data-index="0" style="margin-top: 10px;">
+                                <i class="fa fa-trash delete-icon delete-payment-row-icon"></i>
+                            </button>
+                        </div>
+                    </div>
 
 
-                        <div style="display:flex; justify-content: center; align-items: center; gap: 10px; margin-top:20px;">
-                            <button type="submit" id="pay-print-button" class="pay-print-button" style="display:none;">
-                                <i class="fas fa-print"></i>Pay & Print Receipt
-                            </button>
-                        
-                            <button type="button" id="add-payment" style="display:none;">
-                                <b><i class="fas fa-plus"></i></b>
-                            </button>
+                    <div style="display:flex; justify-content: center; align-items: center; gap: 10px; margin-top:20px;">
+                        <button type="submit" id="pay-print-button" class="pay-print-button" style="display:none;">
+                            <i class="fas fa-print"></i>Pay & Print Receipt
+                        </button>
+
+                        <button type="button" id="add-payment" style="display:none;">
+                            <b><i class="fas fa-plus"></i></b>
+                        </button>
                         <div>
-                    </form>
+                </form>
             </form>
-            
+
         </div>
     </div>
 
@@ -1114,9 +1119,9 @@
         <div class="bank-popup-content">
             <div class="payment-modal-header">
                 <h2>Banks Setup</h2>
-                <button id="bankCloseModal" class="close-button" style="margin-top:-15px;" onclick="closeBankPopup()">&times;</button>                
+                <button id="bankCloseModal" class="close-button" style="margin-top:-15px;" onclick="closeBankPopup()">&times;</button>
             </div>
-            
+
             <div class="bank-tabs">
                 <button id="tab-bank-details" class="active">Bank Details</button>
                 <!-- <button id="tab-branches-details" onclick="showTab('branches-details')">Bank Branches Details</button> -->
@@ -1156,14 +1161,15 @@
     </div>
 
 
-   
+
 
     <script src="../../assets/js/inventory_script.js"></script>
 </body>
+
 </html>
 
 <script>
-    document.addEventListener("keydown", function (event) {
+    document.addEventListener("keydown", function(event) {
         if (event.code === "Home") {
             window.location.href = "../dashboard/index.php";
         }

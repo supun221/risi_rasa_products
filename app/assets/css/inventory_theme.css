@@ -1,0 +1,196 @@
+/* Inventory Theme CSS - Overrides for dashboard style matching */
+:root {
+    --primary-color: #e05b5b;
+    --secondary-color: #e47f7f;
+    --bg-color: #fcf5f5;
+    --text-color: #483535;
+    --button-bg-color: #f7c4c4;
+    --button-hover-color: #e9a8a8;
+    --button-text-color: #483535;
+    --form-bg-color: #fff0f0;
+    --border-color: #e9a8a8;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --header-gradient: linear-gradient(to right, #e05b5b, #e47f7f);
+}
+
+/* Base styles */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.container {
+    background-color: var(--bg-color);
+}
+
+/* Header styling */
+.header-container {
+    background: var(--header-gradient);
+    box-shadow: var(--shadow);
+}
+
+.company-name .heading-english {
+    color: white;
+    font-weight: bold;
+}
+
+.company-name .company-motto {
+    color: #fff4f4;
+}
+
+/* Form sections */
+.product-registration, .create-stock {
+    background-color: var(--form-bg-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin: 10px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.form-topic {
+    background: var(--header-gradient);
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+/* Form inputs */
+form input, form select, .form-group2 input {
+    border: 1px solid var(--border-color);
+    background-color: white;
+    transition: border-color 0.3s;
+}
+
+form input:focus, form select:focus, .form-group2 input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(224, 91, 91, 0.2);
+}
+
+/* Buttons styling */
+form button, .delete-button, #stock-buttons button, #add-supplier-btn, 
+.cat-button, .unit-button, .sup-button, .stock-print-barcode-btn-container button,
+.print-form-button, .merge-items-button-group button, .confirm-pay-now-button,
+.add-bank-btn, .pay-print-button, #add-payment {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s, transform 0.3s;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+form button:hover, .delete-button:hover, #stock-buttons button:hover, #add-supplier-btn:hover,
+.cat-button:hover, .unit-button:hover, .sup-button:hover, .stock-print-barcode-btn-container button:hover,
+.print-form-button:hover, .merge-items-button-group button:hover, .confirm-pay-now-button:hover,
+.add-bank-btn:hover, .pay-print-button:hover, #add-payment:hover {
+    background-color: var(--button-hover-color);
+    transform: translateY(-2px);
+}
+
+/* Table styling */
+table th {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+table td {
+    background-color: white;
+}
+
+table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+/* Footer styling */
+.footer {
+    background-color: var(--form-bg-color);
+    border-top: 3px solid var(--border-color);
+}
+
+.footer-balances, .footer-amounts {
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.footer-pay-button {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 8px;
+    border: none;
+    padding: 12px 20px;
+    font-weight: bold;
+    box-shadow: var(--shadow);
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.footer-pay-button:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+/* Modal styling */
+.modal-content, .all-products-modal-content, #category-container, #unit-container,
+.supplier-modal-content, .stock-modal-content, .barcode-modal-content,
+.merge-items-modal-content, .pay-now-modal-content, #payment-modal-content,
+.bank-popup-content, #update-category-container, #update-unit-container,
+#update-supplier-container {
+    background-color: var(--form-bg-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+/* Checkbox container */
+.checkbox-options {
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+/* Success and error messages */
+#success-message, #success-message-stock {
+    background-color: #d4f5d4 !important;
+    color: #155724 !important;
+    border: 1px solid #c3e6cb !important;
+    border-radius: 8px !important;
+}
+
+#error-message, #error-message-stock {
+    background-color: #fceeee !important;
+    color: #721c24 !important;
+    border: 1px solid #f8d7da !important;
+    border-radius: 8px !important;
+}
+
+/* Profit section */
+#profit {
+    background-color: var(--primary-color);
+    border: 1px solid var(--border-color);
+}
+
+#net-amount-text, #unit-cost-text {
+    background-color: var(--primary-color);
+    border: 1px solid var(--border-color);
+}
+
+/* Radio buttons */
+input[type="radio"] {
+    accent-color: var(--primary-color);
+}
+
+/* Modal headers */
+.modal-header h3, .payment-modal-header h3, .merge-items-modal-header h2 {
+    color: var(--primary-color);
+}
+
+/* Selected row in tables */
+tr.selected {
+    background-color: rgba(224, 91, 91, 0.2) !important;
+}

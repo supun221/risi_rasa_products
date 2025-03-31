@@ -55,196 +55,251 @@ if (is_array($results)) {
     </link>
     <script src="../../assets/notifier/index.var.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<style>
-    /* return form css */
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgb(0, 0, 0);
-        background-color: rgba(0, 0, 0, 0.4);
-    }
+    <style>
+        :root {
+            --primary-color: #e05b5b;
+            --primary-dark: #cc4b4b;
+            --secondary-color: #e47f7f;
+            --bg-color: #fcf5f5;
+            --text-color: #483535;
+            --button-bg-color: #f7c4c4;
+            --button-hover-color: #e9a8a8;
+            --button-text-color: #483535;
+            --input-border: #e9a8a8;
+            --highlight-color: #d04a4a;
+            --success-color: #4CAF50;
+        }
 
-    .modal-content {
-        background-color: rgb(255, 255, 255);
-        margin: 4% auto;
-        padding: 1px;
-        border: 1px solid #888;
-        width: 55%;
-        height: 78%;
-    }
+        /* return form css */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
 
-    .close {
-        color: red;
-        float: right;
-        /* font-size: 18px; */
-        font-weight: bold;
-    }
+        .modal-content {
+            background-color: rgb(255, 255, 255);
+            margin: 4% auto;
+            padding: 1px;
+            border: 1px solid #888;
+            width: 55%;
+            height: 78%;
+        }
 
-    .close:hover,
-    .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
+        .close {
+            color: red;
+            float: right;
+            /* font-size: 18px; */
+            font-weight: bold;
+        }
 
-    /* barcode reader css */
-    .barcode-reader-container {
-        margin: 5px 0;
-        width: 95%;
-    }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
 
-    .barcode-reader-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 2px;
-    }
+        /* barcode reader css */
+        .barcode-reader-container {
+            margin: 5px 0;
+            width: 95%;
+        }
 
-    .barcode-reader-table>thead>tr>th {
-        font-family: "Poppins", serif;
-        font-weight: 500;
-        text-align: center;
-        background-color: #0a3981;
-        color: white;
-        padding: 1px 2px;
-    }
+        .barcode-reader-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2px;
+        }
 
-    .barcode-reader-table>tbody>tr>td {
-        padding: 1px 2px;
-        font-family: "Poppins", serif;
-        font-weight: 400;
-        text-align: center;
-        font-size: 0.9em;
-        color: #2c3e50;
-    }
+        .barcode-reader-table>thead>tr>th {
+            font-family: "Poppins", serif;
+            font-weight: 500;
+            text-align: center;
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 1px 2px;
+        }
 
-    .barcode-reader-table>tbody>tr:hover>td {
-        background-color: #dcdde1;
-    }
+        .barcode-reader-table>tbody>tr>td {
+            padding: 1px 2px;
+            font-family: "Poppins", serif;
+            font-weight: 400;
+            text-align: center;
+            font-size: 0.9em;
+            color: #2c3e50;
+        }
 
-    .barcode-reader-table>tbody>tr:nth-child(odd) {
-        background-color: #dfe4ea;
-    }
+        .barcode-reader-table>tbody>tr:hover>td {
+            background-color: #dcdde1;
+        }
 
-    .barcode-reader-table>tbody>tr:nth-child(even) {
-        background-color: #f1f2f6;
-    }
+        .barcode-reader-table>tbody>tr:nth-child(odd) {
+            background-color: #dfe4ea;
+        }
 
-    .barcode-input,
-    .barcode-product-name,
-    .barcode-quantity,
-    .barcode-our-price {
-        width: 100%;
-        padding: 2px;
-        font-family: "Poppins", serif;
-        font-size: 0.9em;
-        text-align: center;
-    }
+        .barcode-reader-table>tbody>tr:nth-child(even) {
+            background-color: #f1f2f6;
+        }
 
-    .barcode-input {
-        border: 2px solid #2c3e50;
-        border-radius: 4px;
-    }
+        .barcode-input,
+        .barcode-product-name,
+        .barcode-quantity,
+        .barcode-our-price {
+            width: 100%;
+            padding: 2px;
+            font-family: "Poppins", serif;
+            font-size: 0.9em;
+            text-align: center;
+        }
 
-    .barcode-product-name,
-    .barcode-quantity,
-    .barcode-our-price {
-        border: 2px solid #dfe4ea;
-        background-color: #f9f9f9;
-    }
+        .barcode-input {
+            border: 2px solid var(--secondary-color);
+            border-radius: 4px;
+        }
 
-    .barcode-tb-inp {
-        padding: 2px;
-        font-family: "Poppins", serif;
-        font-size: 0.9em;
-        text-align: center;
-        border: none;
-    }
+        .barcode-product-name,
+        .barcode-quantity,
+        .barcode-our-price {
+            border: 2px solid #dfe4ea;
+            background-color: #f9f9f9;
+        }
 
-    .eland-pos-input-cont {
-        position: relative;
-        width: 100%;
-    }
+        .barcode-tb-inp {
+            padding: 2px;
+            font-family: "Poppins", serif;
+            font-size: 0.9em;
+            text-align: center;
+            border: none;
+        }
 
-    #search-customer {
-        width: 100%;
-        box-sizing: border-box;
-    }
+        .eland-pos-input-cont {
+            position: relative;
+            width: 100%;
+        }
 
-    .dropdown-list {
-        position: absolute;
-        top: calc(100% + 2px);
-        left: 0;
-        width: 100%;
-        background: #fff;
-        border: 1px solid #ccc;
-        z-index: 1000;
-        max-height: 150px;
-        overflow-y: auto;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    }
+        #search-customer {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .dropdown-list {
+            position: absolute;
+            top: calc(100% + 2px);
+            left: 0;
+            width: 100%;
+            background: #fff;
+            border: 1px solid #ccc;
+            z-index: 1000;
+            max-height: 150px;
+            overflow-y: auto;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
 
-    .dropdown-item {
-        padding: 8px 12px;
-        cursor: pointer;
-    }
+        .dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
 
-.dropdown-item:hover {
-    background-color: #f0f0f0; 
-}
+        .dropdown-item:hover {
+            background-color: var(--bg-color);
+        }
 
-.modal-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background-color: white;
-    border-radius: 5px;
-    width: 39%;
-    height: 90%;
-    max-width: 1200px;
-    max-height: 90vh;
-    position: relative;
-    overflow: hidden;
-    padding: 10;
-  }
-  
-  .close-modal {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 1001;
-    color: #333;
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-</style>
+        .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 5px;
+            width: 39%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            position: relative;
+            overflow: hidden;
+            padding: 10;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1001;
+            color: #333;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Update barcode reader table styling */
+        .barcode-reader-table>thead>tr>th {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+
+        .barcode-input {
+            border: 2px solid var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        /* Button styling update */
+        button {
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        /* Success color for amount */
+        .total-val-input-main[id="total_amount"] {
+            color: var(--success-color) !important;
+        }
+
+        .total-val-input-main[id="total_cash_tendered"] {
+            color: var(--success-color) !important;
+        }
+
+        .bc-title {
+            color: var(--primary-color);
+        }
+
+        .bc-btn {
+            background-color: var(--primary-color);
+        }
+    </style>
 
 <body>
-<?php include '../customers/add_customer.php';?>
+    <?php include '../customers/add_customer.php'; ?>
     <!-- bill cancel confirmation -->
     <div class="bill-cancellation-modal" id="bill-cancellation-modal">
         <div class="bc-form-area">
@@ -411,9 +466,10 @@ if (is_array($results)) {
                     <!-- <img src="../../assets/images/cart.png" alt="inventory-pholder" class="header-img-rmaster"> -->
                     <!-- company-info -->
                     <div class="company-info">
-                        <!-- <span class="heading-sinhala">එග්ලන්ඩ් සුපර්</span> -->
-                        <span class="heading-english">Ameena Chilies</span>
-                        <span class="company-motto">The Best Spicy</span>
+                        <div class="brand-name">
+                            <h1 class="main-text">RISI RASA</h1>
+                            <h2 class="sub-text">PRODUCTS</h2>
+                        </div>
                     </div>
                     <div id="header-image">
                         <img src="../../assets/images/cart.png" alt="Header Image" />
@@ -519,7 +575,7 @@ if (is_array($results)) {
             </div>
 
             <!-- measurement unit changer -->
-             <div class="mes-unit-modal" id="mes-unit-modal">
+            <div class="mes-unit-modal" id="mes-unit-modal">
                 <table>
                     <tr onclick="setMeasurementUnit('litre')">
                         <td>Litre</td>
@@ -531,7 +587,7 @@ if (is_array($results)) {
                         <td>Kilogram</td>
                     </tr>
                 </table>
-             </div>
+            </div>
 
             <style>
                 .credit-info-container {
@@ -607,7 +663,7 @@ if (is_array($results)) {
                     }
                 });
 
-             
+
                 document.querySelector('.eland-pos-button i.fa-credit-card').closest('button').addEventListener('click', openCreditLimitModal);
             </script>
             <!-- bill related fees -->
@@ -693,7 +749,7 @@ if (is_array($results)) {
                             <tr>
                                 <td>
                                     <!-- onchange="getPossibleBarcodeCombinations('<?php echo $user_branch; ?>')" -->
-                                    <input type="text" id="barcode-input" class="barcode-input" placeholder="Enter barcode" >
+                                    <input type="text" id="barcode-input" class="barcode-input" placeholder="Enter barcode">
                                     <div id="suggestion-box"></div>
                                 </td>
                                 <td>
@@ -734,7 +790,7 @@ if (is_array($results)) {
                         const gramQtyHolder = document.getElementById('gram-value-holder')
                         const barcodeInput = document.getElementById("barcode-input").value.trim();
                         let quantity = parseFloat(document.getElementById("quantity").value) || 1;
-                        if(mesUnit.value != "null"){
+                        if (mesUnit.value != "null") {
                             quantity = (parseFloat(gramQtyHolder.value) * quantity) / 1000
                         }
                         const discount = parseInt(document.getElementById("bcode_discount").value) || 0;
@@ -755,7 +811,7 @@ if (is_array($results)) {
                         // } else {
                         //     processAddToCart(quantity, discount, free_issue, priceValue);
                         // }
-                            processAddToCart(quantity, discount, free_issue, priceValue);
+                        processAddToCart(quantity, discount, free_issue, priceValue);
                     }
 
                     const handleInsertKeyPress = (products) => {
@@ -844,9 +900,9 @@ if (is_array($results)) {
                                         if (data.products.length === 1) {
                                             const product = data.products[0];
                                             currentProduct = product; // Set the current product
-                                            if(currentProduct.unit === 'coc_oil(kg)'){
+                                            if (currentProduct.unit === 'coc_oil(kg)') {
                                                 showMesUnitModal();
-                                            }else{
+                                            } else {
                                                 updateProductUI(product); // Update the input fields
                                                 resolve(); // Resolve the Promise
                                             }
@@ -895,13 +951,11 @@ if (is_array($results)) {
                     function updateProductUIEnhanced(product) {
                         let currentPrice = 0;
                         const invoiceType = getSelectedInvoiceType()
-                        if(invoiceType === 'retail'){
+                        if (invoiceType === 'retail') {
                             currentPrice = product.our_price
-                        }
-                        else if(invoiceType === 'wholesale'){
-                            currentPrice = product.wholesale_price  
-                        }
-                        else{
+                        } else if (invoiceType === 'wholesale') {
+                            currentPrice = product.wholesale_price
+                        } else {
                             currentPrice = product.max_retail_price
                         }
 
@@ -1669,53 +1723,53 @@ if (is_array($results)) {
         localStorage.removeItem('shopping_cart')
     }
 
-var measurementConversions = [];
-const fetchMeasurementConversions = () => {
-    let notifier = new AWN()
-    fetch('fetch_measurement_convs.php')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === 'success') {
-                measurementConversions = data.data;
-                console.log('Measurement conversions loaded successfully:', measurementConversions);
-            } else {
-                console.error('Error fetching measurement conversions:', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching measurement conversions:', error);
-        });
-}
+    var measurementConversions = [];
+    const fetchMeasurementConversions = () => {
+        let notifier = new AWN()
+        fetch('fetch_measurement_convs.php')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    measurementConversions = data.data;
+                    console.log('Measurement conversions loaded successfully:', measurementConversions);
+                } else {
+                    console.error('Error fetching measurement conversions:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching measurement conversions:', error);
+            });
+    }
 
-document.addEventListener('DOMContentLoaded', fetchMeasurementConversions);
+    document.addEventListener('DOMContentLoaded', fetchMeasurementConversions);
 
-const measurementConverter = (itemCode, selectedMesUnit) => {
-    const gramQtyHolder = document.getElementById('gram-value-holder')
-    let notifier = new AWN()
-    measurementConversions.forEach((record) => {
-        if(record.item_code == itemCode){
-            switch(selectedMesUnit){
-                case 'litre':
-                    gramQtyHolder.value = record.selling_litre
-                    break;
-                case 'bottle':
-                    gramQtyHolder.value = record.selling_bottle
-                    break;
-                case 'kilogram':
-                    gramQtyHolder.value = record.selling_kilo
-                    break;
-                default:
-                    notifier.alert('invalid measure unit passed!')
-                    return
+    const measurementConverter = (itemCode, selectedMesUnit) => {
+        const gramQtyHolder = document.getElementById('gram-value-holder')
+        let notifier = new AWN()
+        measurementConversions.forEach((record) => {
+            if (record.item_code == itemCode) {
+                switch (selectedMesUnit) {
+                    case 'litre':
+                        gramQtyHolder.value = record.selling_litre
+                        break;
+                    case 'bottle':
+                        gramQtyHolder.value = record.selling_bottle
+                        break;
+                    case 'kilogram':
+                        gramQtyHolder.value = record.selling_kilo
+                        break;
+                    default:
+                        notifier.alert('invalid measure unit passed!')
+                        return
+                }
             }
-        }
-    })
-}
+        })
+    }
 </script>
 
 

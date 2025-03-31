@@ -5,6 +5,20 @@
   box-sizing: border-box;
 }
 
+:root {
+  --primary-color: #e05b5b;
+  --primary-dark: #cc4b4b;
+  --secondary-color: #e47f7f;
+  --bg-color: #fcf5f5;
+  --text-color: #483535;
+  --button-bg-color: #f7c4c4;
+  --button-hover-color: #e9a8a8;
+  --button-text-color: #483535;
+  --input-border: #e9a8a8;
+  --highlight-color: #d04a4a;
+  --success-color: #4CAF50;
+}
+
 #customer-list {
   border: none;
 }
@@ -12,7 +26,7 @@
 .add-customer {
   padding: 1px;
   border-radius: 6px;
-  background-color: #2980b9;
+  background-color: var(--primary-color);
   outline: none;
   border: none;
   color: white;
@@ -50,7 +64,7 @@
 }
 
 .dropdown-item:hover {
-  background-color: #f0f0f0;
+  background-color: var(--bg-color);
 }
 .invoice-container-rmaster {
   width: 100vw;
@@ -78,7 +92,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #2980b9;
+  background-color: var(--primary-color);
   position: relative;
 }
 
@@ -173,7 +187,7 @@
 .bill-values-container-main {
   width: 32%;
   height: 100%;
-  background-color: #2d3436;
+  background-color: var(--primary-dark);
   padding: 15px;
   display: flex;
   justify-content: center;
@@ -199,7 +213,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  background-color: #0a3981;
+  background-color: var(--primary-dark);
   color: white;
   font-family: "Poppins", serif;
   border-radius: 5px;
@@ -228,7 +242,7 @@
 .salesman-info-ribbon {
   width: 100%;
   min-height: 50px;
-  background-color: #d4ebf8;
+  background-color: var(--bg-color);
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -264,27 +278,27 @@
   font-family: "Poppins", serif;
   font-size: 0.8em;
   font-weight: 500;
-  color: #2c3e50;
+  color: var(--text-color);
   text-transform: capitalize;
   padding-left: 10px;
 }
 
 .eland-input {
   width: 100%;
-  border: 2px solid rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--input-border);
   border-radius: 5px;
   background-color: transparent;
   padding: 5px 10px;
   font-family: "Poppins", serif;
   font-size: 0.9em;
   outline: none;
-  color: #2c3e50;
+  color: var(--text-color);
 }
 
 .transaction-type-selector {
   padding: 5px 30px;
   border-radius: 5px;
-  background-color: #2980b9;
+  background-color: var(--primary-color);
   color: white;
   display: flex;
   justify-content: center;
@@ -292,7 +306,7 @@
 }
 
 .tra-type-selector {
-  accent-color: #2c3e50;
+  accent-color: var(--text-color);
   margin-right: 10px;
 }
 
@@ -312,7 +326,7 @@
 .eland-pos-button {
   padding: 5px 20px;
   border-radius: 6px;
-  background-color: #2980b9;
+  background-color: var(--primary-color);
   outline: none;
   border: none;
   color: white;
@@ -330,6 +344,7 @@
 
 .eland-pos-button:hover {
   cursor: pointer;
+  background-color: var(--primary-dark);
 }
 
 .cart-table-cont {
@@ -350,7 +365,7 @@
 
 .cart-table-cont::-webkit-scrollbar-thumb {
   width: 4px;
-  background-color: #000080;
+  background-color: var(--primary-dark);
 }
 
 /* item components container */
@@ -374,8 +389,13 @@
 }
 
 .held-invoice-heading {
-  flex-shrink: 0;
-  /* Prevent the heading from shrinking */
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  background-color: var(--primary-color);
+  color: white;
+  font-family: "Poppins", serif;
+  border-bottom: 2px solid var(--secondary-color);
 }
 
 #held-invoices {
@@ -389,16 +409,6 @@
   /* Ensures it fits the container width */
 }
 
-.held-invoice-heading {
-  width: 100%;
-  padding: 10px;
-  text-align: center;
-  background-color: #2980b9;
-  color: white;
-  font-family: "Poppins", serif;
-  border-bottom: 2px solid #2c3e50;
-}
-
 .shopping-cart-container {
   width: calc(100vw - 200px);
   height: 100%;
@@ -407,7 +417,7 @@
 .operation-selector-ribbon {
   height: 30px;
   border-radius: 5px;
-  background-color: #2980b9;
+  background-color: var(--primary-color);
   color: white;
   display: flex;
   justify-content: space-evenly;
@@ -424,7 +434,7 @@
   font-family: "Poppins", serif;
   font-weight: 500;
   text-align: center;
-  background-color: #0a3981;
+  background-color: var(--primary-dark);
   color: white;
   padding: 10px 20px;
 }
@@ -445,7 +455,7 @@
   font-family: "Poppins", serif;
   font-weight: 400;
   text-align: center;
-  color: #2c3e50;
+  color: var(--text-color);
   font-size: 0.9em;
 }
 
@@ -459,8 +469,8 @@
   font-family: "Poppins", serif;
   font-weight: 500;
   text-align: center;
-  background-color: #0a3981;
-  border: 2px solid #0a3981;
+  background-color: var(--primary-dark);
+  border: 2px solid var(--primary-dark);
   color: white;
   padding: 10px 20px;
 }
@@ -482,7 +492,7 @@
 .cart-footer {
   width: 100%;
   height: 130px;
-  background-color: #d4ebf8;
+  background-color: var(--bg-color);
   display: flex;
   justify-content: space-evenly;
   align-items: center;
@@ -502,7 +512,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #0a3981;
+  background-color: var(--primary-dark);
   color: white;
   accent-color: black;
   border-radius: 5px;
@@ -534,8 +544,8 @@
   margin: 5px;
   border: none;
   outline: none;
-  background-color: #0a3981;
-  color: white;
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
   transition: 0.3s;
 }
 
@@ -552,35 +562,19 @@
 .button-style:hover {
   cursor: pointer;
   transform: translateY(-10px);
+  background-color: var(--button-hover-color);
 }
 
 .total-val-indicator {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #0a3981;
+  background-color: var(--primary-dark);
   color: white;
   font-family: "Poppins", serif;
   margin: 4px;
   border-radius: 5px;
   padding: 3px 10px;
-}
-
-.total-val-label {
-  font-size: 1.1em;
-  font-weight: 600;
-}
-
-.total-val-input {
-  background-color: transparent;
-  margin-left: 5px;
-  padding-left: 20px;
-  color: white;
-  font-family: "Poppins", serif;
-  font-size: 1.1em;
-  border: none;
-  outline: none;
-  width: 135px;
 }
 
 /* option menu stylings */
@@ -612,7 +606,7 @@
 
 .opt-child-btn:hover {
   cursor: pointer;
-  background-color: #0a3981;
+  background-color: var(--primary-color);
   color: white;
 }
 
@@ -622,17 +616,14 @@
   justify-content: center;
   align-items: center;
   margin: 5px 0;
-  background-color: transparent;
-  border: none;
-  outline: none;
   background-color: white;
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  border: 1px solid grey;
+  border: 1px solid var(--secondary-color);
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
   transition: 0.2s;
-  color: #0a3981;
+  color: var(--primary-color);
 }
 
 .opt-child-btn > i {
@@ -647,7 +638,7 @@
 
 .opt-btn {
   margin-top: 20px;
-  background-color: #0a3981;
+  background-color: var(--primary-color);
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -662,7 +653,7 @@
 
 .cart-item-counter {
   margin-top: 20px;
-  background-color: #0a3981;
+  background-color: var(--primary-color);
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -677,7 +668,7 @@
 .item-count-indicator {
   width: 20px;
   height: 20px;
-  background-color: crimson;
+  background-color: var(--highlight-color);
   color: white;
   display: flex;
   justify-content: center;
@@ -692,7 +683,7 @@
 .item-desc-cont {
   width: 380px;
   height: 95%;
-  background-color: #0a3981;
+  background-color: var(--primary-dark);
   padding: 5px;
   display: flex;
   justify-content: flex-start;
@@ -712,7 +703,7 @@
   margin-right: 5px;
   margin-top: 5px;
   position: relative;
-  background-color: #0a3981;
+  background-color: var(--primary-dark);
 }
 
 .img-box img {
@@ -743,7 +734,7 @@
   margin-left: -830px;
   margin-top: -45px;
   font-size: 34px;
-  background-color: #0a3981;
+  background-color: var(--primary-dark);
   color: white;
   padding: 2px 25px;
   border-radius: 6px;
@@ -883,7 +874,7 @@
 
 .alt-toggle-btn:hover {
   cursor: pointer;
-  background-color: #2980b9;
+  background-color: var(--primary-color);
   color: white;
 }
 
@@ -923,7 +914,7 @@
 
 .mis-modal-area::-webkit-scrollbar-thumb {
   width: 4px;
-  background-color: #0a3981;
+  background-color: var(--primary-dark);
 }
 
 .mis-modal-close {
@@ -981,21 +972,19 @@
 
 .held-invoice-btn {
   background-color: white;
-  color: #0a3981;
+  color: var(--primary-color);
   padding: 10px 12px;
   border-radius: 5px;
   cursor: pointer;
   font-size: 15px;
   transition: background-color 0.3s ease, color 0.3s ease;
   width: 100%;
-  border: 2px solid #0a3981;
+  border: 2px solid var(--primary-color);
 }
 
 .held-invoice-btn:hover {
-  background-color: #0a3981;
-  /* Darker blue background on hover */
+  background-color: var(--primary-color);
   color: white;
-  /* Text turns white on hover */
 }
 
 /* .held-invoice-btn:active { 
@@ -1013,7 +1002,7 @@
 }
 
 .held-invoice-delete-icon {
-  color: #2980b9;
+  color: var(--highlight-color);
   font-size: 18px;
   cursor: pointer;
   padding-left: 10px;
@@ -1097,7 +1086,7 @@
 }
 
 .refund-table th {
-  background-color: #0a3981;
+  background-color: var(--primary-dark);
   color: white;
 }
 
@@ -1116,7 +1105,7 @@
 }
 
 .cash-return-btn {
-  background-color: #2980b9;
+  background-color: var(--button-bg-color);
   color: white;
   padding: 10px;
   border: none;
@@ -1126,7 +1115,7 @@
 }
 
 .refund-bill-id-search-btn {
-  background-color: #2980b9; /* Green background */
+  background-color: var(--button-bg-color); /* Green background */
   color: white; /* White icon */
   border: none;
   padding: 10px 15px;
@@ -1140,7 +1129,7 @@
 }
 
 .refund-bill-id-search-btn:hover {
-  background-color: #1d5e89; /* Darker green on hover */
+  background-color: var(--button-hover-color); /* Darker green on hover */
 }
 
 .calculator {
@@ -1252,7 +1241,7 @@
   margin: 0 auto;
   font-size: 1.4em;
   font-weight: 600;
-  border-bottom: 3px solid #0a3981;
+  border-bottom: 3px solid var(--primary-dark);
 }
 
 .shortcut {
@@ -1309,7 +1298,7 @@
 
 .bc-btn {
   margin: 10px auto;
-  background-color: #c0392b;
+  background-color: var(--highlight-color);
   color: white;
   padding: 5px 20px;
   border-radius: 5px;
@@ -1321,7 +1310,7 @@
 }
 
 .bc-close-btn {
-  background-color: #34495e;
+  background-color: var(--text-color);
   color: white;
   display: flex;
   justify-content: center;
@@ -1341,7 +1330,7 @@
 
 .bc-title {
   font-weight: 500;
-  color: #c0392b;
+  color: var(--highlight-color);
 }
 
 .display-bc-modal {
@@ -1407,10 +1396,20 @@
 .mes-unit-modal > table > tr > td {
   text-align: center;
   padding: 5px 15px;
-  border-top: 2px solid #2c3e50;
-  border-bottom: 2px solid #2c3e50;
+  border-top: 2px solid var(--text-color);
+  border-bottom: 2px solid var(--text-color);
 }
 
 .show-mes-unit-modal {
   display: flex;
+}
+
+/* barcode reader table styling */
+.barcode-reader-table>thead>tr>th {
+  font-family: "Poppins", serif;
+  font-weight: 500;
+  text-align: center;
+  background-color: var(--primary-dark);
+  color: white;
+  padding: 1px 2px;
 }
