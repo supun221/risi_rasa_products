@@ -1,0 +1,137 @@
+/* Base Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+    text-align: center;
+}
+
+h1 {
+    margin: 20px 0;
+    font-size: 24px;
+}
+
+/* Button Bar Layout */
+.button-bar {
+    display: flex;
+    flex-wrap: wrap; /* Allow buttons to wrap to the next row */
+    justify-content: center; /* Center align buttons */
+    gap: 7px; /* Add space between buttons */
+    margin-top: 20px;
+    padding: 0 8px; /* Ensure padding for smaller screens */
+    max-width: 100%; /* Prevent overflow */
+    margin: 7px;
+    padding: 7px;
+
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Button Styling */
+.button-bar button {
+    display: flex;
+    flex-direction: column; /* Stack icon and text vertically */
+    align-items: center;
+    justify-content: center;
+    width: 78px;
+    height: 78px;
+    background-color: hsl(229, 98%, 81%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.button-bar button img {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 5px;
+    transition: transform 0.3s ease;
+}
+
+.button-bar button span {
+    font-size: 12px;
+}
+
+/* Button Hover Effects */
+.button-bar button:hover {
+    background-color: #ac8ef7;
+    transform: translateY(-10px);
+}
+
+.button-bar button:hover img {
+    transform: scale(1.1);
+}
+
+/* Responsive Design for Medium Screens (Tablets) */
+@media (max-width: 768px) {
+    .button-bar {
+        justify-content: space-around; /* Spread buttons evenly */
+    }
+
+    .button-bar button {
+        width: 70px;
+        height: 70px;
+    }
+
+    .button-bar button img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .button-bar button span {
+        font-size: 10px;
+    }
+}
+
+/* Responsive Design for Small Screens (Phones) */
+@media (max-width: 480px) {
+    .button-bar {
+        flex-direction: row; /* Keep buttons horizontal on smaller rows */
+        gap: 10px; /* Reduce gaps */
+    }
+
+    .button-bar button {
+        width: 60px;
+        height: 60px;
+    }
+
+    .button-bar button img {
+        width: 25px;
+        height: 25px;
+    }
+
+    .button-bar button span {
+        font-size: 9px;
+    }
+}
+/* Base Styles for Links */
+a {
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit text color from the parent */
+ 
+    font-weight: bold; /* Optional: make the text bold */
+    transition: color 0.3s ease; 
+}
+       /* Basic styles for buttons and section */
+       .button-bar button {
+        margin: 8px;
+        padding: 8px;
+
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #dynamic-section {
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fafafa;
+    }

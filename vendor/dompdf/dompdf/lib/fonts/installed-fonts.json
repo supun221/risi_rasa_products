@@ -1,0 +1,47 @@
+{
+    "maname": {
+        "normal": "maname_normal_cbb6a173b4b287fd0c3a136544f716a3"
+    },
+    "poppins": {
+        "100_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_100_italic_727dd5397d8b7035fdbbcc0aa9ee792e",
+        "200_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_200_italic_d530784dfe6b65a7b852f7405640887d",
+        "300_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_300_italic_05d5428caf130c8b90ad5d340528297e",
+        "italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_italic_62165265d4ed673868a1db4421a196c0",
+        "500_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_500_italic_1dde4e128df6db1484a4330e6635f4f4",
+        "600_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_600_italic_61021eb1e3e2be5bdb30ceaf8c08eea9",
+        "bold_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_bold_italic_eb3bc1e0116847e10d1cce7a4bd5cfa5",
+        "800_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_800_italic_c4e22d267d00e85404022163ddbc807c",
+        "900_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_900_italic_379bdb0434f36d724eea67e47ff0eca9",
+        "100": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_100_4e13de05189818c2e99b59fa2528fcb8",
+        "200": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_200_75d73e88376f8595c29b2ee29c7d8cf2",
+        "300": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_300_71a46324c5def983e80884621dcd061b",
+        "normal": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_normal_12f61e1aca2bd22472c17cf0465b304e",
+        "500": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_500_eaa67a2dcd54166f62e0cc3adc7e1b71",
+        "600": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_600_a68d0fa714114c7ef3a2a04bbe8fda45",
+        "bold": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_bold_dd0c9eff9089b312c7d5e9a1f45059a4",
+        "800": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/poppins_800_2c180a9fb9282729a9bba6454e868877",
+        "900": "poppins_900_8a18d53cb0b26396514d83d043131d7e"
+    },
+    "roboto": {
+        "100_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/roboto_100_italic_fc13b8f8feee89c41c95bf27309dcb8b",
+        "300_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/roboto_300_italic_d54a1bf1f9b064b835ac1d6bec9ebec1",
+        "italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/roboto_italic_ddc798b08272d4e38b2814a9416af97b",
+        "500_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/roboto_500_italic_f8306c9019d1b34cbc31af36a98bf42b",
+        "bold_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/roboto_bold_italic_fc1d968bd454a4f0ad1ea1fa2c6fb96d",
+        "900_italic": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/roboto_900_italic_8edcce9844866f9d8e9b3db832880d0e",
+        "100": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/roboto_100_c639033bf7f18123515bf2c8d5f6e5f6",
+        "300": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/roboto_300_7f0f040993bb35f67d8431439cbf7385",
+        "normal": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/roboto_normal_744a525d3dfcb8e50d148956703b6b68",
+        "500": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/roboto_500_41ea8fd5770bc278dbd15851922ff806",
+        "bold": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/roboto_bold_8c645f7f06cc7058298670914de0e599",
+        "900": "roboto_900_8c2f973c7818bcf66c70e9cce4eda0d4"
+    },
+    "yaldevi": {
+        "200": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/yaldevi_200_599e3f4b0210ed285a0f8da7037da14b",
+        "300": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/yaldevi_300_b43cea8df426bf05706059ede6e4d9d4",
+        "normal": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/yaldevi_normal_9a417a918776eba3124016cf7c4b4869",
+        "500": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/yaldevi_500_6add6556e6eddba1b551b51e04f87c5e",
+        "600": "C:\\xampp\\htdocs\\nexara_projects\\nexara_project_1_ekland\\project001\\vendor\\dompdf\\dompdf\/lib\/fonts\/yaldevi_600_334195f08650952748918305dc9b2ccd",
+        "bold": "yaldevi_bold_94e201e1af0f8de2ebda2a5fa232e5ae"
+    }
+}

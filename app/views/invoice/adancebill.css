@@ -1,0 +1,48 @@
+body {
+    font-family: "Poppins", serif;
+    letter-spacing: 0px;
+}
+
+.pos-logo {
+    width: 80mm;
+}
+
+table {
+    margin-top: 10px;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead > tr > th {
+    font-size: 0.8em;
+    text-transform: uppercase;
+    text-align: left;
+    border-bottom: 1px solid black;
+    padding-bottom: 5px;
+}
+
+tbody > tr > td {
+    font-size: 0.8em;
+    padding: 5px 0;
+    text-align: left;
+}
+
+.total-box {
+    margin: 20px auto;
+    text-align: center;
+    border: 2px solid black;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    width: 60%;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.thank-text {
+    font-size: 1em;
+    text-transform: uppercase;
+    margin: 5px 0;
+}

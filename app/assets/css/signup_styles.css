@@ -1,0 +1,88 @@
+/* Scoped Signup Page Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+}
+
+/* Container for Signup */
+.signup-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 90vh; /* Full height */
+    background-color: #f8f8f8;
+}
+
+/* Signup Form Styles */
+.signup-form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 350px;
+    text-align: center;
+    margin: 0 auto;
+}
+
+/* Unified Styling for all input fields, select fields, and button */
+.signup-form input,
+.signup-form select,
+.signup-form button {
+    width: 90%;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #f8f8f8;
+    color: #333;
+    box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+}
+
+/* Select field specific styles */
+.signup-form select {
+    -webkit-appearance: none; /* Remove default styling in WebKit browsers */
+    -moz-appearance: none; /* Remove default styling in Firefox */
+    appearance: none; /* Remove default styling in other browsers */
+    background-color: #fff url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 8 8%22%3E%3Cpath d=%22M1 2L4 5L7 2%22 stroke=%22%23333%22 stroke-width=%221.5%22 fill=%22none%22/%3E%3C/svg%3E') no-repeat right 10px center;
+    background-size: 12px; /* Adjust the size of the dropdown arrow */
+}
+
+/* Focus and Hover States */
+.signup-form input:focus,
+.signup-form select:focus,
+.signup-form button:focus {
+    border-color: #007bff; /* Highlight on focus */
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
+
+.signup-form button {
+    background-color: #007bff; /* Button color */
+    color: #fff;
+    cursor: pointer;
+}
+
+.signup-form button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Signup Form Footer Text */
+.signup-container p {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #555;
+}
+
+.signup-container p a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.signup-container p a:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,50 @@
+.day-end-form {
+    width: 50%; 
+    margin: 20px auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 25px; 
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.form-title {
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #333;
+}
+.data-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px; 
+    font-size: 1.2em;
+    color: #555;
+}
+.data-row span {
+    font-weight: bold;
+}
+.btn-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+.action-btn {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px; 
+    font-size: 14px; 
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    text-decoration: none;
+    border: none;
+    background-color: #28a745;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+.action-btn:hover {
+    background-color: #218838;
+}
+.action-btn i {
+    margin-right: 8px; 
+}

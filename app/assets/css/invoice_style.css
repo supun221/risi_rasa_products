@@ -1,0 +1,545 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background-color: #d9d9ea;
+  min-height: 100vh;
+  padding: 10px;
+}
+
+/* Main Layout Containers */
+.invoice-container {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 15px;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+/* Header Styles */
+.custom-header {
+  background-color: #87a4f0;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 12px;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #87a4f0;
+  /* Light Blue Background */
+  padding: 1px;
+  color: #000;
+  border-bottom: 3px solid #5f78b6;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.inventory-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.inventory-image img {
+  width: 170px;
+  /* Adjust size as needed */
+  height: 130px;
+  margin-left: 50px;
+}
+
+.invoice-title {
+  color: white;
+  font-size: 24px;
+  margin: 0;
+}
+
+.company-name {
+  text-align: center;
+  font-weight: bold;
+  color: #112b79;
+  /* Dark blue text */
+
+}
+
+.company-name h1 {
+  font-size: 32px;
+  margin: 5px 0;
+}
+
+.company-name h2 {
+  font-size: 24px;
+  margin: 5px 0;
+}
+
+.company-name p {
+  font-size: 18px;
+  margin: 5px 0;
+}
+
+/* Total Display Section */
+.invoice-header {
+  background-color: #e6ffff;
+  border-radius: 2px;
+  padding: 15px;
+  color: #000080;
+  font-family: 'Digital', monospace;
+}
+
+.invoice-header p {
+  text-align: right;
+  font-size: 24px;
+  margin: 10px 0;
+}
+
+.invoice-bill {
+  margin-top: 15px;
+  text-align: left;
+}
+
+/* Form Sections */
+.content {
+  background: white;
+  border-radius: 5px;
+  padding: 10px;
+  width: 81%;
+  margin-top: -135px;
+
+}
+
+.salesman-section,
+.customer-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20px, 1fr));
+  gap: 2px;
+  margin-bottom: 15px;
+  padding: 5px;
+  background: #f5f5f5;
+  border-radius: 5px;
+}
+
+/* Form Controls */
+select,
+input[type="date"] {
+  width: 80%;
+  padding: 1px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background-color: white;
+}
+
+.customer-type {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+button {
+  padding: 8px 15px;
+  background-color: #000080;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0000a0;
+}
+
+/* Invoice Table */
+.invoice-table {
+  width: 82%;
+  overflow-x: auto;
+  margin-top: 15px;
+  margin-left: 171px;
+
+  position: relative;
+}
+
+.invoice-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoice-table th {
+  background-color: #000080;
+  color: white;
+  padding: 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.invoice-table td {
+  padding: 8px;
+  border: 1px solid #ccc;
+  background-color: #e6ffff;
+}
+
+/* Hold Invoice Sidebar */
+.sidebar {
+  background: white;
+  border-radius: 5px;
+  padding: 20px;
+  width: 10%;
+  height: 390px;
+
+  margin-top: -120px;
+  /* position: fixed; */
+}
+
+.table-container {
+  margin-top: 15px;
+}
+
+.table-striped {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: -20px;
+
+}
+
+.table-striped th {
+  background-color: #000080;
+  color: white;
+  padding: 8px;
+}
+
+.table-striped td {
+  padding: 8px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+/* Bottom Panel */
+.bottom-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 50px;
+  
+  padding: 5px;
+  background: white; 
+  width: 100%;
+  height: 120px;
+}
+
+.right-side-buttons {
+  display: flex;
+  flex-direction: column;
+  /* Stack items vertically */
+  gap: 20px;
+  padding: 20px;
+  background: rgb(255, 255, 255);
+  border-radius: 5px;
+  width: 7%;
+  margin-top: 25px;
+  position: absolute;
+  /* Make it responsive to its parent */
+  right: 15px;
+  /* Adjust to align to the right side */
+  top: 328px;
+  /* Start from the top */
+  bottom: -50px;
+  /* Stretch to the bottom */
+}
+
+.bill1 {
+  margin: 10px;
+  font-family: Arial, sans-serif;
+  margin-left: 30px;
+  margin-top: -8px;
+}
+
+.bill1 select {
+  width: 80px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  font-size: 14px;
+  cursor: pointer;
+
+}
+
+.bill1 select:focus {
+  border-color: #007BFF;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.bill1 option {
+  padding: 5px;
+}
+
+.summary-text {
+  font-size: 14px;
+  margin: 5px 0;
+  color: #333;
+  font-weight: bold;
+  text-align: left;
+  font-family: Arial, sans-serif;
+  margin-left: -180px;
+
+}
+.bill2{
+  display: flex;
+  flex-direction: row;
+  margin-left: 80px;
+
+
+}
+
+
+
+.function-buttons {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-left: -950px;
+  margin-top: 25px;
+}
+
+.logout-btn {
+  background-color: #ff0000;
+}
+
+.logout-btn:hover {
+  background-color: #cc0000;
+}
+
+/* Action Buttons */
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  background-color: #000080;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.action-button img {
+  width: 24px;
+  height: 24px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1200px) {
+  .invoice-container {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    order: -1;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .salesman-section,
+  .customer-section {
+    grid-template-columns: 1fr;
+  }
+
+  .function-buttons,
+  .side-buttons {
+    flex-direction: column;
+  }
+
+  .invoice-table {
+    font-size: 14px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white;
+    padding: 0;
+  }
+
+  .bottom-panel,
+  .sidebar {
+    display: none;
+  }
+
+  .invoice-container {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-table {
+    page-break-inside: avoid;
+  }
+}
+
+/* Utility Classes */
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+.mt-10 {
+  margin-top: 10px;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.hidden {
+  display: none;
+}
+
+#content1 {
+  width: 300px;
+  margin-left: 101%;
+  /* border: 2px solid #615f5f; */
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: -8px;
+  background-color: #ffffff;
+  height: 140px;
+
+
+}
+
+#content2 {
+  width: 300px;
+  margin-left: 7%;
+  border: 5px solid #454242;
+  padding: 10px;
+  border-radius: 20px;
+  margin-top: -25px;
+
+
+
+}
+
+.button-bar button img {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 5px;
+  transition: transform 0.3s ease;
+}
+
+.button-bar {
+  display: flex;
+  flex-wrap: wrap;
+  /* Allow buttons to wrap to the next row */
+  justify-content: center;
+  /* Center align buttons */
+  gap: 5px;
+  /* Add space between buttons */
+  margin-top: 18px;
+  padding: 0 8px;
+  /* Ensure padding for smaller screens */
+  max-width: 100%;
+  /* Prevent overflow */
+  margin: 8px;
+  padding: 8px;
+  /* border: 1px solid #ccc; */
+  border-radius: 5px;
+  cursor: pointer;
+
+}
+
+.radio-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f2f2f2;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.radio-buttons-container label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+.button-bar button {
+  display: flex;
+  flex-direction: column;
+  /* Stack icon and text vertically */
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background-color: hsl(229, 98%, 81%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.button-bar button span {
+  font-size: 12px;
+}
+
+/* Button Hover Effects */
+.button-bar button:hover {
+  background-color: #ac8ef7;
+  transform: translateY(-10px);
+}
+
+.button-bar button:hover img {
+  transform: scale(1.1);
+}
+
+
+/* Responsive Design for Medium Screens (Tablets) */
+@media (max-width: 768px) {
+  .button-bar {
+    justify-content: space-around;
+    /* Spread buttons evenly */
+  }
+
+  .button-bar button {
+    width: 70px;
+    height: 70px;
+  }
+
+  .button-bar button img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .button-bar button span {
+    font-size: 10px;
+  }
+
+
+}
+

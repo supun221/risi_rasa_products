@@ -1,0 +1,113 @@
+/* Scoped styles for the header */
+.custom-header {
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+    margin: 0;
+}
+
+/* Header Styles */
+.custom-header .header {
+    background-color: red;
+    color: white;
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically */
+    font-size: 12px;
+    font-weight: bold;
+    height: 50px; /* Set a height for vertical alignment */
+}
+
+/* Header Container */
+.custom-header .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #87a4f0; /* Light Blue Background */
+    padding: 1px;
+    color: #000;
+    border-bottom: 3px solid #5f78b6;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Left Section: Inventory Image */
+.custom-header .inventory-image img {
+    width: 170px; /* Adjust size as needed */
+    height: 130px;
+    margin-left: 50px;
+}
+
+/* Middle Section: Company Name */
+.custom-header .company-name {
+    text-align: center;
+    font-weight: bold;
+    color: #112b79; /* Dark blue text */
+}
+
+.custom-header .company-name h1 {
+    margin: 0;
+    font-size: 45px;
+}
+
+.custom-header .company-name h2 {
+    margin: 0;
+    font-size: 32px;
+}
+
+.custom-header .company-name p {
+    margin: 5px 0;
+    font-size: 22px;
+    font-family: 'Lohit Sinhala', serif; /* For Sinhala text */
+}
+
+/* Right Section: Date, Time, and User Info */
+.custom-header .date-time-container {
+    text-align: center;
+    margin-right: 50px;
+}
+
+.custom-header .user-info {
+    margin-top: 5px;
+}
+
+.custom-header .date-time-container .user-info #user {
+    margin-right: 15px;
+}
+
+.custom-header #welcome {
+    color: #04632b;
+}
+
+.custom-header .date p,
+.custom-header .user-info label {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+.custom-header .time h2 {
+    margin: 0;
+    color: #000;
+    font-size: 24px;
+}
+
+/* Store Switcher */
+.custom-header .store-switcher {
+    margin-top: 5px;
+}
+
+.custom-header .store-switcher select {
+    padding: 5px;
+    font-size: 14px;
+}
+
+.custom-header .store-switcher button {
+    padding: 5px 10px;
+    background-color: #5f78b6;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.custom-header .store-switcher button:hover {
+    background-color: #3b548c;
+}

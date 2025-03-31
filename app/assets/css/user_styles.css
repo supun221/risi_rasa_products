@@ -1,0 +1,135 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+    text-align: center;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+.table-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 98%; /* Ensures the container spans the full width */
+    margin: 0 auto; /* Centers the container itself */
+}
+
+table {
+    width: 90%;
+   /* This might need to be reconsidered for proper table layout */
+    border-collapse: collapse;
+    margin: 20px 0;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8); /* Adds shadow effect */
+}
+
+table th, table td {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+table th {
+    background-color:hsl(229, 98%, 81%);
+    border: none;;
+    color: white;
+}
+
+table tr:hover {
+    background-color: #f1f1f1; /* Row hover effect */
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.action-buttons a {
+    text-decoration: none;
+    padding: 8px 12px;
+    color: white;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.action-buttons .edit {
+    background-color: #302bc9; 
+
+    color: #ddd;
+}
+
+.action-buttons .delete {
+    background-color: #ff0707; 
+    color: #f1f1f1;
+    border-radius: 10%;
+}
+.action-buttons .delete:hover {
+    
+    color: #fff3f3; 
+    background-color: #73020d; /* Red */
+    transform: scale(1.05);
+}
+
+.action-buttons .edit:hover {
+    background-color: #0a3981; 
+    color: #ffffff; 
+    transform: scale(1.05);
+}
+.add-customer {
+    background-color: rgb(30, 21, 203);
+    margin-left: 20px;
+    color: #ffffff;
+   
+    border: none;
+    border-radius: 4px;
+   
+    padding: 10px 20px;
+   
+    font-size: 16px;
+    /* Text size */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+   
+}
+
+.add-customer:hover {
+    background-color: rgb(46, 26, 180);
+      transform: scale(1.05);
+  
+}
+
+
+.add-user-form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.add-user-form input, .add-user-form select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.add-user-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.add-user-form button:hover {
+    background-color: #0056b3;
+}

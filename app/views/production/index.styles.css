@@ -1,0 +1,102 @@
+:root {
+  --header-red: #8b1e3f;
+  --btn-primary-color: #56552d;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  background-color: #ecf0f1;
+}
+
+::-webkit-scrollbar-thumb {
+  width: 5px;
+  background-color: var(--header-red);
+}
+
+.prod-index-container {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 40px;
+}
+
+.prod-op-selection {
+  width: 100%;
+  max-width: 1100px;
+  padding: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.prod-op-sel-tile {
+  width: 250px;
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  margin: 15px;
+  background-size: cover;
+  background-position: center;
+  background-attachment: scroll;
+  position: relative;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+  border: 2px solid black;
+}
+
+.prod-op-sel-tile:nth-child(1) {
+  background-image: url(https://images.unsplash.com/photo-1602237514002-c2d8ae2da393?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
+}
+
+.prod-op-sel-tile:nth-child(2) {
+  background-image: url(https://images.unsplash.com/photo-1606109693563-d4f5e334357a?q=80&w=1976&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
+}
+
+.tile-option-cont {
+  width: 100%;
+  padding: 10px 5px;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(3.3px);
+  -webkit-backdrop-filter: blur(6.3px);
+}
+
+.tile-heading {
+  font-size: 1.1em;
+  font-family: monospace;
+  font-weight: 600;
+  color: white;
+}
+
+.tile-info {
+  color: white;
+  font-size: 0.8em;
+  font-family: "Roboto", serif;
+  line-height: 1em;
+  margin-top: 10px;
+}
+
+.tile-nav-btn {
+  border: none;
+  background-color: white;
+  padding: 4px 15px;
+  border-radius: 4px;
+  margin-top: 15px;
+  font-size: 0.8em;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.tile-nav-btn:hover {
+  cursor: pointer;
+}
