@@ -2,7 +2,7 @@
 $serverName="localhost";
 $dbUsername="root";
 $dbPassword="";
-$dbName="nexaraso_grinding_meals";
+$dbName="nexaraso_risi_rasa";
 
 $conn=mysqli_connect($serverName,$dbUsername,$dbPassword,$dbName);
 

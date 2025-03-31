@@ -13,7 +13,7 @@
 //     die("Connection failed: " . $db->connect_error);
 // }
 
-$conn = new mysqli('localhost', 'root', '', database: 'nexaraso_grinding_meals');
+$conn = new mysqli('localhost', 'root', '', database: 'nexaraso_risi_rasa');
 
 if ($conn->connect_error) {
     die(json_encode(['success' => false, 'message' => 'Database connection failed.']));
