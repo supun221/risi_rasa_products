@@ -18,7 +18,7 @@ require_once '../header1.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eggland | Report Dashboard</title>
+    <title>Report Dashboard</title>
     <link rel="stylesheet" href="./print_dashboard.styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -43,7 +43,7 @@ require_once '../header1.php';
 </head>
 
 <body>
-    <span class="report-page-header">Eggland Super Report Export Page</span>
+    <span class="report-page-header"> Report Export Page</span>
 
     <div class="report-listing-container">
 

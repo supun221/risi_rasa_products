@@ -31,11 +31,6 @@ if (is_array($results)) {
     $prdName = $results['product_name'];
 }
 
-
-// function getCurrentDate() {
-//     return date('Y-m-d');
-// }
-// $currentDate = getCurrentDate();
 ?>
 
 
@@ -46,10 +41,10 @@ if (is_array($results)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Invoice</title>
+    <title>Create Invoice | Risi Rasa Products</title>
     <!-- remastered-screen styles -->
     <link rel="stylesheet" href="./create-invoice.styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="../../assets/js/cart_handler.js" defer></script>
     <link rel="stylesheet" href="../../assets/notifier/style.css">
     </link>
@@ -57,20 +52,269 @@ if (is_array($results)) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
-            --primary-color: #e05b5b;
-            --primary-dark: #cc4b4b;
-            --secondary-color: #e47f7f;
-            --bg-color: #fcf5f5;
-            --text-color: #483535;
-            --button-bg-color: #f7c4c4;
-            --button-hover-color: #e9a8a8;
-            --button-text-color: #483535;
-            --input-border: #e9a8a8;
-            --highlight-color: #d04a4a;
-            --success-color: #4CAF50;
+            --primary-color: #4361ee;
+            --primary-dark: #3249c2;
+            --secondary-color: #748df0;
+            --bg-color: #f5f7fa;
+            --text-color: #2c3e50;
+            --button-bg-color: #e0e7ff;
+            --button-hover-color: #c7d2fe;
+            --button-text-color: #3249c2;
+            --input-border: #ddd;
+            --highlight-color: #ef476f;
+            --success-color: #10b981;
         }
 
-        /* return form css */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .header-container-rmaster {
+            background: linear-gradient(145deg, var(--primary-color), var(--primary-dark));
+        }
+
+        .company-info {
+            color: white;
+        }
+
+        .total-val-indicator-main {
+            color: white;
+        }
+
+        /* More professional form styling */
+        .eland-input {
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+        }
+
+        .eland-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+            outline: none;
+        }
+
+        /* Button styling update */
+        .eland-pos-button {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 3px 6px rgba(67, 97, 238, 0.2);
+        }
+
+        .eland-pos-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(67, 97, 238, 0.3);
+        }
+
+        .button-style {
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .button-style:hover {
+            background-color: var(--button-hover-color);
+            transform: translateY(-10px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .button-style > i {
+            color: var(--primary-color);
+        }
+
+        /* Table styling */
+        .item-cart > thead > tr > th {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+
+        .item-cart > tbody > tr:nth-child(odd) {
+            background-color: #f1f5fd;
+        }
+
+        .item-cart > tbody > tr:nth-child(even) {
+            background-color: #ffffff;
+        }
+
+        /* Credit info styling */
+        .credit-info-container {
+            padding: 20px;
+        }
+
+        .credit-info-item {
+            margin-bottom: 15px;
+        }
+
+        .credit-info-item label {
+            display: inline-block;
+            width: 120px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .credit-info-item input {
+            width: 150px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+        }
+
+        /* Invoice header styling */
+        #create-invoice-header {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 5px 25px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Barcode reader styling */
+        .barcode-reader-table > thead > tr > th {
+            background-color: var(--primary-dark);
+            color: white;
+            font-size: 13px;
+            padding: 10px 5px;
+        }
+
+        .barcode-input {
+            border: 2px solid var(--secondary-color);
+            border-radius: 6px;
+        }
+
+        .barcode-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+            outline: none;
+        }
+
+        .action-buttons button {
+            background-color: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-buttons button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .salesman-info-ribbon {
+            background-color: #f8f9fa;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Total values */
+        .total-val-input-main {
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        #total_amount {
+            color: var(--success-color) !important;
+        }
+
+        #total_cash_tendered {
+            color: var(--success-color) !important;
+        }
+
+        /* Update the held invoice styles */
+        .held-invoice-heading {
+            background-color: var(--primary-color);
+            font-weight: 600;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .held-invoice-btn {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .held-invoice-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Modals and popups */
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .bc-btn {
+            background-color: var(--primary-color);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .bc-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .dropdown-list {
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-item:hover {
+            background-color: #f1f5fd;
+        }
+
+        /* Transaction type selectors */
+        .transaction-type-selector {
+            background-color: var(--primary-color);
+            border-radius: 6px;
+            padding: 8px 15px;
+        }
+
+        .tra-type-label {
+            font-weight: 500;
+        }
+
+        /* Option menu styling */
+        .opt-btn {
+            background-color: var(--primary-color);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .opt-child-btn {
+            transition: all 0.3s ease;
+        }
+
+        .opt-child-btn:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Cart item counter */
+        .cart-item-counter {
+            background-color: var(--primary-color);
+        }
+
+        .item-count-indicator {
+            background-color: var(--highlight-color);
+            font-weight: 600;
+        }
+        
+        /* return form css and other remaining styles from original */
         .modal {
             display: none;
             position: fixed;
@@ -96,7 +340,6 @@ if (is_array($results)) {
         .close {
             color: red;
             float: right;
-            /* font-size: 18px; */
             font-weight: bold;
         }
 
@@ -119,15 +362,6 @@ if (is_array($results)) {
             margin-top: 2px;
         }
 
-        .barcode-reader-table>thead>tr>th {
-            font-family: "Poppins", serif;
-            font-weight: 500;
-            text-align: center;
-            background-color: var(--primary-dark);
-            color: white;
-            padding: 1px 2px;
-        }
-
         .barcode-reader-table>tbody>tr>td {
             padding: 1px 2px;
             font-family: "Poppins", serif;
@@ -138,18 +372,9 @@ if (is_array($results)) {
         }
 
         .barcode-reader-table>tbody>tr:hover>td {
-            background-color: #dcdde1;
+            background-color: #f1f5fd;
         }
 
-        .barcode-reader-table>tbody>tr:nth-child(odd) {
-            background-color: #dfe4ea;
-        }
-
-        .barcode-reader-table>tbody>tr:nth-child(even) {
-            background-color: #f1f2f6;
-        }
-
-        .barcode-input,
         .barcode-product-name,
         .barcode-quantity,
         .barcode-our-price {
@@ -158,18 +383,8 @@ if (is_array($results)) {
             font-family: "Poppins", serif;
             font-size: 0.9em;
             text-align: center;
-        }
-
-        .barcode-input {
-            border: 2px solid var(--secondary-color);
+            border: 1px solid #ddd;
             border-radius: 4px;
-        }
-
-        .barcode-product-name,
-        .barcode-quantity,
-        .barcode-our-price {
-            border: 2px solid #dfe4ea;
-            background-color: #f9f9f9;
         }
 
         .barcode-tb-inp {
@@ -178,39 +393,6 @@ if (is_array($results)) {
             font-size: 0.9em;
             text-align: center;
             border: none;
-        }
-
-        .eland-pos-input-cont {
-            position: relative;
-            width: 100%;
-        }
-
-        #search-customer {
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .dropdown-list {
-            position: absolute;
-            top: calc(100% + 2px);
-            left: 0;
-            width: 100%;
-            background: #fff;
-            border: 1px solid #ccc;
-            z-index: 1000;
-            max-height: 150px;
-            overflow-y: auto;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-
-        .dropdown-item {
-            padding: 8px 12px;
-            cursor: pointer;
-        }
-
-        .dropdown-item:hover {
-            background-color: var(--bg-color);
         }
 
         .modal-container {
@@ -226,75 +408,82 @@ if (is_array($results)) {
             z-index: 1000;
         }
 
-        .modal-content {
-            background-color: white;
-            border-radius: 5px;
-            width: 39%;
-            height: 90%;
-            max-width: 1200px;
-            max-height: 90vh;
-            position: relative;
-            overflow: hidden;
-            padding: 10;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 1001;
-            color: #333;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
+        /* Bill Values Container Styling */
+        .bill-values-container-main {
+            width: 32%;
+            height: 100%;
+            background-color: #000000;
+            padding: 20px;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Update barcode reader table styling */
-        .barcode-reader-table>thead>tr>th {
-            background-color: var(--primary-dark);
+        .total-val-indicator-main {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
         }
 
-        .barcode-input {
-            border: 2px solid var(--secondary-color);
-            border-radius: 4px;
+        .total-val-indicator-main:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
         }
 
-        /* Button styling update */
-        button {
-            background-color: var(--button-bg-color);
-            color: var(--button-text-color);
+        .total-val-label-main {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .total-val-input-main {
+            background-color: transparent;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 2.5em;
+            font-weight: 700;
             border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
+            outline: none;
+            text-align: center;
+            width: 100%;
+            padding: 5px 0;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
         }
 
-        button:hover {
-            background-color: var(--button-hover-color);
+        .total-val-input-main:focus {
+            border-bottom: 2px solid var(--primary-color);
         }
 
-        /* Success color for amount */
-        .total-val-input-main[id="total_amount"] {
+        #total_amount {
             color: var(--success-color) !important;
+            text-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
         }
 
-        .total-val-input-main[id="total_cash_tendered"] {
+        #total_cash_tendered {
             color: var(--success-color) !important;
+            text-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
         }
 
-        .bc-title {
-            color: var(--primary-color);
-        }
-
-        .bc-btn {
-            background-color: var(--primary-color);
+        #total_balance_final {
+            color: #f8fafc !important;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
         }
     </style>
 
@@ -669,16 +858,16 @@ if (is_array($results)) {
             <!-- bill related fees -->
             <div class="bill-values-container-main">
                 <div class="total-val-indicator-main">
-                    <span class="total-val-label-main">Total Amount:</span>
-                    <input style="color: #26de81;" type="text" class="total-val-input-main" id="total_amount" value="00.00" disabled>
+                    <span class="total-val-label-main">Total Amount</span>
+                    <input type="text" class="total-val-input-main" id="total_amount" value="00.00" style="display: block; visibility: visible; color: #10b981 !important;" disabled>
                 </div>
                 <div class="total-val-indicator-main">
-                    <span class="total-val-label-main">Cash Tendered:</span>
-                    <input style="color: #26de81;" type="text" class="total-val-input-main" id="total_cash_tendered" value="00.00" onkeyup="balanceHandler()">
+                    <span class="total-val-label-main">Cash Tendered</span>
+                    <input type="text" class="total-val-input-main" id="total_cash_tendered" value="00.00" style="display: block; visibility: visible; color: #10b981 !important;" onkeyup="balanceHandler()">
                 </div>
                 <div class="total-val-indicator-main">
-                    <span class="total-val-label-main">Balance:</span>
-                    <input type="text" class="total-val-input-main" id="total_balance_final" value="00.00" disabled>
+                    <span class="total-val-label-main">Balance</span>
+                    <input type="text" class="total-val-input-main" id="total_balance_final" value="00.00" style="display: block; visibility: visible; color: #f8fafc !important;" disabled>
                 </div>
             </div>
         </div>
@@ -1772,5 +1961,49 @@ if (is_array($results)) {
     }
 </script>
 
+<script>
+    // Make sure the bill values are displayed properly
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set initial values and ensure visibility
+        const totalAmount = document.getElementById('total_amount');
+        const cashTendered = document.getElementById('total_cash_tendered');
+        const balanceFinal = document.getElementById('total_balance_final');
+        
+        // Force visibility and proper styling
+        totalAmount.style.display = 'block';
+        totalAmount.style.visibility = 'visible';
+        totalAmount.style.color = '#10b981';
+        
+        cashTendered.style.display = 'block';
+        cashTendered.style.visibility = 'visible';
+        cashTendered.style.color = '#10b981';
+        
+        balanceFinal.style.display = 'block';
+        balanceFinal.style.visibility = 'visible';
+        balanceFinal.style.color = '#f8fafc';
+        
+        // Update display every second to ensure values show
+        setInterval(function() {
+            if (totalAmount.value === '' || totalAmount.value === '0') {
+                totalAmount.value = '00.00';
+            }
+            if (cashTendered.value === '' || cashTendered.value === '0') {
+                cashTendered.value = '00.00';
+            }
+            if (balanceFinal.value === '' || balanceFinal.value === '0') {
+                balanceFinal.value = '00.00';
+            }
+        }, 1000);
+    });
+
+    // Override any existing balanceHandler to ensure it updates the display
+    function balanceHandler() {
+        const totalAmount = parseFloat(document.getElementById('total_amount').value) || 0;
+        const cashTendered = parseFloat(document.getElementById('total_cash_tendered').value) || 0;
+        const balance = cashTendered - totalAmount;
+        
+        document.getElementById('total_balance_final').value = balance.toFixed(2);
+    }
+</script>
 
 </html>

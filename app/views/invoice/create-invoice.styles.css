@@ -184,59 +184,81 @@
   letter-spacing: 3px;
 }
 
+/* Fix for bill values container display issues */
 .bill-values-container-main {
   width: 32%;
   height: 100%;
-  background-color: var(--primary-dark);
-  padding: 15px;
+  background-color: #000000;
+  padding: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 100; /* Ensure it's above other elements */
 }
 
 .total-val-indicator-main {
+  width: 100%;
+  min-height: 80px; /* Ensure minimum height */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   color: white;
-  font-family: "Poppins", serif;
-  border-radius: 5px;
-  line-height: 2.1em;
-  transform: scale(1.2);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
 }
 
-.total-val-indicator-small {
-  width: 285px;
-  margin-left: 4px;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  background-color: var(--primary-dark);
-  color: white;
-  font-family: "Poppins", serif;
-  border-radius: 5px;
-  padding: 3px 10px;
+.total-val-indicator-main:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
 }
 
 .total-val-label-main {
-  font-size: 1.9em;
-  font-weight: 500;
+  font-size: 1.3em;
+  font-weight: 600;
+  margin-bottom: 10px; /* Increased spacing */
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  display: block; /* Ensure block display */
+  text-align: center;
 }
 
 .total-val-input-main {
-  background-color: transparent;
-  color: white;
-  font-family: "Roboto", serif;
-  font-size: 3em;
-  font-weight: 600;
+  background-color: transparent !important;
+  color: white !important;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 2.5em;
+  font-weight: 700;
   border: none;
   outline: none;
   text-align: center;
-  min-width: 100px;
-  max-width: 400px;
-  transform: translateY(-10px);
+  width: 100%;
+  min-height: 45px; /* Ensure minimum height */
+  padding: 5px 0;
+  transition: all 0.3s ease;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  display: block !important; /* Force display as block */
+  visibility: visible !important; /* Force visibility */
+}
+
+#total_amount, 
+#total_cash_tendered {
+  color: #10b981 !important; /* Force success color */
+  text-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
+}
+
+#total_balance_final {
+  color: #f8fafc !important; /* Force white color */
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 .salesman-info-ribbon {
