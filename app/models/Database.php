@@ -25,6 +25,6 @@ class Database {
     }
 }
 
-$db_conn = (new Database('localhost', 'root', '', 'nexaraso_risi_rasa'))->connect();
+$db_conn = (new Database('localhost:3309', 'root', '', 'nexaraso_risi_rasa'))->connect();
 
 ?>

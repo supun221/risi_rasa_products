@@ -1,5 +1,5 @@
 <?php
-require_once '../header1.php';
+
 session_start();
 $user_name = $_SESSION['username'];
 $user_role = $_SESSION['job_role'];
@@ -9,6 +9,7 @@ if ($user_role !== 'admin' || $user_role == null) {
     header("Location: ../unauthorized/unauthorized_access.php");
     exit();
 }
+require_once '../header1.php';
 ?>
 
 <!DOCTYPE html>

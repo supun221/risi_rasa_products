@@ -2,64 +2,197 @@
 <html>
 
 <head>
-
-    <title>Customer List</title>
+    <title>Customer Management | Risi Rasa Products</title>
     <link rel="stylesheet" href="../../assets/css/user_styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* General Layout & Typography */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 25px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Add Customer Button */
         .add-customer {
-            background-color: rgb(30, 21, 203);
-            /* Green for adding */
+            background-color: #4361ee;
             color: #ffffff;
-            /* White text */
             border: none;
-            border-radius: 4px;
-            /* Rounded corners */
-            padding: 10px 20px;
-            /* Padding for a nice size */
-            font-size: 16px;
-            /* Text size */
+            border-radius: 6px;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 500;
             cursor: pointer;
-            /* Pointer cursor on hover */
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            /* Smooth transition */
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 3px 6px rgba(67, 97, 238, 0.2);
         }
 
         .add-customer:hover {
-            background-color: rgb(46, 26, 180);
-            /* Darker green on hover */
-            transform: scale(1.05);
-            /* Slight zoom effect on hover */
+            background-color: #3249c2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(67, 97, 238, 0.3);
+        }
+
+        .add-customer:active {
+            transform: translateY(0);
+        }
+
+        .add-customer i {
+            font-size: 16px;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: #fff;
+            font-size: 14px;
+        }
+
+        table th {
+            background-color: #f8f9fa;
+            color: #516173;
+            font-weight: 600;
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 2px solid #e0e0e0;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #3a3f51;
+            vertical-align: middle;
+        }
+
+        table tr:last-child td {
+            border-bottom: none;
+        }
+
+        table tr:hover {
+            background-color: #f8faff;
+        }
+
+        /* Status Indicators */
+        .credit-balance {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .credit-limit {
+            font-weight: 500;
+            color: #4361ee;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .action-buttons a, 
+        .action-buttons button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn-edit {
+            background-color: #4361ee;
+            width: 36px;
+            height: 36px;
+        }
+
+        .action-btn-edit:hover {
+            background-color: #3249c2;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(67, 97, 238, 0.2);
+        }
+
+        .action-btn-delete {
+            background-color: #ef476f;
+            width: 36px;
+            height: 36px;
+        }
+
+        .action-btn-delete:hover {
+            background-color: #d64161;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(239, 71, 111, 0.2);
         }
 
         .payment {
-            background-color: rgb(255, 193, 7);
-            /* Yellow background */
+            background-color: #fca311;
             color: white;
-            /* Ensures text is white */
+            font-weight: 500;
+            padding: 8px 14px;
+            border-radius: 6px;
             border: none;
-            /* Removes any borders */
-            border-radius: 4px;
-            /* Slightly rounded corners */
-            padding: 10px 20px;
-            /* Padding for button size */
-            font-size: 16px;
-            /* Text size */
-            cursor: pointer;
-            /* Pointer cursor on hover */
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            /* Smooth hover effects */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(252, 163, 17, 0.2);
         }
 
         .payment:hover {
-            background-color: rgb(255, 179, 0);
-            /* Darker yellow on hover */
-            transform: scale(1.05);
-            /* Slight zoom effect */
-            color: white;
-            /* Ensures text remains white on hover */
+            background-color: #e09010;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(252, 163, 17, 0.3);
         }
 
-        /* Popup and Table Styles */
+        /* Modal and popup styles remain the same */
         .popup-container {
             display: none;
             position: fixed;
@@ -108,28 +241,6 @@
         .popup form button:hover {
             background-color: #0056b3;
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        table th,
-        table td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: left;
-        }
-
-        .action-buttons a {
-            margin-right: 5px;
-            text-decoration: none;
-            color: #007bff;
-        }
-
-        .action-buttons a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 
@@ -170,36 +281,28 @@
     include 'update_customer.php'; // Include update customer modal
     ?>
 
-
-    <!DOCTYPE html>
-    <html>
-
-    <head>
-        <title>Customer List</title>
-        <link rel="stylesheet" href="../../assets/css/user_styles.css">
-        <style>
-            /* Your existing CSS styles */
-        </style>
-    </head>
-
-    <body>
-        <h1>Customer List</h1>
-        <button type="button" class="add-customer" data-toggle="modal" data-target="#addCustomerModal">Add customer</button>
-        <?php require_once 'add_customer.php'; // Include add customer modal 
-        ?>
+    <div class="content-wrapper">
+        <div class="page-header">
+            <h1>Customer Management</h1>
+            <button type="button" class="add-customer" data-toggle="modal" data-target="#addCustomerModal">
+                <i class="fas fa-plus-circle"></i> Add Customer
+            </button>
+        </div>
+        
+        <?php require_once 'add_customer.php'; // Include add customer modal ?>
 
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>No</th>
-                        <th>Customer Name</th>
-                        <th>Telephone</th>
-                        <th>NIC</th>
-                        <th>Address</th>
-                        <th>Credit limit</th>
-                        <th>Credit Balance</th>
-                        <th>Actions</th>
+                        <th width="5%">No</th>
+                        <th width="20%">Customer Name</th>
+                        <th width="12%">Telephone</th>
+                        <th width="12%">NIC</th>
+                        <th width="15%">Address</th>
+                        <th width="10%">Credit limit</th>
+                        <th width="10%">Credit Balance</th>
+                        <th width="16%">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -208,119 +311,123 @@
                         foreach ($customers as $index => $customer) {
                             $customerId = $customer['id'];
                             $creditBalance = isset($creditBalances[$customerId]) ? $creditBalances[$customerId] : 0.00;
+                            
+                            // Ensure credit_limit is numeric
+                            $creditLimit = is_numeric($customer['credit_limit']) ? $customer['credit_limit'] : 0.00;
 
                             echo '<tr id="customer-row-' . htmlspecialchars($customerId) . '">';
                             echo '<td>' . ($index + 1) . '</td>';
-                            echo '<td>' . htmlspecialchars($customer['name']) . '</td>';
+                            echo '<td><strong>' . htmlspecialchars($customer['name']) . '</strong></td>';
                             echo '<td>' . htmlspecialchars($customer['telephone']) . '</td>';
                             echo '<td>' . htmlspecialchars($customer['nic']) . '</td>';
                             echo '<td>' . htmlspecialchars($customer['address']) . '</td>';
-                            echo '<td>' . htmlspecialchars($customer['credit_limit']) . '</td>';
-                            echo '<td>' . number_format($creditBalance, 2) . '</td>'; // Display credit balance
+                            echo '<td class="credit-limit">' . number_format((float)$creditLimit, 2) . '</td>';
+                            echo '<td class="credit-balance">' . number_format((float)$creditBalance, 2) . '</td>';
                             echo '<td class="action-buttons">
-                            <a href="javascript:void(0);" onclick="loadCustomerDetails(' . htmlspecialchars($customerId) . ')" class="edit">Edit</a>
-                            <button onclick="confirmDelete(' . htmlspecialchars($customerId) . ')" class="delete">Delete</button>
-                            <a href="payment.php?id=' . urlencode($customerId) . '" class="payment">Payment</a>
+                            <a href="javascript:void(0);" onclick="loadCustomerDetails(' . htmlspecialchars($customerId) . ')" class="action-btn-edit" title="Edit Customer"><i class="fas fa-pencil-alt"></i></a>
+                            <button onclick="confirmDelete(' . htmlspecialchars($customerId) . ')" class="action-btn-delete" title="Delete Customer"><i class="fas fa-trash-alt"></i></button>
+                            <a href="payment.php?id=' . urlencode($customerId) . '" class="payment" title="Make Payment"><i class="fas fa-wallet"></i> Payment</a>
                         </td>';
                             echo '</tr>';
                         }
                     } else {
-                        echo '<tr><td colspan="7">No customers found.</td></tr>';
+                        echo '<tr><td colspan="8" style="text-align:center;padding:20px;">No customers found.</td></tr>';
                     }
                     ?>
                 </tbody>
             </table>
         </div>
+    </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <script>
-            function confirmDelete(customerId) {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Send DELETE request using POST
-                        fetch('../../controllers/customer_controller.php', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    action: 'delete',
-                                    id: customerId,
-                                }),
-                            })
-                            .then((response) => response.json())
-                            .then((data) => {
-                                if (data.status === 'success') {
-                                    Swal.fire('Deleted!', data.message, 'success');
-                                    // Remove the row from the table
-                                    const row = document.getElementById('customer-row-' + customerId);
-                                    if (row) row.remove();
-                                } else {
-                                    Swal.fire('Error!', data.message, 'error');
-                                }
-                            })
-                            .catch((error) => {
-                                console.error('Error:', error);
-                                Swal.fire('Error!', 'Something went wrong.', 'error');
-                            });
-                    }
-                });
-            }
-
-            function loadCustomerDetails(customerId) {
-                // Fetch customer details using AJAX
-                fetch('../../controllers/customer_controller.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'get',
-                            id: customerId,
-                        }),
-                    })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.status === 'success') {
-                            const customer = data.data;
-                            // Populate the modal fields
-                            document.getElementById('update-customer-id').value = customer.id;
-                            document.getElementById('update-name').value = customer.name;
-                            document.getElementById('update-telephone').value = customer.telephone;
-                            document.getElementById('update-nic').value = customer.nic;
-                            document.getElementById('update-address').value = customer.address;
-                            document.getElementById('update-whatsapp').value = customer.whatsapp;
-                            document.getElementById('update-email').value = customer.email;
-                            document.getElementById('update-birthday').value = customer.birthday;
-                            document.getElementById('update-credit-limit').value = customer.credit_limit;
-                            document.getElementById('update-discount').value = customer.discount;
-                            document.getElementById('update-price-type').value = customer.price_type;
-                            // Show the modal
-                            $('#updateCustomerModal').modal('show');
-                        } else {
-                            Swal.fire('Error!', data.message, 'error');
-                        }
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                        Swal.fire('Error!', 'Something went wrong.', 'error');
-                    });
-            }
-            document.addEventListener("keydown", function(event) {
-                if (event.code === "Home") {
-                    window.location.href = "../dashboard/index.php";
+    <script>
+        function confirmDelete(customerId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send DELETE request using POST
+                    fetch('../../controllers/customer_controller.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                action: 'delete',
+                                id: customerId,
+                            }),
+                        })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.status === 'success') {
+                                Swal.fire('Deleted!', data.message, 'success');
+                                // Remove the row from the table
+                                const row = document.getElementById('customer-row-' + customerId);
+                                if (row) row.remove();
+                            } else {
+                                Swal.fire('Error!', data.message, 'error');
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                            Swal.fire('Error!', 'Something went wrong.', 'error');
+                        });
                 }
             });
-        </script>
-    </body>
+        }
 
-    </html>
+        function loadCustomerDetails(customerId) {
+            // Fetch customer details using AJAX
+            fetch('../../controllers/customer_controller.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'get',
+                        id: customerId,
+                    }),
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.status === 'success') {
+                        const customer = data.data;
+                        // Populate the modal fields
+                        document.getElementById('update-customer-id').value = customer.id;
+                        document.getElementById('update-name').value = customer.name;
+                        document.getElementById('update-telephone').value = customer.telephone;
+                        document.getElementById('update-nic').value = customer.nic;
+                        document.getElementById('update-address').value = customer.address;
+                        document.getElementById('update-whatsapp').value = customer.whatsapp;
+                        document.getElementById('update-email').value = customer.email;
+                        document.getElementById('update-birthday').value = customer.birthday;
+                        document.getElementById('update-credit-limit').value = customer.credit_limit;
+                        document.getElementById('update-discount').value = customer.discount;
+                        document.getElementById('update-price-type').value = customer.price_type;
+                        // Show the modal
+                        $('#updateCustomerModal').modal('show');
+                    } else {
+                        Swal.fire('Error!', data.message, 'error');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    Swal.fire('Error!', 'Something went wrong.', 'error');
+                });
+        }
+        document.addEventListener("keydown", function(event) {
+            if (event.code === "Home") {
+                window.location.href = "../dashboard/index.php";
+            }
+        });
+    </script>
+</body>
+
+</html>

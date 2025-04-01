@@ -22,9 +22,9 @@
         }
 
         #search1:focus {
-            border-color: hsl(229, 98%, 81%);
+            border-color: hsl(229, 98%, 81%); /* to match theme's primary color */
             outline: none;
-            box-shadow: 0 0 5px hsl(229, 98%, 81%);
+            box-shadow: 0 0 5px hsl(229, 98%, 81%); /* to match theme's primary color */
         }
 
         #categoryFilter {
@@ -39,9 +39,8 @@
         }
     </style>
     <!-- Search Form -->
-    <input
-        type="text"
-        id="search1"
+    <input type="text" 
+        id="search1" 
         placeholder="Search by Barcode or Product Name"
         onkeyup="liveSearch()">
 

@@ -32,13 +32,14 @@
         }
 
         .filters button {
-            background-color: hsl(229, 98%, 81%);
-            color: white;
+            background-color: #f7c4c4; /* Theme button background color */
+            color: #483535; /* Theme button text color */
+            border: 1px solid #e9a8a8; /* Theme border color */
             cursor: pointer;
         }
 
         .filters button:hover {
-            background-color: hsl(229, 98%, 71%);
+            background-color: #e9a8a8; /* Theme button hover color */
         }
 
         .table-container {
@@ -61,7 +62,7 @@
         }
 
         table th {
-            background-color: hsl(229, 98%, 81%);
+            background-color: #e05b5b; /* Changed to match theme's primary color */
             color: white;
         }
 

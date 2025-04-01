@@ -77,9 +77,8 @@ $result = $stmt->get_result();
         }
 
         table th {
-            background-color: hsl(229, 98%, 81%);
+            background-color:rgb(241, 119, 119); /* Changed to match theme's primary color */
             border: none;
-            ;
             color: white;
         }
 

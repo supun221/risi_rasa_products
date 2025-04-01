@@ -1,15 +1,214 @@
 <!DOCTYPE html>
 <html>
-<?php
-require_once '../header1.php';
-?>
 
 <head>
-
-    <title>Employee List</title>
+    <title>Employee Management | Risi Rasa Products</title>
     <link rel="stylesheet" href="../../assets/css/user_styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <style>
+        /* General Layout & Typography */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 25px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Buttons */
+        .action-btn {
+            background-color: #4361ee;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 3px 6px rgba(67, 97, 238, 0.2);
+        }
+
+        .action-btn:hover {
+            background-color: #3249c2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(67, 97, 238, 0.3);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .action-btn i {
+            font-size: 16px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            box-shadow: 0 3px 6px rgba(23, 162, 184, 0.2);
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+            box-shadow: 0 5px 8px rgba(23, 162, 184, 0.3);
+        }
+
+        .btn-warning {
+            background-color: #fca311;
+            box-shadow: 0 3px 6px rgba(252, 163, 17, 0.2);
+        }
+
+        .btn-warning:hover {
+            background-color: #e09010;
+            box-shadow: 0 5px 8px rgba(252, 163, 17, 0.3);
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: #fff;
+            font-size: 14px;
+        }
+
+        table th {
+            background-color: #f8f9fa;
+            color: #516173;
+            font-weight: 600;
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 2px solid #e0e0e0;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #3a3f51;
+            vertical-align: middle;
+        }
+
+        table tr:last-child td {
+            border-bottom: none;
+        }
+
+        table tr:hover {
+            background-color: #f8faff;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .action-buttons a, 
+        .action-buttons button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+        }
+
+        .action-btn-edit {
+            background-color: #4361ee;
+        }
+
+        .action-btn-edit:hover {
+            background-color: #3249c2;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(67, 97, 238, 0.2);
+        }
+
+        .action-btn-delete {
+            background-color: #ef476f;
+        }
+
+        .action-btn-delete:hover {
+            background-color: #d64161;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(239, 71, 111, 0.2);
+        }
+
+        /* Barcode Scanner Styles */
+        .barcode-scanner {
+            margin: 20px 0;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+
+        #barcodeInput {
+            padding: 14px;
+            width: 400px;
+            font-size: 16px;
+            border: 2px solid #4361ee;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(67, 97, 238, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        #barcodeInput:focus {
+            outline: none;
+            border-color: #3249c2;
+            box-shadow: 0 5px 8px rgba(67, 97, 238, 0.2);
+        }
+
+        /* Popup styles remain the same */
         .popup-container {
             display: none;
             position: fixed;
@@ -58,61 +257,12 @@ require_once '../header1.php';
         .popup form button:hover {
             background-color: #0056b3;
         }
-
-        table {
-            width: 98%;
-            border-collapse: collapse;
-            align-items: center;
-        }
-
-        table th,
-        table td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: left;
-        }
-
-        .action-buttons a {
-            margin-right: 5px;
-            text-decoration: none;
-            color: #007bff;
-        }
-
-        .action-buttons a:hover {
-            text-decoration: underline;
-        }
-
-        .barcode-scanner {
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        #barcodeInput {
-            padding: 10px;
-            width: 300px;
-            font-size: 16px;
-            border: 2px solid #007bff;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 
 <body>
-    <h1>Employee List</h1>
-    <div class="barcode-scanner">
-        <input type="text" id="barcodeInput" placeholder="Scan Employee Barcode" autofocus>
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <button type="button" class="add-customer" data-toggle="modal" data-target="#addEmployeeModal">Add Employee</button>
-        <button type="button" class="add-customer" onclick=showSalaryModal()>Add salary</button>
-        <button type="button" class="add-customer" onclick="location.href='attendance_list.php'">Attendance List</button>
-        <button type="button" class="add-customer" onclick="location.href='salary_list.php'">Salary List</button>
-    </div>
-
     <?php
-    require_once 'add_employee.php';
-    require_once 'Salary_form.php';
+    require_once '../header1.php';
     require_once '../../../config/databade.php';
 
     $employees = [];
@@ -128,48 +278,77 @@ require_once '../header1.php';
     }
 
     include 'update_employee.php';
+    require_once 'add_employee.php';
+    require_once 'Salary_form.php';
     ?>
 
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Employee ID</th>
-                    <th>Employee Name</th>
-                    <th>Telephone</th>
-                    <th>NIC</th>
-                    <th>Address</th>
-                    <th>Barcode</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                if (!empty($employees)) {
-                    foreach ($employees as $index => $employee) {
-                        echo '<tr id="employee-row-' . htmlspecialchars($employee['emp_id']) . '">';
-                        echo '<td>' . ($index + 1) . '</td>';
-                        echo '<td>' . htmlspecialchars($employee['emp_id']) . '</td>';
-                        echo '<td>' . htmlspecialchars($employee['name']) . '</td>';
-                        echo '<td>' . htmlspecialchars($employee['telephone']) . '</td>';
-                        echo '<td>' . htmlspecialchars($employee['nic']) . '</td>';
-                        echo '<td>' . htmlspecialchars($employee['address']) . '</td>';
-                        echo '<td><svg class="barcode" data-empid="' . htmlspecialchars($employee['emp_id']) . '"></svg></td>';
-                        echo '<td class="action-buttons">';
-                        echo '<a href="javascript:void(0);" onclick="loadEmployeeDetails(\'' . htmlspecialchars($employee['emp_id']) . '\')" class="edit">Edit</a>';
-                        echo '<button onclick="confirmDelete(\'' . htmlspecialchars($employee['emp_id']) . '\')" class="delete">Delete</button>';
-                        echo '</td>';
-                        echo '</tr>';
-                    }
-                } else {
-                    echo '<tr><td colspan="8">No employees found.</td></tr>';
-                }
-                ?>
+    <div class="content-wrapper">
+        <div class="page-header">
+            <h1>Employee Management</h1>
+            <div class="btn-group">
+                <button type="button" class="action-btn" data-toggle="modal" data-target="#addEmployeeModal">
+                    <i class="fas fa-user-plus"></i> Add Employee
+                </button>
+                <button type="button" class="action-btn btn-warning" onclick="showSalaryModal()">
+                    <i class="fas fa-money-bill-wave"></i> Add Salary
+                </button>
+            </div>
+        </div>
 
-            </tbody>
-        </table>
+        <div class="barcode-scanner">
+            <input type="text" id="barcodeInput" placeholder="Scan Employee Barcode" autofocus>
+        </div>
+
+        <div class="btn-group" style="justify-content: center; margin-bottom: 20px;">
+            <button type="button" class="action-btn btn-info" onclick="location.href='attendance_list.php'">
+                <i class="fas fa-clipboard-list"></i> Attendance List
+            </button>
+            <button type="button" class="action-btn btn-info" onclick="location.href='salary_list.php'">
+                <i class="fas fa-money-check-alt"></i> Salary List
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="5%">No</th>
+                        <th width="10%">Employee ID</th>
+                        <th width="20%">Employee Name</th>
+                        <th width="15%">Telephone</th>
+                        <th width="15%">NIC</th>
+                        <th width="15%">Address</th>
+                        <th width="10%">Barcode</th>
+                        <th width="10%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if (!empty($employees)) {
+                        foreach ($employees as $index => $employee) {
+                            echo '<tr id="employee-row-' . htmlspecialchars($employee['emp_id']) . '">';
+                            echo '<td>' . ($index + 1) . '</td>';
+                            echo '<td>' . htmlspecialchars($employee['emp_id']) . '</td>';
+                            echo '<td><strong>' . htmlspecialchars($employee['name']) . '</strong></td>';
+                            echo '<td>' . htmlspecialchars($employee['telephone']) . '</td>';
+                            echo '<td>' . htmlspecialchars($employee['nic']) . '</td>';
+                            echo '<td>' . htmlspecialchars($employee['address']) . '</td>';
+                            echo '<td><svg class="barcode" data-empid="' . htmlspecialchars($employee['emp_id']) . '"></svg></td>';
+                            echo '<td class="action-buttons">';
+                            echo '<a href="javascript:void(0);" onclick="loadEmployeeDetails(\'' . htmlspecialchars($employee['emp_id']) . '\')" class="action-btn-edit" title="Edit Employee"><i class="fas fa-pencil-alt"></i></a>';
+                            echo '<button onclick="confirmDelete(\'' . htmlspecialchars($employee['emp_id']) . '\')" class="action-btn-delete" title="Delete Employee"><i class="fas fa-trash-alt"></i></button>';
+                            echo '</td>';
+                            echo '</tr>';
+                        }
+                    } else {
+                        echo '<tr><td colspan="8" style="text-align:center;padding:20px;">No employees found.</td></tr>';
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
@@ -256,10 +435,6 @@ require_once '../header1.php';
                 });
         }
 
-
-
-
-        // Add this script after your existing SweetAlert script
         document.getElementById('barcodeInput').addEventListener('change', function() {
             const empId = this.value.trim();
             if (!empId) return;
@@ -341,12 +516,12 @@ require_once '../header1.php';
                     this.focus();
                 });
         });
-        document.addEventListener("keydown", function(event) {
-        if (event.code === "Home") {
-            window.location.href = "../dashboard/index.php";
-        }
-    });
 
+        document.addEventListener("keydown", function(event) {
+            if (event.code === "Home") {
+                window.location.href = "../dashboard/index.php";
+            }
+        });
     </script>
 </body>
 

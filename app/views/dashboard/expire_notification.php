@@ -31,9 +31,9 @@
 
         .filters button {
             padding: 10px 20px;
-            background-color: hsl(229, 98%, 81%);
-            color: white;
-            border: none;
+            background-color: #f7c4c4; /* Theme button background color */
+            color: #483535; /* Theme button text color */
+            border: 1px solid #e9a8a8; /* Theme border color */
             border-radius: 5px;
             font-size: 14px;
             cursor: pointer;
@@ -41,7 +41,7 @@
         }
 
         .filters button:hover {
-            background-color: hsl(229, 98%, 71%);
+            background-color: #e9a8a8; /* Theme button hover color */
         }
 
         body {
@@ -92,11 +92,9 @@
             /* font-weight: bold; */
         }
 
-
         table th {
-            background-color: hsl(229, 98%, 81%);
+            background-color: #e05b5b; /* Changed to match theme's primary color */
             border: none;
-            ;
             color: white;
         }
 
