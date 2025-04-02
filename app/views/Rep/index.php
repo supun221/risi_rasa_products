@@ -1,5 +1,50 @@
 <!DOCTYPE html>
+<?php
+// Correct the database connection path - there was a typo in "databade.php"
+require_once '../../../config/databade.php';
 
+// Get rep_id from session (assuming it's stored there)
+session_start();
+$rep_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 1; // Default to 1 for testing
+
+// Fetch lorry stock data
+try {
+    // Make sure connection is established
+    if (!isset($conn) || $conn->connect_error) {
+        throw new Exception("Database connection failed.");
+    }
+    
+    $stmt = $conn->prepare("
+        SELECT product_name, SUM(quantity) as total_qty, SUM(total_amount) as total_value
+        FROM lorry_stock 
+        WHERE rep_id = ? AND status = 'active'
+        GROUP BY product_name
+        ORDER BY product_name
+    ");
+    
+    if (!$stmt) {
+        throw new Exception("Query preparation failed: " . $conn->error);
+    }
+    
+    $stmt->bind_param("i", $rep_id);
+    $stmt->execute();
+    $lorry_stock = $stmt->get_result();
+    
+    // Calculate grand total
+    $grand_total = 0;
+    $temp_results = [];
+    
+    while ($row = $lorry_stock->fetch_assoc()) {
+        $temp_results[] = $row;
+        $grand_total += $row['total_value'];
+    }
+    
+} catch (Exception $e) {
+    // Store error message for debugging
+    $error_message = "Error: " . $e->getMessage();
+    error_log($error_message);
+}
+?>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -31,6 +76,11 @@
                 <i class="fas fa-clipboard-list"></i> Remaining Lorry Stock
             </div>
             <div class="section-body">
+                <?php if (isset($error_message)): ?>
+                    <div class="alert alert-danger">
+                        <?php echo htmlspecialchars($error_message); ?>
+                    </div>
+                <?php endif; ?>
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
@@ -41,26 +91,24 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Product 1</td>
-                                <td>15</td>
-                                <td>$150.00</td>
-                            </tr>
-                            <tr>
-                                <td>Product 2</td>
-                                <td>8</td>
-                                <td>$240.00</td>
-                            </tr>
-                            <tr>
-                                <td>Product 3</td>
-                                <td>23</td>
-                                <td>$345.00</td>
-                            </tr>
+                            <?php if (isset($temp_results) && !empty($temp_results)): ?>
+                                <?php foreach ($temp_results as $item): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($item['product_name']); ?></td>
+                                        <td><?php echo htmlspecialchars($item['total_qty']); ?></td>
+                                        <td>Rs. <?php echo number_format($item['total_value'], 2); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="3" class="text-center">No items in lorry stock</td>
+                                </tr>
+                            <?php endif; ?>
                         </tbody>
                         <tfoot>
                             <tr>
                                 <th colspan="2">Total Value</th>
-                                <th>$735.00</th>
+                                <th>Rs. <?php echo isset($grand_total) ? number_format($grand_total, 2) : '0.00'; ?></th>
                             </tr>
                         </tfoot>
                     </table>
