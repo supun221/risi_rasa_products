@@ -63,6 +63,7 @@ require_once '../header1.php';
                 <option value="" disabled selected>Select Job Role</option>
                 <option value="staff">Staff</option>
                 <option value="admin">Admin</option>    
+                <option value="rep">Rep</option>    
             </select>
             
             <input type="email" name="email" placeholder="Email" required><br>

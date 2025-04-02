@@ -57,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $username = htmlspecialchars(trim($_POST['username']));
     $password = $_POST['password'];
     $store = htmlspecialchars(trim($_POST['store']));
+    $job_role = isset($_POST['job_role']) ? htmlspecialchars(trim($_POST['job_role'])) : '';
 
     // Validate inputs
     if (empty($username) || empty($password) || empty($store)) {
@@ -65,16 +66,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 
     // Get the user by username and store
     $user = $userModel->getUserByUsernameAndStore($username, $store);
+    
     if ($user && password_verify($password, $user['password'])) {
         // Set session variables
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['store'] = $user['store'];
-        $_SESSION['job_role'] = $user['job_role'];
+        
+        // If job_role was selected in the form and it matches the user's actual role, use it
+        // Otherwise use the role from the database
+        if (!empty($job_role) && $job_role === $user['job_role']) {
+            $_SESSION['job_role'] = $job_role;
+        } else {
+            $_SESSION['job_role'] = $user['job_role'];
+        }
 
-        // Redirect to the dashboard
-        header("Location: ../views/dashboard/index.php");
-        exit();
+        // Check if user is a rep and redirect accordingly
+        if ($_SESSION['job_role'] === 'rep') {
+            header("Location: ../views/rep/index.php");
+            exit();
+        } else {
+            // Redirect to regular dashboard for other roles
+            header("Location: ../views/dashboard/index.php");
+            exit();
+        }
     } else {
         // Redirect with error parameter instead of using redirectWithMessage
         header("Location: ../views/auth/login.php?error=invalid");
