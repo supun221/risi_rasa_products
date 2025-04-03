@@ -29,10 +29,11 @@ $(document).ready(function() {
         
         const day = days[sriLankaTime.getUTCDay()];
         const date = sriLankaTime.getUTCDate();
-        const month = months[sriLankaTime.getUTCMonth()];
+        const monthIndex = sriLankaTime.getUTCMonth(); // Get month as 0-11 index
         const year = sriLankaTime.getUTCFullYear();
         
-        const dateStr = `${day}, ${month} ${date}, ${year}`;
+        // Fixed: Use months array with the month index to get correct month name
+        const dateStr = `${day}, ${months[monthIndex]} ${date}, ${year}`;
         $('#sl-date').text(dateStr);
     }
     
@@ -40,7 +41,19 @@ $(document).ready(function() {
     $('.nav-item').click(function() {
         $('.nav-item').removeClass('active');
         $(this).addClass('active');
-        // You would add page transition logic here
+        
+        // For dashboard nav item
+        if ($(this).attr('id') === 'dashboard-nav') {
+            returnToDashboard();
+        }
+        // You would add page transition logic here for other nav items
+    });
+    
+    // Dashboard navigation item click handler
+    $('#dashboard-nav').click(function() {
+        returnToDashboard();
+        $('.nav-item').removeClass('active');
+        $(this).addClass('active');
     });
     
     // Unified return function
@@ -66,6 +79,10 @@ $(document).ready(function() {
     $(document).on('click', '.return-link', function(e) {
         e.preventDefault();
         returnToDashboard();
+        
+        // Also update the active nav item
+        $('.nav-item').removeClass('active');
+        $('#dashboard-nav').addClass('active');
     });
     
     // Unified tile click handler with transitions and AJAX loading

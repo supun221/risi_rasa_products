@@ -13,12 +13,22 @@ try {
     // Get search term, or use empty string to get all customers
     $search_term = isset($_GET['term']) ? '%' . $_GET['term'] . '%' : '%';
     
-    // Prepare and execute query
+    // Prepare and execute query with advance payment information
     $stmt = $conn->prepare("
-        SELECT id, name, telephone, nic, address, whatsapp, credit_limit, branch
-        FROM customers 
-        WHERE name LIKE ? OR telephone LIKE ? OR nic LIKE ?
-        ORDER BY name
+        SELECT c.id, c.name, c.telephone, c.nic, c.address, c.whatsapp, c.credit_limit, c.branch,
+               COALESCE(ap.net_amount, 0) as advance_amount
+        FROM customers c
+        LEFT JOIN (
+            SELECT customer_id, net_amount 
+            FROM advance_payments 
+            WHERE id IN (
+                SELECT MAX(id) 
+                FROM advance_payments 
+                GROUP BY customer_id
+            )
+        ) ap ON c.id = ap.customer_id
+        WHERE c.name LIKE ? OR c.telephone LIKE ? OR c.nic LIKE ?
+        ORDER BY c.name
         LIMIT 50
     ");
     $stmt->bind_param("sss", $search_term, $search_term, $search_term);
@@ -35,7 +45,8 @@ try {
             'address' => htmlspecialchars($row['address']),
             'whatsapp' => htmlspecialchars($row['whatsapp']),
             'credit_limit' => htmlspecialchars($row['credit_limit']),
-            'branch' => htmlspecialchars($row['branch'] ?? '')
+            'branch' => htmlspecialchars($row['branch'] ?? ''),
+            'advance_amount' => (float)$row['advance_amount']
         ];
     }
     

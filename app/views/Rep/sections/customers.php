@@ -36,6 +36,7 @@ require_once '../../../../config/databade.php';
                         <th>Phone</th>
                         <th>NIC</th>
                         <th>Credit Limit</th>
+                        <th>Advance</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -46,10 +47,20 @@ require_once '../../../../config/databade.php';
                     
                     try {
                         $stmt = $conn->prepare("
-                            SELECT id, name, telephone, nic, address, whatsapp, credit_limit
-                            FROM customers
-                            WHERE name LIKE ? OR telephone LIKE ? OR nic LIKE ?
-                            ORDER BY name
+                            SELECT c.id, c.name, c.telephone, c.nic, c.address, c.whatsapp, c.credit_limit,
+                                   COALESCE(ap.net_amount, 0) as advance_amount
+                            FROM customers c
+                            LEFT JOIN (
+                                SELECT customer_id, net_amount 
+                                FROM advance_payments 
+                                WHERE id IN (
+                                    SELECT MAX(id) 
+                                    FROM advance_payments 
+                                    GROUP BY customer_id
+                                )
+                            ) ap ON c.id = ap.customer_id
+                            WHERE c.name LIKE ? OR c.telephone LIKE ? OR c.nic LIKE ?
+                            ORDER BY c.name
                             LIMIT 50
                         ");
                         $stmt->bind_param("sss", $search_term, $search_term, $search_term);
@@ -58,11 +69,18 @@ require_once '../../../../config/databade.php';
                         
                         if ($result->num_rows > 0) {
                             while ($customer = $result->fetch_assoc()) {
+                                // Format advance amount - add text color based on value
+                                $advanceClass = $customer['advance_amount'] > 0 ? 'text-success font-weight-bold' : '';
+                                $advanceAmount = $customer['advance_amount'] > 0 ? 
+                                    "<span class='$advanceClass'>Rs. " . number_format($customer['advance_amount'], 2) . '</span>' : 
+                                    'Rs. 0.00';
+                                
                                 echo "<tr>
                                     <td>{$customer['name']}</td>
                                     <td>{$customer['telephone']}</td>
                                     <td>{$customer['nic']}</td>
                                     <td>Rs. {$customer['credit_limit']}</td>
+                                    <td>{$advanceAmount}</td>
                                     <td>
                                         <button class='btn btn-sm btn-info view-customer' data-id='{$customer['id']}' title='View Details'>
                                             <i class='fas fa-eye'></i>
@@ -74,10 +92,10 @@ require_once '../../../../config/databade.php';
                                 </tr>";
                             }
                         } else {
-                            echo "<tr><td colspan='5' class='text-center'>No customers found</td></tr>";
+                            echo "<tr><td colspan='6' class='text-center'>No customers found</td></tr>";
                         }
                     } catch (Exception $e) {
-                        echo "<tr><td colspan='5' class='text-center text-danger'>Error: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                        echo "<tr><td colspan='6' class='text-center text-danger'>Error: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
                     }
                     ?>
                 </tbody>
@@ -147,11 +165,18 @@ require_once '../../../../config/databade.php';
             
             if (customers.length > 0) {
                 customers.forEach(function(customer) {
+                    // Format advance amount with color styling
+                    const advanceClass = customer.advance_amount > 0 ? 'text-success font-weight-bold' : '';
+                    const advanceAmount = customer.advance_amount > 0 ? 
+                        `<span class='${advanceClass}'>Rs. ${parseFloat(customer.advance_amount).toFixed(2)}</span>` : 
+                        'Rs. 0.00';
+                    
                     html += `<tr>
                         <td>${customer.name}</td>
                         <td>${customer.telephone}</td>
                         <td>${customer.nic}</td>
                         <td>Rs. ${customer.credit_limit}</td>
+                        <td>${advanceAmount}</td>
                         <td>
                             <button class='btn btn-sm btn-info view-customer' data-id='${customer.id}' title='View Details'>
                                 <i class='fas fa-eye'></i>
@@ -163,7 +188,7 @@ require_once '../../../../config/databade.php';
                     </tr>`;
                 });
             } else {
-                html = "<tr><td colspan='5' class='text-center'>No customers found</td></tr>";
+                html = "<tr><td colspan='6' class='text-center'>No customers found</td></tr>";
             }
             
             $('#customers-table tbody').html(html);
@@ -202,6 +227,12 @@ require_once '../../../../config/databade.php';
                     if (response.success) {
                         const customer = response.customer;
                         
+                        // Format advance amount with color styling
+                        const advanceClass = customer.advance_amount > 0 ? 'text-success font-weight-bold' : '';
+                        const advanceAmount = customer.advance_amount > 0 ? 
+                            `<span class='${advanceClass}'>Rs. ${parseFloat(customer.advance_amount).toFixed(2)}</span>` : 
+                            'Rs. 0.00';
+                        
                         // Format customer details
                         let html = `
                             <div class="customer-info">
@@ -230,6 +261,11 @@ require_once '../../../../config/databade.php';
                                 <div class="row mb-2">
                                     <div class="col-4 font-weight-bold">Credit Limit:</div>
                                     <div class="col-8">Rs. ${customer.credit_limit}</div>
+                                </div>
+                                
+                                <div class="row mb-2">
+                                    <div class="col-4 font-weight-bold">Advance Amount:</div>
+                                    <div class="col-8">${advanceAmount}</div>
                                 </div>
                                 
                                 <div class="row mb-2">

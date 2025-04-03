@@ -61,7 +61,7 @@ body {
     transition: all 0.2s ease;
     padding: 5px 0;
     cursor: pointer;
-    width: 25%;
+    width: 20%; /* Updated from 25% to 20% to accommodate 5 items */
     font-size: 13px;
 }
 .nav-item.active {
@@ -383,6 +383,7 @@ h2.dashboard-title {
     }
     .nav-item {
         font-size: 11px;
+        width: 20%;
     }
     .form-group label {
         font-size: 12px;
@@ -426,6 +427,15 @@ h2.dashboard-title {
     
     .sl-clock-label, .sl-clock-date {
         font-size: 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .nav-item {
+        font-size: 10px;
+    }
+    .nav-item i {
+        font-size: 13px;
     }
 }
 

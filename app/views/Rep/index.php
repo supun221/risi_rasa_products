@@ -139,7 +139,13 @@ try {
             <!-- Retrieve from Lorry Tile -->
             <div class="tile" id="retrieve-from-lorry-tile" data-target="retrieve-section" data-file="retrieve_stock">
                 <i class="fas fa-dolly"></i>
-                <div class="tile-title">Retrieve Stock</div>
+                <div class="tile-title">Sales Stock</div>
+            </div>
+            
+            <!-- Advance Payment Tile -->
+            <div class="tile" id="advance-payment-tile" data-target="advance-payment-section" data-file="advance_payment">
+                <i class="fas fa-money-check-alt"></i>
+                <div class="tile-title">Advance Payment</div>
             </div>
         </div>
         
@@ -151,6 +157,10 @@ try {
     
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
+        <div class="nav-item" id="dashboard-nav">
+            <i class="fas fa-th-large"></i>
+            <div>Dashboard</div>
+        </div>
         <div class="nav-item active">
             <i class="fas fa-truck"></i>
             <div>Stock</div>

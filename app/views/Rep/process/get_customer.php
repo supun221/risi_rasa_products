@@ -14,13 +14,22 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     $customer_id = (int)$_GET['id'];
     
     try {
-        // Prepare and execute query
+        // Prepare and execute query with advance payment information
         $stmt = $conn->prepare("
-            SELECT id, name, telephone, nic, address, whatsapp, credit_limit, branch
-            FROM customers 
-            WHERE id = ?
+            SELECT c.id, c.name, c.telephone, c.nic, c.address, c.whatsapp, c.credit_limit, c.branch,
+                   COALESCE(ap.net_amount, 0) as advance_amount,
+                   ap.advance_bill_number
+            FROM customers c
+            LEFT JOIN (
+                SELECT customer_id, net_amount, advance_bill_number
+                FROM advance_payments
+                WHERE id = (
+                    SELECT MAX(id) FROM advance_payments WHERE customer_id = ?
+                )
+            ) ap ON c.id = ap.customer_id
+            WHERE c.id = ?
         ");
-        $stmt->bind_param("i", $customer_id);
+        $stmt->bind_param("ii", $customer_id, $customer_id);
         $stmt->execute();
         $result = $stmt->get_result();
         
@@ -36,7 +45,9 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
                 'address' => htmlspecialchars($customer['address']),
                 'whatsapp' => htmlspecialchars($customer['whatsapp']),
                 'credit_limit' => htmlspecialchars($customer['credit_limit']),
-                'branch' => htmlspecialchars($customer['branch'] ?? '')
+                'branch' => htmlspecialchars($customer['branch'] ?? ''),
+                'advance_amount' => (float)$customer['advance_amount'],
+                'advance_bill_number' => $customer['advance_bill_number']
             ];
             
             $response['success'] = true;
