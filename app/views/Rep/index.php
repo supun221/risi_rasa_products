@@ -54,8 +54,45 @@ try {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/rep-dashboard.css">
+    <style>
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            font-size: 16px;
+            padding: 8px 16px;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            min-width: 110px;
+        }
+        
+        .logout-btn i {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        
+        @media (max-width: 576px) {
+            .logout-btn {
+                top: 10px;
+                right: 10px;
+                font-size: 14px;
+                padding: 8px 12px;
+                min-width: auto;
+            }
+            
+            .logout-btn i {
+                margin-right: 5px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Logout Button -->
+    <a href="../../controllers/logout.php" class="btn btn-danger logout-btn" title="Logout">
+        <i class="fas fa-sign-out-alt"></i> 
+    </a>
+    
     <div class="container">
         <div class="dashboard-header">
             <h2 class="dashboard-title">Rep Dashboard</h2>

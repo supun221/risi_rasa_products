@@ -45,6 +45,10 @@ $(document).ready(function() {
         // For dashboard nav item
         if ($(this).attr('id') === 'dashboard-nav') {
             returnToDashboard();
+        } 
+        // For profile navigation
+        else if ($(this).find('i').hasClass('fa-user-circle')) {
+            loadProfileSection();
         }
         // You would add page transition logic here for other nav items
     });
@@ -118,6 +122,37 @@ $(document).ready(function() {
             }
         });
     });
+    
+    // Function to load the profile section
+    function loadProfileSection() {
+        // Hide main sections
+        $('#stock-section').fadeOut(200);
+        $('#main-tiles').fadeOut(200);
+        
+        // Show loading indicator
+        $('#dynamic-content').html('<div class="text-center my-5"><i class="fas fa-circle-notch fa-spin fa-3x text-primary"></i><p class="mt-2">Loading profile...</p></div>');
+        
+        // Load the content via AJAX
+        $.ajax({
+            url: 'sections/profile.php',
+            type: 'GET',
+            success: function(response) {
+                // Replace content and add animation
+                $('#dynamic-content').html(response).hide().fadeIn(300);
+                
+                // Scroll to the section
+                $('html, body').animate({
+                    scrollTop: $('#dynamic-content').offset().top - 15
+                }, 300);
+                
+                // Update URL
+                history.pushState({page: 'profile'}, 'Profile', '?section=profile');
+            },
+            error: function() {
+                $('#dynamic-content').html('<div class="alert alert-danger">Error loading profile. Please try again.</div>');
+            }
+        });
+    }
     
     // Show stock section by default
     $('#stock-section').show();
