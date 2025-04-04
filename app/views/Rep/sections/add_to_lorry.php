@@ -435,6 +435,9 @@ require_once '../../../../config/databade.php';
                     console.log('Server response:', response);
                     
                     if (response.success) {
+                        // Load recent additions to refresh the table
+                        loadRecentAdditions();
+                        
                         // Show success message
                         Swal.fire({
                             icon: 'success',
