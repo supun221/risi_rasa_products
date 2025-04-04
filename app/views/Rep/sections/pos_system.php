@@ -1665,8 +1665,7 @@ $(document).ready(function() {
         
         // Complete sale handler - ensure advance payment is included
         $('#complete-sale').click(function() {
-            // ...existing validation code...
-            
+        
             // Prepare sale data 
             const saleData = {
                 // ...existing properties...
@@ -1674,23 +1673,10 @@ $(document).ready(function() {
                 // ...existing properties...
             };
             
-            // Additional validation for advance + payment
-            const effectiveTotal = Math.max(0, posData.grandTotal - advanceUsed);
-            const paidAmount = parseFloat($('#paid-amount').val()) || 0;
-            
-            if ($('#payment-method').val() !== 'credit' && paidAmount < effectiveTotal) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Payment Error',
-                    text: 'The paid amount must cover the remaining amount after advance payment.'
-                });
-                return;
-            }
-            
-            // ...existing AJAX code to save_pos_sale.php...
+  
         });
         
-        // ...existing code...
+       
     });
 });
 
