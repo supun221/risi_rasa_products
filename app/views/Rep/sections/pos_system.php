@@ -1238,21 +1238,19 @@ $(document).ready(function() {
     
     // Handle advance payment checkbox
     $('#use-advance-payment').change(function() {
+        // Don't automatically set the paid amount - just recalculate
         updateModalPaymentCalculations();
         
-        // If advance checked and covers the full amount, set paid to 0
-        if ($(this).is(':checked') && posData.advanceUsed >= posData.grandTotal) {
-            $('#modal-paid-amount').val("0.00");
-        } else if ($(this).is(':checked')) {
-            // If advance checked but doesn't cover full amount, set paid to remaining
+        // Suggest a default amount but don't force it - keep field editable
+        if ($(this).is(':checked')) {
+            // If advance is checked, suggest remaining amount (if any)
             const remaining = Math.max(0, posData.grandTotal - posData.advanceUsed);
-            $('#modal-paid-amount').val(remaining.toFixed(2));
+            // Only suggest, don't set - user can still type
+            $('#modal-paid-amount').attr('placeholder', remaining.toFixed(2));
         } else {
-            // If advance unchecked, reset to full amount
-            $('#modal-paid-amount').val(posData.grandTotal.toFixed(2));
+            // If advance is unchecked, suggest full amount
+            $('#modal-paid-amount').attr('placeholder', posData.grandTotal.toFixed(2));
         }
-        
-        updateModalPaymentCalculations();
     });
     
     // Update payment calculations in the modal
@@ -1272,32 +1270,16 @@ $(document).ready(function() {
             $('#summary-used-advance-row').show();
             $('#summary-used-advance').text(posData.advanceUsed.toFixed(2));
             
-            // If advance covers everything, default paid amount to zero
-            if (remainingTotal <= 0) {
-                $('#modal-paid-amount').val("0.00");
-                paidAmount = 0;
-            } else {
-                // Otherwise, set paid amount to remaining amount
-                $('#modal-paid-amount').val(remainingTotal.toFixed(2));
-                paidAmount = remainingTotal;
-            }
+            // Don't automatically set the paid amount - keep it as user entered
+            // This allows users to type additional payment amounts
         } else {
             posData.advanceUsed = 0;
             $('#summary-used-advance-row').hide();
         }
         
         // Calculate change or credit amount
-        if (posData.advanceUsed >= posData.grandTotal) {
-            // Advance fully covers payment - no change unless additional payment made
-            posData.changeAmount = paidAmount;
-            posData.creditAmount = 0;
-            
-            // Update UI
-            $('#modal-change-amount-group').show();
-            $('#modal-credit-amount-group').hide();
-            $('#modal-change-amount').text(posData.changeAmount.toFixed(2));
-        } else if (paidAmount + posData.advanceUsed >= posData.grandTotal) {
-            // Combination of advance and payment covers or exceeds total
+        if (paidAmount + posData.advanceUsed >= posData.grandTotal) {
+            // Paid in full (combination of advance and payment)
             posData.changeAmount = (paidAmount + posData.advanceUsed) - posData.grandTotal;
             posData.creditAmount = 0;
             
