@@ -13,20 +13,11 @@ try {
     // Get search term, or use empty string to get all customers
     $search_term = isset($_GET['term']) ? '%' . $_GET['term'] . '%' : '%';
     
-    // Prepare and execute query with advance payment information
+    // Prepare and execute query - directly use advance_amount from customers table
     $stmt = $conn->prepare("
         SELECT c.id, c.name, c.telephone, c.nic, c.address, c.whatsapp, c.credit_limit, c.branch,
-               COALESCE(ap.net_amount, 0) as advance_amount
+               c.advance_amount, c.credit_balance
         FROM customers c
-        LEFT JOIN (
-            SELECT customer_id, net_amount 
-            FROM advance_payments 
-            WHERE id IN (
-                SELECT MAX(id) 
-                FROM advance_payments 
-                GROUP BY customer_id
-            )
-        ) ap ON c.id = ap.customer_id
         WHERE c.name LIKE ? OR c.telephone LIKE ? OR c.nic LIKE ?
         ORDER BY c.name
         LIMIT 50
@@ -46,7 +37,8 @@ try {
             'whatsapp' => htmlspecialchars($row['whatsapp']),
             'credit_limit' => htmlspecialchars($row['credit_limit']),
             'branch' => htmlspecialchars($row['branch'] ?? ''),
-            'advance_amount' => (float)$row['advance_amount']
+            'advance_amount' => (float)$row['advance_amount'],
+            'credit_balance' => (float)$row['credit_balance']
         ];
     }
     

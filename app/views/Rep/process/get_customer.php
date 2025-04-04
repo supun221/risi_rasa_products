@@ -5,7 +5,7 @@ require_once '../../../../config/databade.php';
 // Initialize response array
 $response = [
     'success' => false,
-    'customer' => [],
+    'customer' => null,
     'message' => ''
 ];
 
@@ -17,11 +17,11 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         // Prepare and execute query with advance payment information
         $stmt = $conn->prepare("
             SELECT c.id, c.name, c.telephone, c.nic, c.address, c.whatsapp, c.credit_limit, c.branch,
-                   COALESCE(ap.net_amount, 0) as advance_amount,
+                   c.advance_amount, c.credit_balance, c.discount, c.price_type, c.last_purchase_date,
                    ap.advance_bill_number
             FROM customers c
             LEFT JOIN (
-                SELECT customer_id, net_amount, advance_bill_number
+                SELECT customer_id, advance_bill_number
                 FROM advance_payments
                 WHERE id = (
                     SELECT MAX(id) FROM advance_payments WHERE customer_id = ?
@@ -47,6 +47,10 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
                 'credit_limit' => htmlspecialchars($customer['credit_limit']),
                 'branch' => htmlspecialchars($customer['branch'] ?? ''),
                 'advance_amount' => (float)$customer['advance_amount'],
+                'credit_balance' => (float)$customer['credit_balance'],
+                'discount' => htmlspecialchars($customer['discount'] ?? ''),
+                'price_type' => htmlspecialchars($customer['price_type'] ?? ''),
+                'last_purchase_date' => $customer['last_purchase_date'],
                 'advance_bill_number' => $customer['advance_bill_number']
             ];
             

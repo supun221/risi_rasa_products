@@ -457,5 +457,62 @@ $(document).ready(function() {
             }
         });
     });
+    
+    // Function to display customer information after selection
+    function displayCustomerInfo(customer) {
+        $('#customer-name-display').text(customer.name);
+        $('#customer-phone-display').text(customer.telephone);
+        $('#customer-nic-display').text(customer.nic);
+        $('#customer-address-display').text(customer.address);
+        $('#customer-credit-limit-display').text(parseFloat(customer.credit_limit).toFixed(2));
+        
+        // Use advance_amount directly from customers table
+        $('#customer-advance-display').text(parseFloat(customer.advance_amount).toFixed(2));
+        
+        // Set customer ID in form
+        $('#customer_id').val(customer.id);
+        
+        // Show customer info
+        $('#selected-customer-info').show();
+    }
+    
+    // When selecting a customer from search results
+    $('.customer-result').click(function(e) {
+        e.preventDefault();
+        
+        // Get customer ID and load complete details
+        const customerId = $(this).data('id');
+        
+        $.ajax({
+            url: 'process/get_customer.php',
+            type: 'GET',
+            data: { id: customerId },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    // Store customer data and display info
+                    selectedCustomer = response.customer;
+                    displayCustomerInfo(selectedCustomer);
+                    
+                    // Hide search results
+                    $('#customer-search-results').hide();
+                } else {
+                    // Show error message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Failed to load customer details'
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load customer details'
+                });
+            }
+        });
+    });
 });
 </script>
