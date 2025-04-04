@@ -1239,6 +1239,20 @@ $(document).ready(function() {
     // Handle advance payment checkbox
     $('#use-advance-payment').change(function() {
         updateModalPaymentCalculations();
+        
+        // If advance checked and covers the full amount, set paid to 0
+        if ($(this).is(':checked') && posData.advanceUsed >= posData.grandTotal) {
+            $('#modal-paid-amount').val("0.00");
+        } else if ($(this).is(':checked')) {
+            // If advance checked but doesn't cover full amount, set paid to remaining
+            const remaining = Math.max(0, posData.grandTotal - posData.advanceUsed);
+            $('#modal-paid-amount').val(remaining.toFixed(2));
+        } else {
+            // If advance unchecked, reset to full amount
+            $('#modal-paid-amount').val(posData.grandTotal.toFixed(2));
+        }
+        
+        updateModalPaymentCalculations();
     });
     
     // Update payment calculations in the modal
@@ -1257,15 +1271,34 @@ $(document).ready(function() {
             // Show advance usage in summary
             $('#summary-used-advance-row').show();
             $('#summary-used-advance').text(posData.advanceUsed.toFixed(2));
+            
+            // If advance covers everything, default paid amount to zero
+            if (remainingTotal <= 0) {
+                $('#modal-paid-amount').val("0.00");
+                paidAmount = 0;
+            } else {
+                // Otherwise, set paid amount to remaining amount
+                $('#modal-paid-amount').val(remainingTotal.toFixed(2));
+                paidAmount = remainingTotal;
+            }
         } else {
             posData.advanceUsed = 0;
             $('#summary-used-advance-row').hide();
         }
         
         // Calculate change or credit amount
-        if (paidAmount + posData.advanceUsed >= remainingTotal) {
-            // Fully paid or excess payment
-            posData.changeAmount = (paidAmount + posData.advanceUsed) - remainingTotal;
+        if (posData.advanceUsed >= posData.grandTotal) {
+            // Advance fully covers payment - no change unless additional payment made
+            posData.changeAmount = paidAmount;
+            posData.creditAmount = 0;
+            
+            // Update UI
+            $('#modal-change-amount-group').show();
+            $('#modal-credit-amount-group').hide();
+            $('#modal-change-amount').text(posData.changeAmount.toFixed(2));
+        } else if (paidAmount + posData.advanceUsed >= posData.grandTotal) {
+            // Combination of advance and payment covers or exceeds total
+            posData.changeAmount = (paidAmount + posData.advanceUsed) - posData.grandTotal;
             posData.creditAmount = 0;
             
             // Update UI
@@ -1275,7 +1308,7 @@ $(document).ready(function() {
         } else {
             // Partial payment (credit)
             posData.changeAmount = 0;
-            posData.creditAmount = remainingTotal - (paidAmount + posData.advanceUsed);
+            posData.creditAmount = posData.grandTotal - (paidAmount + posData.advanceUsed);
             
             // Update UI
             $('#modal-change-amount-group').hide();
