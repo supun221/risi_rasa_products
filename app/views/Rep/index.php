@@ -192,27 +192,34 @@ try {
         </div>
     </div>
     
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation Bar -->
     <div class="bottom-nav">
-        <div class="nav-item" id="dashboard-nav">
-            <i class="fas fa-th-large"></i>
+        <div class="nav-item active" id="dashboard-nav">
+            <i class="fas fa-home"></i>
             <div>Dashboard</div>
+            <span class="nav-indicator"></span>
         </div>
-        <div class="nav-item active">
+        <div class="nav-item" id="stock-nav">
             <i class="fas fa-truck"></i>
             <div>Stock</div>
+            <span class="nav-indicator"></span>
         </div>
-        <div class="nav-item">
+        <div class="nav-item" id="pos-nav">
+            <div class="nav-icon-circle">
+                <i class="fas fa-cash-register"></i>
+            </div>
+            <div>POS</div>
+            <span class="nav-indicator"></span>
+        </div>
+        <div class="nav-item" id="history-nav">
             <i class="fas fa-history"></i>
             <div>History</div>
+            <span class="nav-indicator"></span>
         </div>
-        <div class="nav-item">
-            <i class="fas fa-chart-bar"></i>
-            <div>Reports</div>
-        </div>
-        <div class="nav-item">
-            <i class="fas fa-user-circle"></i>
+        <div class="nav-item" id="profile-nav">
+            <i class="fas fa-user"></i>
             <div>Profile</div>
+            <span class="nav-indicator"></span>
         </div>
     </div>
 

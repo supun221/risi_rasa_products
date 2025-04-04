@@ -394,6 +394,9 @@ $(document).ready(function() {
             return false;
         }
         
+        // Show loading spinner
+        $('#advance-payment-form button[type="submit"]').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...').prop('disabled', true);
+        
         // Send AJAX request
         $.ajax({
             url: 'process/save_advance_payment.php',
@@ -414,13 +417,22 @@ $(document).ready(function() {
                         text: response.message,
                         showConfirmButton: true
                     }).then((result) => {
-                        // Clear form
-                        $('#payment_amount').val('');
-                        $('#payment_type').val('');
-                        $('#reason').val('');
+                        // Show refreshing message
+                        Swal.fire({
+                            title: 'Refreshing...',
+                            text: 'Updating system with new advance payment',
+                            icon: 'info',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            willOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
                         
-                        // Update the displayed advance amount
-                        $('#customer-advance-display').text(parseFloat(response.new_amount).toFixed(2));
+                        // Refresh the page after a short delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
                     });
                 } else {
                     Swal.fire({
@@ -428,6 +440,9 @@ $(document).ready(function() {
                         title: 'Error',
                         text: response.message
                     });
+                    
+                    // Reset button
+                    $('#advance-payment-form button[type="submit"]').html('<i class="fas fa-save mr-1"></i> Save Payment').prop('disabled', false);
                 }
             },
             error: function() {
@@ -436,6 +451,9 @@ $(document).ready(function() {
                     title: 'Error',
                     text: 'Error saving advance payment. Please try again.'
                 });
+                
+                // Reset button
+                $('#advance-payment-form button[type="submit"]').html('<i class="fas fa-save mr-1"></i> Save Payment').prop('disabled', false);
             }
         });
     });

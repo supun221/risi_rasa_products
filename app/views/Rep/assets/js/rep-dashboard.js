@@ -177,4 +177,96 @@ $(document).ready(function() {
     }).on('touchend', function() {
         $(this).css('transform', '');
     });
+    
+    // Bottom Navigation Handlers
+    $('.nav-item').click(function() {
+        // Remove active class from all items
+        $('.nav-item').removeClass('active');
+        
+        // Add active class to clicked item
+        $(this).addClass('active');
+        
+        // Add subtle animation effect
+        $(this).find('i').addClass('animate__animated animate__bounceIn');
+        setTimeout(() => {
+            $(this).find('i').removeClass('animate__animated animate__bounceIn');
+        }, 500);
+        
+        // Handle different navigation items
+        const navId = $(this).attr('id');
+        
+        // Hide all sections first
+        $('#stock-section').hide();
+        $('#main-tiles').hide();
+        
+        switch(navId) {
+            case 'dashboard-nav':
+                returnToDashboard();
+                break;
+                
+            case 'stock-nav':
+                loadSection('stock_management');  // Use this name consistently
+                break;
+                
+            case 'pos-nav':
+                loadSection('pos_system');
+                break;
+                
+            case 'history-nav':
+                loadSection('history');
+                break;
+                
+            case 'profile-nav':
+                loadProfileSection();
+                break;
+        }
+    });
+    
+    // Function to load sections via AJAX
+    function loadSection(sectionName) {
+        // Show loading indicator
+        $('#dynamic-content').html('<div class="text-center my-5"><i class="fas fa-circle-notch fa-spin fa-3x text-primary"></i><p class="mt-2">Loading...</p></div>');
+        
+        // Fix section name if needed - ensure consistent filenames
+        const fixedSectionName = sectionName === 'stock_management' ? 'stock_management' : sectionName;
+        
+        // Log the URL being requested to help with debugging
+        const url = `sections/${fixedSectionName}.php`;
+        console.log("Loading section from:", url);
+        
+        // Load the content via AJAX
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response) {
+                // Replace content and add animation
+                $('#dynamic-content').html(response).hide().fadeIn(300);
+                
+                // Update URL
+                history.pushState({page: fixedSectionName}, fixedSectionName, `?section=${fixedSectionName}`);
+            },
+            error: function(xhr, status, error) {
+                // Provide more detailed error information
+                console.error("Error loading section:", status, error);
+                console.log("Response status:", xhr.status);
+                console.log("Response text:", xhr.responseText);
+                
+                $('#dynamic-content').html(`
+                    <div class="alert alert-danger">
+                        <h4 class="alert-heading">Error loading content</h4>
+                        <p>Section "${fixedSectionName}" could not be loaded.</p>
+                        <hr>
+                        <p class="mb-0">Error details: ${status} - ${error}</p>
+                    </div>
+                `);
+            }
+        });
+    }
+    
+    // Add touch ripple effect to nav items
+    $('.nav-item').on('touchstart', function() {
+        $(this).css('opacity', '0.7');
+    }).on('touchend touchcancel', function() {
+        $(this).css('opacity', '1');
+    });
 });

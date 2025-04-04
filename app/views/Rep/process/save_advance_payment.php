@@ -100,6 +100,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response['new_amount'] = $payment_amount;
         }
         
+        // IMPORTANT: Update the customer's advance_amount in the customers table
+        $stmt = $conn->prepare("
+            UPDATE customers 
+            SET advance_amount = advance_amount + ?
+            WHERE id = ?
+        ");
+        $stmt->bind_param("di", $payment_amount, $customer_id);
+        $stmt->execute();
+        
         // Add branch information to response for debugging
         $response['branch'] = $branch;
         
@@ -107,6 +116,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn->commit();
         
         $response['success'] = true;
+        
+        // Add refresh flag to indicate the page should be refreshed
+        $response['refresh'] = true;
         
     } catch (Exception $e) {
         // Roll back transaction on error

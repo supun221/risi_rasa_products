@@ -52,6 +52,7 @@ require_once '../../../../config/databade.php';
                     <div class="form-group">
                         <label for="available-stock">Available Stock</label>
                         <input type="text" class="form-control" id="available-stock" readonly>
+                        <small class="form-text text-muted">This is the quantity available in main stock</small>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -410,6 +411,16 @@ require_once '../../../../config/databade.php';
                 return false;
             }
             
+            // Get rep_id from any source available
+            const repId = <?php echo isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : '0'; ?>;
+            
+            // Debug the values that will be sent
+            console.log('Submitting form with values:', {
+                stock_entry_id: stockEntryId,
+                quantity: quantity,
+                rep_id: repId
+            });
+            
             // Send AJAX request
             $.ajax({
                 url: 'process/add_to_lorry_process.php',
@@ -417,48 +428,64 @@ require_once '../../../../config/databade.php';
                 data: {
                     stock_entry_id: stockEntryId,
                     quantity: quantity,
-                    price: $('#price').val(),
-                    total_amount: $('#total-amount').val()
+                    rep_id: repId
                 },
                 dataType: 'json',
                 success: function(response) {
+                    console.log('Server response:', response);
+                    
                     if (response.success) {
-                        // Show success notification
-                        Toast.fire({
+                        // Show success message
+                        Swal.fire({
                             icon: 'success',
-                            title: 'Product added successfully'
+                            title: 'Success',
+                            text: response.message,
+                            timer: 2000
+                        }).then(function() {
+                            // Reset form
+                            resetForm();
                         });
-                        
-                        // Clear form
-                        $('#add-to-lorry-form')[0].reset();
-                        $('#product').html('<option value="">Select Product</option>');
-                        $('#item-code').val('');
-                        $('#available-stock').val('');
-                        $('#price').val('');
-                        $('#total-amount').val('');
-                        
-                        // Reload recent additions
-                        loadRecentAdditions();
-                        
-                        // Focus on barcode input for next scan
-                        $('#barcode-input').focus();
                     } else {
-                        // Show error notification
-                        Toast.fire({
+                        // Show error message
+                        let errorMsg = response.message;
+                        
+                        // If there's debug info, show it only during development
+                        if (response.debug_info) {
+                            console.error('Debug info:', response.debug_info);
+                            // Comment out the next line in production
+                            errorMsg += '\n\nDebug info: ' + JSON.stringify(response.debug_info, null, 2);
+                        }
+                        
+                        Swal.fire({
                             icon: 'error',
-                            title: response.message
+                            title: 'Error',
+                            text: errorMsg
                         });
                     }
                 },
-                error: function() {
-                    // Show error notification
-                    Toast.fire({
+                error: function(xhr, status, error) {
+                    console.error('AJAX error:', status, error);
+                    console.log('Response text:', xhr.responseText);
+                    
+                    // Show error message
+                    Swal.fire({
                         icon: 'error',
-                        title: 'Error adding product. Please try again.'
+                        title: 'Error',
+                        text: 'An error occurred. Please try again.'
                     });
                 }
             });
         });
+        
+        // Function to reset the form
+        function resetForm() {
+            $('#product').html('<option value="">Select Product</option>');
+            $('#item-code').val('');
+            $('#available-stock').val('');
+            $('#price').val('');
+            $('#total-amount').val('');
+            $('#quantity').val('1');
+        }
         
         // Sweet Alert Toast
         const Toast = Swal.mixin({
@@ -475,5 +502,34 @@ require_once '../../../../config/databade.php';
         
         // Focus on barcode input when page loads
         $('#barcode-input').focus();
+        
+        // Update the JavaScript to include available_stock in the display
+        $('#product-search-results').on('click', '.product-item', function() {
+            const stockId = $(this).data('id');
+            const productName = $(this).data('name');
+            const availableStock = $(this).data('stock');
+            const price = $(this).data('price');
+            
+            $('#stock-entry-id').val(stockId);
+            $('#selected-product').val(productName);
+            $('#available-stock').val(availableStock);
+            $('#product-price').text('Rs. ' + parseFloat(price).toFixed(2));
+            
+            // Set max quantity to available stock
+            $('#quantity').attr('max', availableStock);
+            
+            $('#product-search-results').hide();
+        });
+        
+        // Ensure quantity doesn't exceed available stock
+        $('#quantity').on('input', function() {
+            const max = parseInt($(this).attr('max'));
+            const val = parseInt($(this).val());
+            
+            if (val > max) {
+                $(this).val(max);
+                alert('You cannot add more than the available stock (' + max + ')');
+            }
+        });
     });
 </script>

@@ -157,16 +157,79 @@ try {
             $stmt->execute();
         }
         
-        // If advance was used, deduct from customer advance amount
+        // If advance was used, update both advance_payments and customers tables
         if ($advance_used > 0) {
-            $stmt = $conn->prepare("
-                UPDATE customers
-                SET advance_amount = advance_amount - ?,
-                    last_purchase_date = NOW()
-                WHERE id = ?
-            ");
-            $stmt->bind_param("di", $advance_used, $customer_id);
+            // First verify that customer has sufficient advance
+            $stmt = $conn->prepare("SELECT advance_amount FROM customers WHERE id = ?");
+            $stmt->bind_param("i", $customer_id);
             $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows > 0) {
+                $customer = $result->fetch_assoc();
+                $available_advance = (float)$customer['advance_amount'];
+                
+                // Make sure we don't use more than available
+                if ($advance_used > $available_advance) {
+                    $advance_used = $available_advance;
+                }
+                
+                // Only proceed if there's advance to use
+                if ($advance_used > 0) {
+                    // Get the latest advance payment record for history tracking
+                    $stmt = $conn->prepare("
+                        SELECT id, net_amount, advance_bill_number
+                        FROM advance_payments 
+                        WHERE customer_id = ? 
+                        ORDER BY created_at DESC 
+                        LIMIT 1
+                    ");
+                    $stmt->bind_param("i", $customer_id);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    
+                    if ($result->num_rows > 0) {
+                        $advance_record = $result->fetch_assoc();
+                        $advance_id = $advance_record['id'];
+                        $current_advance = $advance_record['net_amount'];
+                        $advance_bill_number = $advance_record['advance_bill_number'];
+                        
+                        // Calculate new balance
+                        $new_advance_balance = $current_advance - $advance_used;
+                        
+                        // Update the advance payment record for history tracking
+                        $stmt = $conn->prepare("
+                            UPDATE advance_payments 
+                            SET net_amount = ?,
+                                reason = CONCAT(IFNULL(reason, ''), '\nUsed Rs. " . number_format($advance_used, 2) . " for invoice " . $invoice_number . " on " . date('Y-m-d H:i:s') . "')
+                            WHERE id = ?
+                        ");
+                        $stmt->bind_param("di", $new_advance_balance, $advance_id);
+                        $stmt->execute();
+                    }
+                    
+                    // CRITICAL: Update the customer's advance_amount in the customers table
+                    // This is the most important update - it ensures the customer's balance is reduced
+                    $stmt = $conn->prepare("
+                        UPDATE customers 
+                        SET advance_amount = advance_amount - ?,
+                            last_purchase_date = NOW()
+                        WHERE id = ?
+                    ");
+                    $stmt->bind_param("di", $advance_used, $customer_id);
+                    $stmt->execute();
+                    
+                    // Log the transaction
+                    $stmt = $conn->prepare("
+                        INSERT INTO lorry_transactions 
+                        (rep_id, transaction_type, reason, customer_name, total_amount) 
+                        VALUES (?, 'advance_used', ?, ?, ?)
+                    ");
+                    $reason = "Used advance payment for invoice " . $invoice_number;
+                    $stmt->bind_param("issd", $rep_id, $reason, $customer_name, $advance_used);
+                    $stmt->execute();
+                }
+            }
         }
     }
     
