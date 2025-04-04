@@ -1063,7 +1063,7 @@ $(document).ready(function() {
     function updateCartUI() {
         if (posData.items.length === 0) {
             // Empty cart
-            $('#pos-items-body').html('<tr id="empty-cart"><td colspan="7" class="text-center">No items added yet</td></tr>');
+            $('#pos-items-body').html('<tr id="empty-cart"><td colspan="7" class="text-center">No items added yet</td>');
             
             // Reset totals
             posData.subtotal = 0;
@@ -1324,6 +1324,9 @@ $(document).ready(function() {
             print_invoice: $('#print-invoice').is(':checked') ? 1 : 0
         };
         
+        // Show loading indicator
+        $('#confirm-payment').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+        
         // Send data to server
         $.ajax({
             url: 'process/save_pos_sale.php',
@@ -1336,20 +1339,33 @@ $(document).ready(function() {
                 $('#payment-confirmation-modal').modal('hide');
                 
                 if (response.success) {
+                    // Print invoice if requested
+                    if (saleData.print_invoice) {
+                        window.open(`../invoice/pos_rep_invoice.php?invoice=${response.invoice_number}`, '_blank');
+                    }
+                    
+                    // Update the invoice number display with the new number from server
+                    if (response.next_invoice) {
+                        // Update in posData
+                        posData.invoice = response.next_invoice;
+                        
+                        // Update invoice display in the UI
+                        $('span.text-muted:contains("Invoice #:")').next().text(response.next_invoice);
+                    }
+                    
+                    // Reset the POS system for the next sale
+                    resetPOSForNextSale();
+                    
                     // Show success message
                     Swal.fire({
                         icon: 'success',
                         title: 'Sale Completed',
                         text: 'The sale has been successfully processed.'
-                    }).then((result) => {
-                        // Print invoice if requested
-                        if (saleData.print_invoice) {
-                            window.open(`../invoice/pos_rep_invoice.php?invoice=${response.invoice_number}`, '_blank');
-                        }
-                        
-                        // Reset the POS system
-                        resetPOS(response.next_invoice);
                     });
+                    
+                    // Focus on barcode input for next sale
+                    $('#barcode-input').focus();
+                    
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -1357,6 +1373,9 @@ $(document).ready(function() {
                         text: response.message || 'An error occurred while processing the sale.'
                     });
                 }
+                
+                // Reset button state
+                $('#confirm-payment').prop('disabled', false).html('Confirm & Complete');
             },
             error: function() {
                 // Close modal
@@ -1367,43 +1386,61 @@ $(document).ready(function() {
                     title: 'Server Error',
                     text: 'Could not connect to the server. Please try again.'
                 });
+                
+                // Reset button state
+                $('#confirm-payment').prop('disabled', false).html('Confirm & Complete');
             }
         });
     });
     
-    // Reset POS for new sale
-    function resetPOS(newInvoice) {
-        // Update invoice number
-        posData.invoice = newInvoice;
-        
-        // Reset customer
-        clearSelectedCustomer();
-        
-        // Clear cart
+    // Simple function to reset the POS system for a new sale
+    function resetPOSForNextSale() {
+        // Clear cart items
         posData.items = [];
-        updateCartUI();
+        $('#pos-items-body').html('<tr id="empty-cart"><td colspan="7" class="text-center">No items added yet</td></tr>');
         
-        // Reset payment info
+        // Reset totals
         posData.subtotal = 0;
         posData.totalDiscount = 0;
         posData.grandTotal = 0;
+        
+        // Update summary displays
+        $('#subtotal-amount').text('0.00');
+        $('#total-discount').text('0.00');
+        $('#grand-total').text('0.00');
+        $('#display-paid-amount').text('0.00');
+        $('#change-amount').text('0.00');
+        
+        // Reset customer info
+        clearSelectedCustomer();
+        posData.customerId = null;
+        posData.customerName = null;
+        posData.advanceAmount = 0;
+        posData.advanceUsed = 0;
+        
+        // Clear customer badge if it has any advance info
+        $('#customer-badge').html('<i class="fas fa-user mr-1"></i> <span id="pos-customer-name-display"></span>');
+        
+        // Reset payment info
         posData.paidAmount = 0;
         posData.changeAmount = 0;
         posData.creditAmount = 0;
-        posData.paymentMethod = 'cash';
+        
+        // Reset form fields
         $('#payment-method').val('cash');
-        $('#paid-amount').val(0);
+        $('#paid-amount').val('0.00');
+        $('#barcode-input').val('');
+        $('#product-search').val('');
         
-        // Focus on barcode input
-        $('#barcode-input').focus();
+        // Hide credit amount row
+        $('#credit-amount-row').hide();
         
-        // Update UI
-        $('#customer-search-card').hide();
-        $('#customer-phone-search').val('');
+        // Reset the use advance checkbox
+        $('#use-advance-payment').prop('checked', false);
+        
+        // Log reset completion
+        console.log("POS system reset with new invoice:", posData.invoice);
     }
-    
-    // Set focus on barcode input when page loads
-    $('#barcode-input').focus();
     
     // Function to handle using advance payment
     $(document).ready(function() {
