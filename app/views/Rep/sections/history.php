@@ -663,10 +663,155 @@ $(document).ready(function() {
 });
 </script>
 
-<!-- Add necessary supporting script for SweetAlert2 if not already included -->
+<!-- Properly include SweetAlert2 -->
 <script>
-// Check if SweetAlert2 is already loaded, if not load it
-if (typeof Swal === 'undefined') {
-    document.write('<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"><\/script>');
-}
+(function() {
+    // Check if SweetAlert is already loaded
+    if (typeof Swal !== 'undefined') {
+        // SweetAlert is already loaded, no need to do anything
+        return;
+    }
+    
+    // Create script element instead of using document.write
+    var sweetAlertScript = document.createElement('script');
+    sweetAlertScript.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+    sweetAlertScript.async = true;
+    
+    // Append to head
+    document.head.appendChild(sweetAlertScript);
+})();
+
+$(document).ready(function() {
+    // Export functionality - Updated implementation with better script loading
+    $('.export-sales-btn').click(function(e) {
+        e.preventDefault();
+        
+        // Safety check for SweetAlert2 - display native dialog if not available
+        if (typeof Swal === 'undefined') {
+            const format = confirm('Select export format:\n\nOK - Export as CSV\nCancel - Export as PDF');
+            
+            if (format) {
+                promptExportCSV();
+            } else {
+                promptExportPDF();
+            }
+            return;
+        }
+        
+        // If SweetAlert is available, use the nice dialog
+        Swal.fire({
+            icon: 'info',
+            title: 'Export Options',
+            html: `
+                <div class="text-left">
+                    <p>Select export format:</p>
+                    <form id="export-form">
+                        <div class="form-group">
+                            <label for="export-start-date">Start Date:</label>
+                            <input type="date" id="export-start-date" class="form-control" value="${getDefaultStartDate()}">
+                        </div>
+                        <div class="form-group">
+                            <label for="export-end-date">End Date:</label>
+                            <input type="date" id="export-end-date" class="form-control" value="${getDefaultEndDate()}">
+                        </div>
+                        <div class="form-group">
+                            <label for="export-payment-method">Payment Method (Optional):</label>
+                            <select id="export-payment-method" class="form-control">
+                                <option value="">All Methods</option>
+                                <option value="cash">Cash</option>
+                                <option value="card">Card</option>
+                                <option value="credit_card">Credit Card</option>
+                                <option value="credit">Credit</option>
+                                <option value="advance">Advance</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3 mt-4">
+                            <button type="button" class="btn btn-outline-primary btn-block export-csv-btn">
+                                <i class="fas fa-file-csv mr-2"></i> Export as CSV
+                            </button>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline-danger btn-block export-pdf-btn">
+                                <i class="fas fa-file-pdf mr-2"></i> Export as PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `,
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: '500px'
+        });
+    });
+    
+    // Helper functions for export dates
+    function getDefaultStartDate() {
+        const date = new Date();
+        date.setDate(date.getDate() - 30);
+        return date.toISOString().split('T')[0];
+    }
+    
+    function getDefaultEndDate() {
+        const date = new Date();
+        return date.toISOString().split('T')[0];
+    }
+    
+    // Handle CSV export button click - using direct event handler
+    $(document).on('click', '.export-csv-btn', function() {
+        promptExportCSV();
+    });
+    
+    // Handle PDF export button click - using direct event handler  
+    $(document).on('click', '.export-pdf-btn', function() {
+        promptExportPDF();
+    });
+    
+    // Function to handle CSV export process
+    function promptExportCSV() {
+        const startDate = $('#export-start-date').val() || getDefaultStartDate();
+        const endDate = $('#export-end-date').val() || getDefaultEndDate();
+        const paymentMethod = $('#export-payment-method').val() || '';
+        
+        // Validate dates
+        if (!validateDateRange(startDate, endDate)) {
+            return;
+        }
+        
+        // Create and submit the form for download
+        const url = `process/export_sales_csv.php?start_date=${startDate}&end_date=${endDate}&payment_method=${paymentMethod}`;
+        window.location = url;
+    }
+    
+    // Function to handle PDF export process
+    function promptExportPDF() {
+        const startDate = $('#export-start-date').val() || getDefaultStartDate();
+        const endDate = $('#export-end-date').val() || getDefaultEndDate();
+        const paymentMethod = $('#export-payment-method').val() || '';
+        
+        // Validate dates
+        if (!validateDateRange(startDate, endDate)) {
+            return;
+        }
+        
+        // Create and submit the form for download
+        const url = `process/export_sales_pdf.php?start_date=${startDate}&end_date=${endDate}&payment_method=${paymentMethod}`;
+        window.location = url;
+    }
+    
+    // Validate date range
+    function validateDateRange(startDate, endDate) {
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates');
+            return false;
+        }
+        
+        if (startDate > endDate) {
+            alert('Start date cannot be after end date');
+            return false;
+        }
+        
+        return true;
+    }
+});
 </script>

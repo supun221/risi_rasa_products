@@ -156,7 +156,7 @@ $invoiceNumber = generateInvoiceNumber($conn);
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label for="discount-amount">Disc Amount</label>
-                                <input type="number" class="form-control" id="discount-amount" min="0" value="0">
+                                <input type="number" class="form-control" id="discount-amount" min="0" value="0" step="0.01">
                             </div>
                         </div>
                         <div class="col-md-2">
@@ -1739,5 +1739,41 @@ $(document).ready(function() {
     if (posData.items && posData.items.length > 0) {
         updateTotals();
     }
+});
+
+$(document).ready(function() {
+    // ...existing code...
+    
+    // Allow proper decimal handling for discount input
+    $('#discount-amount').on('input', function() {
+        // Allow decimal values with any precision
+        let value = $(this).val();
+        
+        // Ensure valid decimal format (only numbers and one decimal point)
+        if (value && !/^[0-9]*\.?[0-9]*$/.test(value)) {
+            value = value.replace(/[^0-9.]/g, '');
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            $(this).val(value);
+        }
+        
+        // Update calculations with the decimal value
+        calculateTotals();
+    });
+    
+    // ...existing code...
+    
+    function calculateTotals() {
+        // ...existing code...
+        
+        // Parse discount amount as float to properly handle decimals
+        const discountAmount = parseFloat($('#discount-amount').val()) || 0;
+        
+        // ...existing code...
+    }
+    
+    // ...existing code...
 });
 </script>
