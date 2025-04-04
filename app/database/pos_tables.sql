@@ -144,3 +144,7 @@ CREATE TABLE IF NOT EXISTS `rep_payments` (
 -- Add cheque_num column to rep_payments table
 ALTER TABLE `rep_payments` 
 ADD COLUMN `cheque_num` VARCHAR(50) DEFAULT NULL AFTER `payment_method`;
+
+-- Add cheque_number column to pos_sales table if it doesn't exist
+ALTER TABLE `pos_sales` 
+ADD COLUMN `cheque_number` VARCHAR(50) DEFAULT NULL AFTER `payment_method`;

@@ -17,7 +17,23 @@ if (!$invoiceNumber) {
 }
 
 try {
-    // Fetch invoice details
+    // Check if cheque_number column exists in pos_sales table
+    $checkColumnQuery = "SHOW COLUMNS FROM pos_sales LIKE 'cheque_number'";
+    $checkColumnResult = $conn->query($checkColumnQuery);
+    $hasChequeNumberColumn = $checkColumnResult->num_rows > 0;
+    
+    // If column doesn't exist, add it
+    if (!$hasChequeNumberColumn) {
+        $alterTableQuery = "ALTER TABLE pos_sales ADD COLUMN cheque_number VARCHAR(50) DEFAULT NULL AFTER payment_method";
+        try {
+            $conn->query($alterTableQuery);
+            error_log("Added cheque_number column to pos_sales table");
+        } catch (Exception $e) {
+            error_log("Failed to add cheque_number column: " . $e->getMessage());
+        }
+    }
+
+    // Fetch invoice details with cheque_number field
     $stmt = $conn->prepare("
         SELECT ps.*, 
                CONCAT(s.username) as rep_name 
@@ -35,6 +51,12 @@ try {
         exit;
     }
 
+    // Debug - log raw payment method value
+    error_log("Invoice payment method: " . ($invoice['payment_method'] ?? 'NULL'));
+    if ($hasChequeNumberColumn) {
+        error_log("Invoice cheque number: " . ($invoice['cheque_number'] ?? 'NULL'));
+    }
+    
     // Fetch invoice items
     $stmt = $conn->prepare("
         SELECT * FROM pos_sale_items WHERE sale_id = ?
@@ -57,15 +79,49 @@ try {
     $invoiceDate = date('Y-m-d', strtotime($invoice['sale_date']));
     $invoiceTime = date('h:i A', strtotime($invoice['sale_date']));
     
-    // Payment method display text
+    // Payment method display text - ensure it's case insensitive and has a fallback
     $paymentMethodMap = [
         'cash' => 'Cash',
         'card' => 'Card',
         'credit_card' => 'Credit Card',
         'credit' => 'Credit',
-        'advance' => 'Advance'
+        'advance' => 'Advance',
+        'cheque' => 'Cheque'
     ];
-    $paymentMethodText = $paymentMethodMap[$invoice['payment_method']] ?? $invoice['payment_method'];
+    
+    // Get payment method and ensure it's not null (use lowercase for comparison)
+    $paymentMethod = strtolower($invoice['payment_method'] ?? '');
+    
+    // Set default text if payment method is empty
+    if (empty($paymentMethod)) {
+        $paymentMethodText = 'Unknown';
+    } else {
+        // Get the display text from map or use the original value
+        $paymentMethodText = $paymentMethodMap[$paymentMethod] ?? ucfirst($paymentMethod);
+    }
+    
+    // Add cheque number text if payment method is cheque
+    if ($paymentMethod == 'cheque') {
+        if ($hasChequeNumberColumn && !empty($invoice['cheque_number'])) {
+            $paymentMethodText .= ' #' . $invoice['cheque_number'];
+        } else {
+            // Try to get cheque number from rep_payments table as fallback
+            $paymentStmt = $conn->prepare("
+                SELECT cheque_num FROM rep_payments 
+                WHERE invoice_number = ? AND payment_method = 'cheque'
+                LIMIT 1
+            ");
+            $paymentStmt->bind_param('s', $invoiceNumber);
+            $paymentStmt->execute();
+            $paymentResult = $paymentStmt->get_result();
+            
+            if ($paymentResult && $paymentRow = $paymentResult->fetch_assoc()) {
+                if (!empty($paymentRow['cheque_num'])) {
+                    $paymentMethodText .= ' #' . $paymentRow['cheque_num'];
+                }
+            }
+        }
+    }
 
 } catch (Exception $e) {
     echo "<div style='color:red; padding:20px; text-align:center;'>Error: " . $e->getMessage() . "</div>";
@@ -234,7 +290,7 @@ try {
                 </tr>
                 <tr>
                     <td>Payment:</td>
-                    <td><?php echo $paymentMethodText; ?></td>
+                    <td><?php echo htmlspecialchars($paymentMethodText); ?></td>
                 </tr>
             </table>
         </div>

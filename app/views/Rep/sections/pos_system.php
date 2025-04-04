@@ -1237,6 +1237,11 @@ $(document).ready(function() {
         // Show/hide cheque number field based on payment method
         if (posData.paymentMethod === 'cheque') {
             $('#cheque-number-group').show();
+            
+            // Focus on cheque number field when shown
+            setTimeout(function() {
+                $('#cheque-number').focus();
+            }, 100);
         } else {
             $('#cheque-number-group').hide();
         }
@@ -1335,6 +1340,8 @@ $(document).ready(function() {
                 return;
             }
             posData.chequeNumber = chequeNumber;
+        } else {
+            posData.chequeNumber = null; // Reset cheque number if not cheque payment
         }
         
         // Prepare data for submission
@@ -1351,9 +1358,11 @@ $(document).ready(function() {
             change_amount: posData.changeAmount,
             credit_amount: posData.creditAmount,
             advance_used: posData.advanceUsed,
-            cheque_number: posData.chequeNumber || null,
+            cheque_number: posData.chequeNumber,
             print_invoice: $('#print-invoice').is(':checked') ? 1 : 0
         };
+        
+        console.log('Submitting sale data:', saleData); // Debug log
         
         // Show loading indicator
         $('#confirm-payment').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
@@ -1366,13 +1375,18 @@ $(document).ready(function() {
             contentType: 'application/json',
             dataType: 'json',
             success: function(response) {
+                console.log('Server response:', response); // Add debug log for response
+                
                 // Close modal
                 $('#payment-confirmation-modal').modal('hide');
                 
                 if (response.success) {
                     // Print invoice if requested
                     if (saleData.print_invoice) {
-                        window.open(`../invoice/pos_rep_invoice.php?invoice=${response.invoice_number}`, '_blank');
+                        // Add a small delay to ensure data is saved before printing
+                        setTimeout(function() {
+                            window.open(`../invoice/pos_rep_invoice.php?invoice=${response.invoice_number}`, '_blank');
+                        }, 500);
                     }
                     
                     // Update the invoice number display with the new number from server
