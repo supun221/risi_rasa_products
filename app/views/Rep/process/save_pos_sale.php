@@ -33,6 +33,12 @@ try {
     $credit_amount = $data['credit_amount'] ?? 0;
     $advance_used = $data['advance_used'] ?? 0;
     $print_invoice = $data['print_invoice'] ?? 0;
+    $cheque_number = null;  // Default to null
+    
+    // If payment method is cheque, get the cheque number
+    if ($payment_method === 'cheque' && isset($data['cheque_number'])) {
+        $cheque_number = $data['cheque_number'];
+    }
     
     // Optional fields
     $customer_id = $data['customer_id'] ?? null;
@@ -124,25 +130,49 @@ try {
     // Handle customer credit and advance balances if applicable
     if ($customer_id) {
         // First record the payment in rep_payments
-        $stmt = $conn->prepare("
-            INSERT INTO rep_payments (
-                invoice_number, customer_id, customer_name, amount, payment_method, 
-                rep_id, branch, notes
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ");
+        if ($payment_method === 'cheque') {
+            // Include cheque number in the query
+            $stmt = $conn->prepare("
+                INSERT INTO rep_payments (
+                    invoice_number, customer_id, customer_name, amount, payment_method, cheque_num, 
+                    rep_id, branch, notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $payment_notes = "Sale payment";
+            $stmt->bind_param(
+                "sisdsisss",
+                $invoice_number,
+                $customer_id,
+                $customer_name,
+                $paid_amount,
+                $payment_method,
+                $cheque_number,
+                $rep_id,
+                $branch,
+                $payment_notes
+            );
+        } else {
+            // Normal payment record without cheque number
+            $stmt = $conn->prepare("
+                INSERT INTO rep_payments (
+                    invoice_number, customer_id, customer_name, amount, payment_method, 
+                    rep_id, branch, notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $payment_notes = "Sale payment";
+            $stmt->bind_param(
+                "sisdsiss",
+                $invoice_number,
+                $customer_id,
+                $customer_name,
+                $paid_amount,
+                $payment_method,
+                $rep_id,
+                $branch,
+                $payment_notes
+            );
+        }
         
-        $payment_notes = "Sale payment";
-        $stmt->bind_param(
-            "sisdsiss",
-            $invoice_number,
-            $customer_id,
-            $customer_name,
-            $paid_amount,
-            $payment_method,
-            $rep_id,
-            $branch,
-            $payment_notes
-        );
         $stmt->execute();
         
         // If credit amount is present, update customer credit balance

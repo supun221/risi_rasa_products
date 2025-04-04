@@ -140,3 +140,7 @@ CREATE TABLE IF NOT EXISTS `rep_payments` (
   KEY `customer_id` (`customer_id`),
   KEY `rep_id` (`rep_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Add cheque_num column to rep_payments table
+ALTER TABLE `rep_payments` 
+ADD COLUMN `cheque_num` VARCHAR(50) DEFAULT NULL AFTER `payment_method`;

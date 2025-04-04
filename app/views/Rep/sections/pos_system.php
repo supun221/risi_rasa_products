@@ -365,13 +365,22 @@ $invoiceNumber = generateInvoiceNumber($conn);
                                         <option value="cash">Cash</option>
                                         <option value="card">Card</option>
                                         <option value="credit_card">Credit Card</option>
+                                        <option value="cheque">Cheque</option>
                                         <option value="credit">Credit</option>
                                     </select>
                                 </div>
+                                
+                                <!-- Cheque Number Field (initially hidden) -->
+                                <div class="form-group" id="cheque-number-group" style="display: none;">
+                                    <label for="cheque-number">Cheque Number <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="cheque-number" placeholder="Enter cheque number">
+                                </div>
+                                
                                 <div class="form-group">
                                     <label for="modal-paid-amount">Amount Paid</label>
                                     <input type="number" class="form-control" id="modal-paid-amount" min="0" step="0.01">
                                 </div>
+                                
                                 <div class="form-group" id="modal-change-amount-group">
                                     <label>Change Amount</label>
                                     <div class="form-control bg-light">Rs. <span id="modal-change-amount">0.00</span></div>
@@ -1225,6 +1234,13 @@ $(document).ready(function() {
     $('#modal-payment-method').change(function() {
         posData.paymentMethod = $(this).val();
         
+        // Show/hide cheque number field based on payment method
+        if (posData.paymentMethod === 'cheque') {
+            $('#cheque-number-group').show();
+        } else {
+            $('#cheque-number-group').hide();
+        }
+        
         // If credit selected, automatically set paid amount to 0
         if (posData.paymentMethod === 'credit') {
             $('#modal-paid-amount').val(0);
@@ -1307,6 +1323,20 @@ $(document).ready(function() {
         // Update payment method from modal
         posData.paymentMethod = $('#modal-payment-method').val();
         
+        // Validate cheque number if payment method is cheque
+        if (posData.paymentMethod === 'cheque') {
+            const chequeNumber = $('#cheque-number').val().trim();
+            if (!chequeNumber) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Cheque Number Required',
+                    text: 'Please enter the cheque number to continue.'
+                });
+                return;
+            }
+            posData.chequeNumber = chequeNumber;
+        }
+        
         // Prepare data for submission
         const saleData = {
             invoice_number: posData.invoice,
@@ -1321,6 +1351,7 @@ $(document).ready(function() {
             change_amount: posData.changeAmount,
             credit_amount: posData.creditAmount,
             advance_used: posData.advanceUsed,
+            cheque_number: posData.chequeNumber || null,
             print_invoice: $('#print-invoice').is(':checked') ? 1 : 0
         };
         
@@ -1437,6 +1468,11 @@ $(document).ready(function() {
         
         // Reset the use advance checkbox
         $('#use-advance-payment').prop('checked', false);
+        
+        // Reset cheque fields
+        $('#cheque-number').val('');
+        $('#cheque-number-group').hide();
+        posData.chequeNumber = null;
         
         // Log reset completion
         console.log("POS system reset with new invoice:", posData.invoice);
