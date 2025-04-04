@@ -432,6 +432,120 @@ try {
     </div>
 </div>
 
+<!-- Stock Movements Modal -->
+<div class="modal fade" id="movementsModal" tabindex="-1" role="dialog" aria-labelledby="movementsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="movementsModalLabel">All Stock Movements</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Filters -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="movement-date-start">From Date</label>
+                            <input type="date" id="movement-date-start" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="movement-date-end">To Date</label>
+                            <input type="date" id="movement-date-end" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="movement-type-filter">Transaction Type</label>
+                            <select id="movement-type-filter" class="form-control form-control-sm">
+                                <option value="">All Types</option>
+                                <option value="add">Added Stock</option>
+                                <option value="retrieve">Retrieved Stock</option>
+                                <option value="return">Returns</option>
+                                <option value="transfer">Transfers</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="movement-product-filter">Product Name</label>
+                            <input type="text" id="movement-product-filter" class="form-control form-control-sm" placeholder="Search products...">
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12 text-right">
+                        <button id="apply-movement-filters" class="btn btn-sm btn-primary">
+                            <i class="fas fa-filter mr-1"></i> Apply Filters
+                        </button>
+                        <button id="reset-movement-filters" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-redo mr-1"></i> Reset
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Movements Table -->
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-hover" id="all-movements-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Item Code</th>
+                                <th>Type</th>
+                                <th>Qty</th>
+                                <th>Reason</th>
+                                <th>Customer/Note</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-movements-body">
+                            <tr>
+                                <td colspan="8" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        <span id="movement-showing-info">Showing 0 to 0 of 0 entries</span>
+                    </div>
+                    <div>
+                        <nav>
+                            <ul class="pagination pagination-sm" id="movement-pagination">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                </li>
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">1</a>
+                                </li>
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-success" id="export-movements-csv">
+                    <i class="fas fa-file-csv mr-1"></i> Export as CSV
+                </button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 $(document).ready(function() {
     // Tab switching with URL parameter
@@ -660,28 +774,251 @@ $(document).ready(function() {
             showCloseButton: true
         });
     });
-});
-</script>
-
-<!-- Properly include SweetAlert2 -->
-<script>
-(function() {
-    // Check if SweetAlert is already loaded
-    if (typeof Swal !== 'undefined') {
-        // SweetAlert is already loaded, no need to do anything
-        return;
+    
+    // View all movements - new implementation
+    $('#view-all-movements-btn').click(function(e) {
+        e.preventDefault();
+        
+        // Set default date range (last 30 days)
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        $('#movement-date-start').val(formatDate(thirtyDaysAgo));
+        $('#movement-date-end').val(formatDate(today));
+        
+        // Load initial data and show modal
+        loadMovementsData();
+        $('#movementsModal').modal('show');
+    });
+    
+    // Helper function to format date as YYYY-MM-DD
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
     
-    // Create script element instead of using document.write
-    var sweetAlertScript = document.createElement('script');
-    sweetAlertScript.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
-    sweetAlertScript.async = true;
+    // Apply movement filters
+    $('#apply-movement-filters').click(function() {
+        loadMovementsData(1); // Reset to first page when applying filters
+    });
     
-    // Append to head
-    document.head.appendChild(sweetAlertScript);
-})();
-
-$(document).ready(function() {
+    // Reset movement filters
+    $('#reset-movement-filters').click(function() {
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        $('#movement-date-start').val(formatDate(thirtyDaysAgo));
+        $('#movement-date-end').val(formatDate(today));
+        $('#movement-type-filter').val('');
+        $('#movement-product-filter').val('');
+        
+        loadMovementsData(1);
+    });
+    
+    // Handle pagination clicks
+    $(document).on('click', '#movement-pagination .page-link', function(e) {
+        e.preventDefault();
+        
+        const page = $(this).data('page');
+        if (page) {
+            loadMovementsData(page);
+        }
+    });
+    
+    // Export movements as CSV
+    $('#export-movements-csv').click(function() {
+        const startDate = $('#movement-date-start').val();
+        const endDate = $('#movement-date-end').val();
+        const type = $('#movement-type-filter').val();
+        const product = $('#movement-product-filter').val();
+        
+        const url = `process/export_movements_csv.php?start_date=${startDate}&end_date=${endDate}&type=${type}&product=${encodeURIComponent(product)}`;
+        window.location = url;
+    });
+    
+    // Function to load movements data with AJAX
+    function loadMovementsData(page = 1) {
+        const startDate = $('#movement-date-start').val();
+        const endDate = $('#movement-date-end').val();
+        const type = $('#movement-type-filter').val();
+        const product = $('#movement-product-filter').val();
+        
+        // Show loading spinner
+        $('#all-movements-body').html(`
+            <tr>
+                <td colspan="8" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </td>
+            </tr>
+        `);
+        
+        // Fetch data with AJAX
+        $.ajax({
+            url: 'process/get_all_movements.php',
+            type: 'GET',
+            data: {
+                page: page,
+                start_date: startDate,
+                end_date: endDate,
+                type: type,
+                product: product
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    displayMovementsData(response);
+                } else {
+                    $('#all-movements-body').html(`
+                        <tr>
+                            <td colspan="8" class="text-center text-danger">
+                                ${response.message || 'Failed to load movements data'}
+                            </td>
+                        </tr>
+                    `);
+                }
+            },
+            error: function() {
+                $('#all-movements-body').html(`
+                    <tr>
+                        <td colspan="8" class="text-center text-danger">
+                            Failed to connect to server. Please try again.
+                        </td>
+                    </tr>
+                `);
+            }
+        });
+    }
+    
+    // Function to display movements data in the table
+    function displayMovementsData(response) {
+        const movements = response.movements;
+        const pagination = response.pagination;
+        
+        // Clear table body
+        $('#all-movements-body').empty();
+        
+        if (movements.length === 0) {
+            $('#all-movements-body').html(`
+                <tr>
+                    <td colspan="8" class="text-center">
+                        No stock movement records found matching the selected criteria
+                    </td>
+                </tr>
+            `);
+        } else {
+            // Add rows to table
+            movements.forEach(function(movement) {
+                let typeBadge = 'badge-secondary';
+                let typeText = ucfirst(movement.transaction_type);
+                
+                if (movement.transaction_type === 'add') {
+                    typeBadge = 'badge-success';
+                    typeText = 'Added';
+                } else if (movement.transaction_type === 'retrieve') {
+                    typeBadge = 'badge-warning';
+                    typeText = 'Retrieved';
+                } else if (movement.transaction_type === 'return') {
+                    typeBadge = 'badge-info';
+                    typeText = 'Return';
+                } else if (movement.transaction_type === 'transfer') {
+                    typeBadge = 'badge-primary';
+                    typeText = 'Transfer';
+                }
+                
+                // Modified this line to use only customer_name since notes doesn't exist
+                const customerInfo = escapeHtml(movement.customer_name || 'N/A');
+                
+                $('#all-movements-body').append(`
+                    <tr>
+                        <td>${escapeHtml(movement.product_name || 'Unknown Product')}</td>
+                        <td>${escapeHtml(movement.itemcode || 'N/A')}</td>
+                        <td>
+                            <span class="badge ${typeBadge}">${typeText}</span>
+                        </td>
+                        <td>${movement.quantity}</td>
+                        <td>${ucfirst(movement.reason || 'N/A')}</td>
+                        <td>${customerInfo}</td>
+                        <td>
+                            ${movement.total_amount ? 'Rs. ' + parseFloat(movement.total_amount).toFixed(2) : 'N/A'}
+                        </td>
+                        <td>${formatDateTime(movement.transaction_date)}</td>
+                    </tr>
+                `);
+            });
+            
+            // Update pagination info
+            $('#movement-showing-info').text(
+                `Showing ${pagination.from} to ${pagination.to} of ${pagination.total} entries`
+            );
+            
+            // Build pagination links
+            const paginationHtml = buildPaginationLinks(pagination);
+            $('#movement-pagination').html(paginationHtml);
+        }
+    }
+    
+    // Helper function to build pagination links
+    function buildPaginationLinks(pagination) {
+        let html = '';
+        const currentPage = pagination.current_page;
+        const lastPage = pagination.last_page;
+        
+        // Previous button
+        html += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${currentPage - 1}" ${currentPage === 1 ? 'tabindex="-1"' : ''}>Previous</a>
+            </li>
+        `;
+        
+        // Page numbers
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(lastPage, currentPage + 2);
+        
+        for (let i = startPage; i <= endPage; i++) {
+            html += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `;
+        }
+        
+        // Next button
+        html += `
+            <li class="page-item ${currentPage === lastPage ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${currentPage + 1}" ${currentPage === lastPage ? 'tabindex="-1"' : ''}>Next</a>
+            </li>
+        `;
+        
+        return html;
+    }
+    
+    // Helper function to capitalize first letter
+    function ucfirst(string) {
+        if (!string) return '';
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+    
+    // Helper function to format date and time
+    function formatDateTime(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleString();
+    }
+    
+    // Helper function to escape HTML entities
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.innerText = text;
+        return div.innerHTML;
+    }
+    
     // Export functionality - Updated implementation with better script loading
     $('.export-sales-btn').click(function(e) {
         e.preventDefault();
@@ -814,4 +1151,23 @@ $(document).ready(function() {
         return true;
     }
 });
+</script>
+
+<!-- Properly include SweetAlert2 -->
+<script>
+(function() {
+    // Check if SweetAlert is already loaded
+    if (typeof Swal !== 'undefined') {
+        // SweetAlert is already loaded, no need to do anything
+        return;
+    }
+    
+    // Create script element instead of using document.write
+    var sweetAlertScript = document.createElement('script');
+    sweetAlertScript.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+    sweetAlertScript.async = true;
+    
+    // Append to head
+    document.head.appendChild(sweetAlertScript);
+})();
 </script>
