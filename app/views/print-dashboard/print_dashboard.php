@@ -1005,7 +1005,7 @@ require_once '../header1.php';
                                 <td>${itemValue.toFixed(2)}</td>
                                 <td>${item.rep_name}</td>
                                 <td>${item.status}</td>
-                                <td>${item.updated_at}</td>
+                                <td>${item.date_added}</td>
                             </tr>
                         `;
                     });
