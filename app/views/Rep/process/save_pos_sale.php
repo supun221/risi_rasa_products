@@ -47,8 +47,8 @@ try {
     // Get rep_id from session
     $rep_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 1; // Default to 1 for testing
     
-    // Get branch from session
-    $branch = isset($_SESSION['branch']) ? $_SESSION['branch'] : 'main';
+    // Get branch from session - using store value instead of branch
+    $branch = isset($_SESSION['store']) ? $_SESSION['store'] : 'main';
     
     // Validate items
     if (empty($items)) {
