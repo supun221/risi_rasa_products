@@ -603,6 +603,64 @@ require_once '../header1.php';
                 <button class="rep_generate_btn" onclick="fetchLowStockReport()">Run Report</button>
                 <button class="rep_generate_btn" onclick="printLowStockReport()">Print Report</button>
             </div>
+            
+            <!-- Rep Payments Report -->
+            <div class="report-btn-container">
+                <div class="report-heading-cont">
+                    <span class="report-name">Rep Payments</span>
+                </div>
+                <label for="rep-payments-username">Select Rep:</label>
+                <select id="rep-payments-username">
+                    <option value="">All Reps</option>
+                </select>
+                <label for="rep-payments-start-date">Start Date:</label>
+                <input type="date" id="rep-payments-start-date">
+                <label for="rep-payments-end-date">End Date:</label>
+                <input type="date" id="rep-payments-end-date">
+                <p class="report-content">Generate a report of payments collected by reps.</p>
+                <button class="rep_generate_btn" onclick="fetchRepPaymentsReport()">Run Report</button>
+                <button class="rep_generate_btn" onclick="printRepPaymentsReport()">Print Report</button>
+            </div>
+            
+            <!-- Rep Sales Items Report -->
+            <div class="report-btn-container">
+                <div class="report-heading-cont">
+                    <span class="report-name">Rep Sales Items</span>
+                </div>
+                <label for="rep-sales-username">Select Rep:</label>
+                <select id="rep-sales-username">
+                    <option value="">All Reps</option>
+                </select>
+                <label for="rep-sales-start-date">Start Date:</label>
+                <input type="date" id="rep-sales-start-date">
+                <label for="rep-sales-end-date">End Date:</label>
+                <input type="date" id="rep-sales-end-date">
+                <label for="rep-sales-barcode">Barcode:</label>
+                <input type="text" id="rep-sales-barcode" placeholder="Search by Product Barcode">
+                <p class="report-content">Generate a report of sales items by reps.</p>
+                <button class="rep_generate_btn" onclick="fetchRepSalesReport()">Run Report</button>
+                <button class="rep_generate_btn" onclick="printRepSalesReport()">Print Report</button>
+            </div>
+            
+            <!-- Rep Lorry Stock Report -->
+            <div class="report-btn-container">
+                <div class="report-heading-cont">
+                    <span class="report-name">Rep Lorry Stock</span>
+                </div>
+                <label for="rep-stock-username">Select Rep:</label>
+                <select id="rep-stock-username">
+                    <option value="">All Reps</option>
+                </select>
+                <label for="rep-stock-start-date">Start Date:</label>
+                <input type="date" id="rep-stock-start-date">
+                <label for="rep-stock-end-date">End Date:</label>
+                <input type="date" id="rep-stock-end-date">
+                <label for="rep-stock-barcode">Barcode:</label>
+                <input type="text" id="rep-stock-barcode" placeholder="Search by Product Barcode">
+                <p class="report-content">Generate a report of lorry stock status for reps.</p>
+                <button class="rep_generate_btn" onclick="fetchRepLorryStockReport()">Run Report</button>
+                <button class="rep_generate_btn" onclick="printRepLorryStockReport()">Print Report</button>
+            </div>
         </div>
     </div>
 
@@ -661,6 +719,338 @@ require_once '../header1.php';
             window.location.href = "../dashboard/index.php";
         }
     });
+    
+    // Load rep usernames when page loads
+    document.addEventListener("DOMContentLoaded", function() {
+        fetchCategoriesForSalesReport();
+        loadUsers();
+        loadRepUsernames();
+    });
+    
+    // Function to load rep usernames for the dropdown lists
+    function loadRepUsernames() {
+        fetch("fetch_rep_users.php")
+            .then(response => response.json())
+            .then(users => {
+                let repPaymentsSelect = document.getElementById("rep-payments-username");
+                let repSalesSelect = document.getElementById("rep-sales-username");
+                let repStockSelect = document.getElementById("rep-stock-username");
+                
+                // Reset dropdowns with default options
+                repPaymentsSelect.innerHTML = '<option value="">All Reps</option>';
+                repSalesSelect.innerHTML = '<option value="">All Reps</option>';
+                repStockSelect.innerHTML = '<option value="">All Reps</option>';
+                
+                // Populate dropdowns with user data
+                users.forEach(user => {
+                    let option = `<option value="${user.id}">${user.username}</option>`;
+                    repPaymentsSelect.innerHTML += option;
+                    repSalesSelect.innerHTML += option;
+                    repStockSelect.innerHTML += option;
+                });
+            })
+            .catch(error => console.error("Error fetching rep usernames:", error));
+    }
+    
+    // Rep Payments Report Functions
+    function fetchRepPaymentsReport() {
+        let repId = document.getElementById("rep-payments-username").value;
+        let startDate = document.getElementById("rep-payments-start-date").value;
+        let endDate = document.getElementById("rep-payments-end-date").value;
+        
+        let queryParams = new URLSearchParams({
+            rep_id: repId,
+            start_date: startDate,
+            end_date: endDate
+        });
+        
+        let url = `fetch_rep_payments_report.php?${queryParams.toString()}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                $("#reportTitle").text("Rep Payments Report");
+                $("#reportModalLabel").text("Rep Payments Report");
+                
+                let tableHeaders = `
+                    <th>Invoice Number</th>
+                    <th>Customer Name</th>
+                    <th>Amount</th>
+                    <th>Payment Method</th>
+                    <th>Cheque Number</th>
+                    <th>Rep</th>
+                    <th>Branch</th>
+                    <th>Date</th>
+                    <th>Notes</th>
+                `;
+                
+                let tableBody = "";
+                let totalAmount = 0;
+                
+                if (!data.success || data.data.length === 0) {
+                    tableBody = "<tr><td colspan='9'>No payment records found.</td></tr>";
+                } else {
+                    data.data.forEach(item => {
+                        totalAmount += parseFloat(item.amount) || 0;
+                        
+                        tableBody += `
+                            <tr>
+                                <td>${item.invoice_number}</td>
+                                <td>${item.customer_name}</td>
+                                <td>${parseFloat(item.amount).toFixed(2)}</td>
+                                <td>${item.payment_method}</td>
+                                <td>${item.cheque_num || "N/A"}</td>
+                                <td>${item.rep_name}</td>
+                                <td>${item.branch}</td>
+                                <td>${item.payment_date}</td>
+                                <td>${item.notes || ""}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    // Append total row
+                    tableBody += `
+                        <tr style="font-weight: bold;">
+                            <td colspan="2" style="text-align:right;">Total:</td>
+                            <td>${totalAmount.toFixed(2)}</td>
+                            <td colspan="6"></td>
+                        </tr>
+                    `;
+                }
+                
+                $("#reportTableHead").html(tableHeaders);
+                $("#reportTableBody").html(tableBody);
+                $("#reportModal").modal("show");
+            })
+            .catch(error => console.error("Error fetching rep payments report:", error));
+    }
+    
+    function printRepPaymentsReport() {
+        let repId = document.getElementById("rep-payments-username").value;
+        let startDate = document.getElementById("rep-payments-start-date").value;
+        let endDate = document.getElementById("rep-payments-end-date").value;
+        
+        let url = `print_rep_payments_report.php?rep_id=${encodeURIComponent(repId)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
+        
+        let printWindow = window.open(url, '_blank');
+        
+        if (printWindow) {
+            setTimeout(() => {
+                printWindow.focus();
+                printWindow.print();
+                printWindow.onafterprint = function() {
+                    printWindow.close();
+                };
+            }, 1000);
+        } else {
+            alert("Popup blocked! Allow popups for this site.");
+        }
+    }
+    
+    // Rep Sales Report Functions
+    function fetchRepSalesReport() {
+        let repId = document.getElementById("rep-sales-username").value;
+        let startDate = document.getElementById("rep-sales-start-date").value;
+        let endDate = document.getElementById("rep-sales-end-date").value;
+        let barcode = document.getElementById("rep-sales-barcode").value;
+        
+        let queryParams = new URLSearchParams({
+            rep_id: repId,
+            start_date: startDate,
+            end_date: endDate,
+            barcode: barcode
+        });
+        
+        let url = `fetch_rep_sales_report.php?${queryParams.toString()}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                $("#reportTitle").text("Rep Sales Items Report");
+                $("#reportModalLabel").text("Rep Sales Items Report");
+                
+                let tableHeaders = `
+                    <th>Invoice Number</th>
+                    <th>Product Name</th>
+                    <th>Barcode</th>
+                    <th>Quantity</th>
+                    <th>Free Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Discount</th>
+                    <th>Subtotal</th>
+                    <th>Rep</th>
+                    <th>Date</th>
+                `;
+                
+                let tableBody = "";
+                let totalQuantity = 0;
+                let totalAmount = 0;
+                
+                if (!data.success || data.data.length === 0) {
+                    tableBody = "<tr><td colspan='10'>No sales records found.</td></tr>";
+                } else {
+                    data.data.forEach(item => {
+                        totalQuantity += parseInt(item.quantity) || 0;
+                        totalAmount += parseFloat(item.subtotal) || 0;
+                        
+                        tableBody += `
+                            <tr>
+                                <td>${item.invoice_number}</td>
+                                <td>${item.product_name}</td>
+                                <td>${item.barcode || "N/A"}</td>
+                                <td>${item.quantity}</td>
+                                <td>${item.free_quantity}</td>
+                                <td>${parseFloat(item.unit_price).toFixed(2)}</td>
+                                <td>${parseFloat(item.discount_percent).toFixed(2)}%</td>
+                                <td>${parseFloat(item.subtotal).toFixed(2)}</td>
+                                <td>${item.rep_name}</td>
+                                <td>${item.sale_date}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    // Append total row
+                    tableBody += `
+                        <tr style="font-weight: bold;">
+                            <td colspan="3" style="text-align:right;">Total:</td>
+                            <td>${totalQuantity}</td>
+                            <td colspan="3"></td>
+                            <td>${totalAmount.toFixed(2)}</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    `;
+                }
+                
+                $("#reportTableHead").html(tableHeaders);
+                $("#reportTableBody").html(tableBody);
+                $("#reportModal").modal("show");
+            })
+            .catch(error => console.error("Error fetching rep sales report:", error));
+    }
+    
+    function printRepSalesReport() {
+        let repId = document.getElementById("rep-sales-username").value;
+        let startDate = document.getElementById("rep-sales-start-date").value;
+        let endDate = document.getElementById("rep-sales-end-date").value;
+        let barcode = document.getElementById("rep-sales-barcode").value;
+        
+        let url = `print_rep_sales_report.php?rep_id=${encodeURIComponent(repId)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}&barcode=${encodeURIComponent(barcode)}`;
+        
+        let printWindow = window.open(url, '_blank');
+        
+        if (printWindow) {
+            setTimeout(() => {
+                printWindow.focus();
+                printWindow.print();
+                printWindow.onafterprint = function() {
+                    printWindow.close();
+                };
+            }, 1000);
+        } else {
+            alert("Popup blocked! Allow popups for this site.");
+        }
+    }
+    
+    // Rep Lorry Stock Report Functions
+    function fetchRepLorryStockReport() {
+        let repId = document.getElementById("rep-stock-username").value;
+        let startDate = document.getElementById("rep-stock-start-date").value;
+        let endDate = document.getElementById("rep-stock-end-date").value;
+        let barcode = document.getElementById("rep-stock-barcode").value;
+        
+        let queryParams = new URLSearchParams({
+            rep_id: repId,
+            start_date: startDate,
+            end_date: endDate,
+            barcode: barcode
+        });
+        
+        let url = `fetch_rep_lorry_stock_report.php?${queryParams.toString()}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                $("#reportTitle").text("Rep Lorry Stock Report");
+                $("#reportModalLabel").text("Rep Lorry Stock Report");
+                
+                let tableHeaders = `
+                    <th>Product Name</th>
+                    <th>Barcode</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total Value</th>
+                    <th>Rep</th>
+                    <th>Status</th>
+                    <th>Last Updated</th>
+                `;
+                
+                let tableBody = "";
+                let totalQuantity = 0;
+                let totalValue = 0;
+                
+                if (!data.success || data.data.length === 0) {
+                    tableBody = "<tr><td colspan='8'>No lorry stock records found.</td></tr>";
+                } else {
+                    data.data.forEach(item => {
+                        let itemValue = parseFloat(item.quantity) * parseFloat(item.unit_price);
+                        totalQuantity += parseInt(item.quantity) || 0;
+                        totalValue += itemValue;
+                        
+                        tableBody += `
+                            <tr>
+                                <td>${item.product_name}</td>
+                                <td>${item.barcode || "N/A"}</td>
+                                <td>${item.quantity}</td>
+                                <td>${parseFloat(item.unit_price).toFixed(2)}</td>
+                                <td>${itemValue.toFixed(2)}</td>
+                                <td>${item.rep_name}</td>
+                                <td>${item.status}</td>
+                                <td>${item.updated_at}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    // Append total row
+                    tableBody += `
+                        <tr style="font-weight: bold;">
+                            <td colspan="2" style="text-align:right;">Total:</td>
+                            <td>${totalQuantity}</td>
+                            <td></td>
+                            <td>${totalValue.toFixed(2)}</td>
+                            <td colspan="3"></td>
+                        </tr>
+                    `;
+                }
+                
+                $("#reportTableHead").html(tableHeaders);
+                $("#reportTableBody").html(tableBody);
+                $("#reportModal").modal("show");
+            })
+            .catch(error => console.error("Error fetching rep lorry stock report:", error));
+    }
+    
+    function printRepLorryStockReport() {
+        let repId = document.getElementById("rep-stock-username").value;
+        let startDate = document.getElementById("rep-stock-start-date").value;
+        let endDate = document.getElementById("rep-stock-end-date").value;
+        let barcode = document.getElementById("rep-stock-barcode").value;
+        
+        let url = `print_rep_lorry_stock_report.php?rep_id=${encodeURIComponent(repId)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}&barcode=${encodeURIComponent(barcode)}`;
+        
+        let printWindow = window.open(url, '_blank');
+        
+        if (printWindow) {
+            setTimeout(() => {
+                printWindow.focus();
+                printWindow.print();
+                printWindow.onafterprint = function() {
+                    printWindow.close();
+                };
+            }, 1000);
+        } else {
+            alert("Popup blocked! Allow popups for this site.");
+        }
+    }
 </script>
 
 </html>
