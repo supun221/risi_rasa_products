@@ -25,15 +25,15 @@
       <div class="contact-details">
         <div class="contact-item">
           <span class="contact-icon">📞</span>
-          <span class="contact-text">075 1234567 / 075 7204220</span>
+          <span class="contact-text">075 2155499 / 075 7204220</span>
         </div>
-        <div class="contact-item">
+        <!-- <div class="contact-item">
           <span class="contact-icon">✉️</span>
           <span class="contact-text">info@risirasa.lk</span>
-        </div>
+        </div> -->
         <div class="contact-item">
           <span class="contact-icon">🏢</span>
-          <span class="contact-text">45 Main Street, Colombo</span>
+          <span class="contact-text">No 548/1 ,Near the Hospital,Morayaya,Minipe</span>
         </div>
       </div>
     </div>
