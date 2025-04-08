@@ -314,22 +314,28 @@ if ($user_branch) {
             font-weight: bold;
             font-family: serif;
             margin: 0 auto;
+            text-align: center;
+            display: block;
+            width: 100%;
         }
 
         .info-section {
-            margin-left: -6px;  /* Aligns with the end of the cart logo */
+            width: 100%;
+            text-align: center;
+            margin: 5px 0;
         }
 
         .address-section {
             display: flex;
             align-items: center;
+            justify-content: center;
             margin-bottom: 3px;
         }
 
         .phone-section {
             display: flex;
             align-items: center;
-            justify-content:center;
+            justify-content: center;
         }
 
         .location-icon, .phone-icon {
@@ -375,28 +381,17 @@ if ($user_branch) {
             <!-- Logo and Company Name on same line -->
             <span class="company-name">RisiRasa Product</span>
 
-            <div style="display:flex">
-                <!-- <div class="logo-section">
-                    <?php if ($logoBase64): ?>
-                        <img id="logoImg" src="<?= $logoBase64 ?>" alt="Risi Rasa Logo" class="company-logo">
-                    <?php endif; ?>
-                    
-                </div> -->
-                
-                <!-- Sinhala text and address section -->
-                <div class="info-section">
-                    <!-- <div><span id="theme">The Best Spicy</span></div> -->
-                    <?php if ($branch_details): ?>
-                        <div class="address-section">
-                            <!-- <span class="location-icon"></span> -->
-                            <span class="address">◎ <?= htmlspecialchars($branch_details['address']) ?></span>
-                        </div>
-                        <div class="phone-section">
-                            <span class="phone-icon">☎</span>
-                            <span class="telephone"><?= htmlspecialchars($branch_details['phone']) ?></span>
-                        </div>
-                    <?php endif; ?>
-                </div>
+            <!-- Address and Phone information -->
+            <div class="info-section">
+                <?php if ($branch_details): ?>
+                    <div class="address-section">
+                        <span class="address">◎ <?= htmlspecialchars($branch_details['address']) ?></span>
+                    </div>
+                    <div class="phone-section">
+                        <span class="phone-icon">☎</span>
+                        <span class="telephone"><?= htmlspecialchars($branch_details['phone']) ?></span>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
         <div class="header-line"></div>
