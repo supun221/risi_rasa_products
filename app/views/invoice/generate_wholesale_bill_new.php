@@ -672,7 +672,7 @@ if ($user_branch) {
         </p>
         <p>
             <strong style="font-size: 15px; font-weight:600;" class="<?= $language === 'sinhala' ? 'sinhala-text' : 'english-text' ?>">
-                <?= $language === 'sinhala' ? getSinhalaText('Eggland Super') : 'Eggland Super' ?>
+                <?= $language === 'sinhala' ? getSinhalaText('RisiRasa Products') : 'RisiRasa Products' ?>
             </strong>
         </p>
     </div>

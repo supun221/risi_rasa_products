@@ -62,7 +62,7 @@ if($customerName == ""){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eggland | Payment</title>
+    <title>RisiRasa Products | Payment</title>
     <link rel="stylesheet" href="./create-invoice.styles.css">
     <link rel="stylesheet" href="./pos_checkout.styles.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

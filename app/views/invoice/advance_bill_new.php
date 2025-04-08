@@ -65,7 +65,7 @@ $freeIssuesFlag = false;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eggland | Advance Bill</title>
+    <title>RisiRasa | Advance Bill</title>
     <style>
         * {
             margin: 0;

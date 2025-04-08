@@ -268,7 +268,7 @@ $customerID = $billData['customer_id'] ?? 'Unknown';
 
     <div class="footer">
         <p>Thank You Come Again!</p>
-        <p><strong>Eggland Super</strong></p>
+        <p><strong>RisiRasa Products</strong></p>
     </div>
 </body>
 </html>

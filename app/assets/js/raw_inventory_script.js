@@ -1435,8 +1435,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Barcode Generation with Company Name and Price
     function generateBarcode() {
-        const companyName = "EGGLAND SUPER"; // Replace with your actual company name
-        const address = "Dambulla Road, Yaggapitiya, Kurunegala."; 
+        const companyName = "Risi Rasa"; // Replace with your actual company name
+        const address = "No 548/1 ,near the Hospital,Morayaya,Minipe"; 
         const product = productNameInput.value
         const price = document.getElementById("printPrice").value;
         const mfd = document.getElementById("mfDate").value;
