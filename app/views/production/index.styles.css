@@ -56,11 +56,11 @@
 }
 
 .prod-op-sel-tile:nth-child(1) {
-  background-image: url(https://images.unsplash.com/photo-1602237514002-c2d8ae2da393?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
+  background-image: url("ice_cream.jpg");
 }
 
 .prod-op-sel-tile:nth-child(2) {
-  background-image: url(https://images.unsplash.com/photo-1606109693563-d4f5e334357a?q=80&w=1976&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
+  background-image: url("choclate.jpg");
 }
 
 .tile-option-cont {
