@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ameena Chilies POS - Branch Sales</title>
+    <title>RisiRasa POS - Branch Sales</title>
     <link href="https://fonts.googleapis.com/css?family=Cardo:400i|Rubik:400,700&display=swap" rel="stylesheet">
     <style>
         /* Same CSS as before with modifications for .date-selection and card layout */

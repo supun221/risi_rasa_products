@@ -56,7 +56,7 @@ if (!$imagePath || !file_exists($imagePath)) {
 function formatAmount($amount) {
     return number_format($amount, 2, '.', '');
 }
-$logoPath = "https://egg.land.nexarasolutions.site/app/views/invoice/images/bill-header.png";
+$logoPath = "images/ameena_logo.png";
 $freeIssuesFlag = false;
 ?>
 

@@ -55,6 +55,30 @@ try {
         throw new Exception('No items in the cart');
     }
     
+    // Check credit limit if payment method is credit and we have a customer ID
+    if ($payment_method === 'credit' && $customer_id && $credit_amount > 0) {
+        // Get customer's current credit balance and credit limit
+        $stmt = $conn->prepare("SELECT credit_balance, credit_limit FROM customers WHERE id = ?");
+        $stmt->bind_param("i", $customer_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            $customer = $result->fetch_assoc();
+            $current_credit_balance = (float)$customer['credit_balance'];
+            $credit_limit = (float)$customer['credit_limit'];
+            
+            // Check if the new credit amount would exceed the limit
+            $new_balance = $current_credit_balance + $credit_amount;
+            
+            if ($new_balance > $credit_limit) {
+                throw new Exception("This sale would exceed the customer's credit limit of Rs. " . number_format($credit_limit, 2) . ". Current balance: Rs. " . number_format($current_credit_balance, 2));
+            }
+        } else {
+            throw new Exception("Customer not found");
+        }
+    }
+    
     // Start transaction
     $conn->begin_transaction();
     

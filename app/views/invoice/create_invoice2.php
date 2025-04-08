@@ -61,7 +61,7 @@ if (is_array($results)) {
     .modal {
         display: none;
         position: fixed;
-        z-index: 1;
+        z-index: 1005; /* Increased z-index */
         left: 0;
         top: 0;
         width: 100%;
@@ -210,7 +210,7 @@ if (is_array($results)) {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 1005; /* Increased z-index */
   }
   
   .modal-content {
@@ -231,7 +231,7 @@ if (is_array($results)) {
     right: 10px;
     font-size: 24px;
     cursor: pointer;
-    z-index: 1001;
+    z-index: 1007; /* One higher than modal content */
     color: #333;
     background: rgba(255, 255, 255, 0.7);
     border-radius: 50%;
@@ -241,6 +241,54 @@ if (is_array($results)) {
     align-items: center;
     justify-content: center;
   }
+
+  /* Added new styles to ensure elements stay on top of modals */
+.bill-values-container-main {
+    position: relative; 
+    z-index: 1000;
+}
+
+.opt-btn {
+    position: relative;
+    z-index: 1000;
+}
+
+.opt-menu {
+    z-index: 1000;
+}
+
+/* Updating modal z-index to be lower than our key elements */
+.modal-container {
+    z-index: 1005; /* Increased z-index */
+}
+
+.modal {
+    z-index: 1005; /* Increased z-index */
+}
+
+.multiple-item-selector-modal,
+.short-cut-keys-modal,
+.bill-cancellation-modal,
+.attendance-mark-modal,
+.mes-unit-modal {
+    z-index: 1005; /* Increased z-index for all modals */
+}
+
+/* Make sure modal content is above the overlay */
+.modal-content,
+.bc-form-area,
+.mis-modal-area {
+    position: relative;
+    z-index: 1006; /* One higher than the modal background */
+}
+
+/* Close buttons should be above modal content */
+.close,
+.close-modal,
+.bc-close-btn,
+.mis-modal-close {
+    z-index: 1007; /* One higher than modal content */
+}
 </style>
 
 <body>

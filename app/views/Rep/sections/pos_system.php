@@ -1344,6 +1344,41 @@ $(document).ready(function() {
             posData.chequeNumber = null; // Reset cheque number if not cheque payment
         }
         
+        // Check credit limit if payment method is credit
+        if (posData.paymentMethod === 'credit' && posData.customerId && posData.creditAmount > 0) {
+            // Check credit limit before processing
+            $.ajax({
+                url: 'process/check_credit_limit.php',
+                type: 'GET',
+                data: { 
+                    customer_id: posData.customerId,
+                    credit_amount: posData.creditAmount
+                },
+                dataType: 'json',
+                async: false, // Make this synchronous so we wait for the response
+                success: function(response) {
+                    if (!response.success) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Credit Limit Exceeded',
+                            text: response.message
+                        });
+                        $('#payment-confirmation-modal').modal('hide');
+                        return false; // Prevent form submission
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error',
+                        text: 'Could not check credit limit. Please try again.'
+                    });
+                    $('#payment-confirmation-modal').modal('hide');
+                    return false; // Prevent form submission
+                }
+            });
+        }
+        
         // Prepare data for submission
         const saleData = {
             invoice_number: posData.invoice,
