@@ -46,7 +46,7 @@ function getSinhalaText($text) {
         'BILL PAYMENT' => 'බිල්පත් ගෙවීම',
         'VOUCHER PAYMENT' => 'වවුචර් ගෙවීම',
         'FREE PAYMENT' => 'නොමිලේ ගෙවීම',
-        'Eggland Super' => 'Eggland Super',
+        'Risi Rasa' => 'Risi Rasa',
         'Advance Payment' => 'අත්තිකාරම් ගෙවීම'
     ];
     
@@ -373,19 +373,19 @@ if ($user_branch) {
     <div class="header">
         <div class="header-content">
             <!-- Logo and Company Name on same line -->
-            <span class="company-name">Ameena Chilies</span>
+            <span class="company-name">RisiRasa Product</span>
 
             <div style="display:flex">
-                <div class="logo-section">
+                <!-- <div class="logo-section">
                     <?php if ($logoBase64): ?>
-                        <img id="logoImg" src="<?= $logoBase64 ?>" alt="Eggland Super Logo" class="company-logo">
+                        <img id="logoImg" src="<?= $logoBase64 ?>" alt="Risi Rasa Logo" class="company-logo">
                     <?php endif; ?>
                     
-                </div>
+                </div> -->
                 
                 <!-- Sinhala text and address section -->
                 <div class="info-section">
-                    <div><span id="theme">The Best Spicy</span></div>
+                    <!-- <div><span id="theme">The Best Spicy</span></div> -->
                     <?php if ($branch_details): ?>
                         <div class="address-section">
                             <!-- <span class="location-icon"></span> -->
@@ -560,19 +560,19 @@ if ($user_branch) {
         </tr>
 
         <?php 
-            $payments = json_decode($billData['payments'], true);
+            $payments = isset($billData['payments']) ? json_decode($billData['payments'], true) : null;
             $totalPaid = 0;
             $paymentsByType = [];
             
             // Group payments by type
             if ($payments) {
                 foreach ($payments as $payment) {
-                    $totalPaid += floatval($payment['amount']);
-                    $type = $payment['type'];
+                    $type = $payment['type'] ?? 'cash_payment';
                     if (!isset($paymentsByType[$type])) {
                         $paymentsByType[$type] = [];
                     }
                     $paymentsByType[$type][] = $payment;
+                    $totalPaid += $payment['amount'];
                 }
                 
                 // Display cash payments
@@ -631,9 +631,20 @@ if ($user_branch) {
                 }
                 
 
+            } else {
+                // If no structured payment data, use the cash tendered value
+                $totalPaid = $cashTendered;
+                ?>
+                <tr>
+                    <td style="border-bottom:none;" class="<?= $language === 'sinhala' ? 'sinhala-text' : 'english-text' ?>">
+                        <?= $language === 'sinhala' ? getSinhalaText('CASH') : 'CASH' ?>
+                    </td>
+                    <td style="border-bottom:none;"><?= formatAmount($cashTendered); ?></td>
+                </tr>
+                <?php
             }
             
-            // Calculate actual balance (Net Amount - Total Payments)
+            // Calculate actual balance (Total Paid - Net Amount)
             $actualBalance = $totalPaid - $netAmount;
             ?>
             
@@ -688,7 +699,7 @@ if ($user_branch) {
         </p>
         <p>
             <strong style="font-size: 15px; font-weight:600;" class="<?= $language === 'sinhala' ? 'sinhala-text' : 'english-text' ?>">
-                <?= $language === 'sinhala' ? getSinhalaText('Eggland Super') : 'Eggland Super' ?>
+                <?= $language === 'sinhala' ? getSinhalaText('Risi Rasa') : 'Risi Rasa' ?>
             </strong>
         </p>
     </div>

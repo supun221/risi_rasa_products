@@ -412,8 +412,8 @@ if (is_array($results)) {
                     <!-- company-info -->
                     <div class="company-info">
                         <!-- <span class="heading-sinhala">එග්ලන්ඩ් සුපර්</span> -->
-                        <span class="heading-english">Ameena Chilies</span>
-                        <span class="company-motto">The Best Spicy</span>
+                        <span class="heading-english">RisiRasa Products</span>
+                        <span class="company-motto">Delicious Treats</span>
                     </div>
                     <div id="header-image">
                         <img src="../../assets/images/cart.png" alt="Header Image" />
