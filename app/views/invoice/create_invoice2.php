@@ -31,6 +31,11 @@ if (is_array($results)) {
     $prdName = $results['product_name'];
 }
 
+
+// function getCurrentDate() {
+//     return date('Y-m-d');
+// }
+// $currentDate = getCurrentDate();
 ?>
 
 
@@ -41,454 +46,205 @@ if (is_array($results)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Invoice | Risi Rasa Products</title>
+    <title>Create Invoice</title>
     <!-- remastered-screen styles -->
     <link rel="stylesheet" href="./create-invoice.styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="../../assets/js/cart_handler.js" defer></script>
     <link rel="stylesheet" href="../../assets/notifier/style.css">
     </link>
     <script src="../../assets/notifier/index.var.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        :root {
-            --primary-color: #4361ee;
-            --primary-dark: #3249c2;
-            --secondary-color: #748df0;
-            --bg-color: #f5f7fa;
-            --text-color: #2c3e50;
-            --button-bg-color: #e0e7ff;
-            --button-hover-color: #c7d2fe;
-            --button-text-color: #3249c2;
-            --input-border: #ddd;
-            --highlight-color: #ef476f;
-            --success-color: #10b981;
-        }
+</head>
+<style>
+    /* return form css */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    .modal-content {
+        background-color: rgb(255, 255, 255);
+        margin: 4% auto;
+        padding: 1px;
+        border: 1px solid #888;
+        width: 55%;
+        height: 78%;
+    }
 
-        .header-container-rmaster {
-            background: linear-gradient(145deg, var(--primary-color), var(--primary-dark));
-        }
+    .close {
+        color: red;
+        float: right;
+        /* font-size: 18px; */
+        font-weight: bold;
+    }
 
-        .company-info {
-            color: white;
-        }
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 
-        .total-val-indicator-main {
-            color: white;
-        }
+    /* barcode reader css */
+    .barcode-reader-container {
+        margin: 5px 0;
+        width: 95%;
+    }
 
-        /* More professional form styling */
-        .eland-input {
-            border: 1px solid var(--input-border);
-            border-radius: 6px;
-            padding: 8px 12px;
-            transition: all 0.3s ease;
-        }
+    .barcode-reader-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 2px;
+    }
 
-        .eland-input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-            outline: none;
-        }
+    .barcode-reader-table>thead>tr>th {
+        font-family: "Poppins", serif;
+        font-weight: 500;
+        text-align: center;
+        background-color: #0a3981;
+        color: white;
+        padding: 1px 2px;
+    }
 
-        /* Button styling update */
-        .eland-pos-button {
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            border: none;
-            box-shadow: 0 3px 6px rgba(67, 97, 238, 0.2);
-        }
+    .barcode-reader-table>tbody>tr>td {
+        padding: 1px 2px;
+        font-family: "Poppins", serif;
+        font-weight: 400;
+        text-align: center;
+        font-size: 0.9em;
+        color: #2c3e50;
+    }
 
-        .eland-pos-button:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 8px rgba(67, 97, 238, 0.3);
-        }
+    .barcode-reader-table>tbody>tr:hover>td {
+        background-color: #dcdde1;
+    }
 
-        .button-style {
-            background-color: var(--button-bg-color);
-            color: var(--button-text-color);
-            border-radius: 8px;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            border: none;
-        }
+    .barcode-reader-table>tbody>tr:nth-child(odd) {
+        background-color: #dfe4ea;
+    }
 
-        .button-style:hover {
-            background-color: var(--button-hover-color);
-            transform: translateY(-10px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
+    .barcode-reader-table>tbody>tr:nth-child(even) {
+        background-color: #f1f2f6;
+    }
 
-        .button-style > i {
-            color: var(--primary-color);
-        }
+    .barcode-input,
+    .barcode-product-name,
+    .barcode-quantity,
+    .barcode-our-price {
+        width: 100%;
+        padding: 2px;
+        font-family: "Poppins", serif;
+        font-size: 0.9em;
+        text-align: center;
+    }
 
-        /* Table styling */
-        .item-cart > thead > tr > th {
-            background-color: var(--primary-dark);
-            color: white;
-        }
+    .barcode-input {
+        border: 2px solid #2c3e50;
+        border-radius: 4px;
+    }
 
-        .item-cart > tbody > tr:nth-child(odd) {
-            background-color: #f1f5fd;
-        }
+    .barcode-product-name,
+    .barcode-quantity,
+    .barcode-our-price {
+        border: 2px solid #dfe4ea;
+        background-color: #f9f9f9;
+    }
 
-        .item-cart > tbody > tr:nth-child(even) {
-            background-color: #ffffff;
-        }
+    .barcode-tb-inp {
+        padding: 2px;
+        font-family: "Poppins", serif;
+        font-size: 0.9em;
+        text-align: center;
+        border: none;
+    }
 
-        /* Credit info styling */
-        .credit-info-container {
-            padding: 20px;
-        }
+    .eland-pos-input-cont {
+        position: relative;
+        width: 100%;
+    }
 
-        .credit-info-item {
-            margin-bottom: 15px;
-        }
+    #search-customer {
+        width: 100%;
+        box-sizing: border-box;
+    }
 
-        .credit-info-item label {
-            display: inline-block;
-            width: 120px;
-            font-weight: 600;
-            color: var(--text-color);
-        }
+    .dropdown-list {
+        position: absolute;
+        top: calc(100% + 2px);
+        left: 0;
+        width: 100%;
+        background: #fff;
+        border: 1px solid #ccc;
+        z-index: 1000;
+        max-height: 150px;
+        overflow-y: auto;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-        .credit-info-item input {
-            width: 150px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            background-color: #f8f9fa;
-        }
 
-        /* Invoice header styling */
-        #create-invoice-header {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 5px 25px;
-            color: white;
-            font-weight: 600;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+    .dropdown-item {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
 
-        /* Barcode reader styling */
-        .barcode-reader-table > thead > tr > th {
-            background-color: var(--primary-dark);
-            color: white;
-            font-size: 13px;
-            padding: 10px 5px;
-        }
+.dropdown-item:hover {
+    background-color: #f0f0f0; 
+}
 
-        .barcode-input {
-            border: 2px solid var(--secondary-color);
-            border-radius: 6px;
-        }
-
-        .barcode-input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-            outline: none;
-        }
-
-        .action-buttons button {
-            background-color: var(--primary-color);
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .action-buttons button:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .salesman-info-ribbon {
-            background-color: #f8f9fa;
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Total values */
-        .total-val-input-main {
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        #total_amount {
-            color: var(--success-color) !important;
-        }
-
-        #total_cash_tendered {
-            color: var(--success-color) !important;
-        }
-
-        /* Update the held invoice styles */
-        .held-invoice-heading {
-            background-color: var(--primary-color);
-            font-weight: 600;
-            border-radius: 6px 6px 0 0;
-        }
-
-        .held-invoice-btn {
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .held-invoice-btn:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        /* Modals and popups */
-        .modal-header {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .bc-btn {
-            background-color: var(--primary-color);
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .bc-btn:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .dropdown-list {
-            border-radius: 6px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .dropdown-item:hover {
-            background-color: #f1f5fd;
-        }
-
-        /* Transaction type selectors */
-        .transaction-type-selector {
-            background-color: var(--primary-color);
-            border-radius: 6px;
-            padding: 8px 15px;
-        }
-
-        .tra-type-label {
-            font-weight: 500;
-        }
-
-        /* Option menu styling */
-        .opt-btn {
-            background-color: var(--primary-color);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .opt-child-btn {
-            transition: all 0.3s ease;
-        }
-
-        .opt-child-btn:hover {
-            background-color: var(--primary-color);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Cart item counter */
-        .cart-item-counter {
-            background-color: var(--primary-color);
-        }
-
-        .item-count-indicator {
-            background-color: var(--highlight-color);
-            font-weight: 600;
-        }
-        
-        /* return form css and other remaining styles from original */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0, 0, 0);
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-
-        .modal-content {
-            background-color: rgb(255, 255, 255);
-            margin: 4% auto;
-            padding: 1px;
-            border: 1px solid #888;
-            width: 55%;
-            height: 78%;
-        }
-
-        .close {
-            color: red;
-            float: right;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        /* barcode reader css */
-        .barcode-reader-container {
-            margin: 5px 0;
-            width: 95%;
-        }
-
-        .barcode-reader-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 2px;
-        }
-
-        .barcode-reader-table>tbody>tr>td {
-            padding: 1px 2px;
-            font-family: "Poppins", serif;
-            font-weight: 400;
-            text-align: center;
-            font-size: 0.9em;
-            color: #2c3e50;
-        }
-
-        .barcode-reader-table>tbody>tr:hover>td {
-            background-color: #f1f5fd;
-        }
-
-        .barcode-product-name,
-        .barcode-quantity,
-        .barcode-our-price {
-            width: 100%;
-            padding: 2px;
-            font-family: "Poppins", serif;
-            font-size: 0.9em;
-            text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .barcode-tb-inp {
-            padding: 2px;
-            font-family: "Poppins", serif;
-            font-size: 0.9em;
-            text-align: center;
-            border: none;
-        }
-
-        .modal-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        /* Bill Values Container Styling */
-        .bill-values-container-main {
-            width: 32%;
-            height: 100%;
-            background-color: #000000;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .total-val-indicator-main {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 15px;
-            background-color: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .total-val-indicator-main:hover {
-            background-color: rgba(255, 255, 255, 0.08);
-            transform: translateY(-2px);
-        }
-
-        .total-val-label-main {
-            font-size: 1.3em;
-            font-weight: 600;
-            margin-bottom: 5px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .total-val-input-main {
-            background-color: transparent;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 2.5em;
-            font-weight: 700;
-            border: none;
-            outline: none;
-            text-align: center;
-            width: 100%;
-            padding: 5px 0;
-            transition: all 0.3s ease;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .total-val-input-main:focus {
-            border-bottom: 2px solid var(--primary-color);
-        }
-
-        #total_amount {
-            color: var(--success-color) !important;
-            text-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
-        }
-
-        #total_cash_tendered {
-            color: var(--success-color) !important;
-            text-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
-        }
-
-        #total_balance_final {
-            color: #f8fafc !important;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-        }
-    </style>
+.modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: white;
+    border-radius: 5px;
+    width: 39%;
+    height: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+    position: relative;
+    overflow: hidden;
+    padding: 10;
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1001;
+    color: #333;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
 
 <body>
-    <?php include '../customers/add_customer.php'; ?>
+<?php include '../customers/add_customer.php';?>
     <!-- bill cancel confirmation -->
     <div class="bill-cancellation-modal" id="bill-cancellation-modal">
         <div class="bc-form-area">
@@ -655,10 +411,9 @@ if (is_array($results)) {
                     <!-- <img src="../../assets/images/cart.png" alt="inventory-pholder" class="header-img-rmaster"> -->
                     <!-- company-info -->
                     <div class="company-info">
-                        <div class="brand-name">
-                            <h1 class="main-text">RISI RASA</h1>
-                            <h2 class="sub-text">PRODUCTS</h2>
-                        </div>
+                        <!-- <span class="heading-sinhala">එග්ලන්ඩ් සුපර්</span> -->
+                        <span class="heading-english">Ameena Chilies</span>
+                        <span class="company-motto">The Best Spicy</span>
                     </div>
                     <div id="header-image">
                         <img src="../../assets/images/cart.png" alt="Header Image" />
@@ -764,7 +519,7 @@ if (is_array($results)) {
             </div>
 
             <!-- measurement unit changer -->
-            <div class="mes-unit-modal" id="mes-unit-modal">
+             <div class="mes-unit-modal" id="mes-unit-modal">
                 <table>
                     <tr onclick="setMeasurementUnit('litre')">
                         <td>Litre</td>
@@ -776,7 +531,7 @@ if (is_array($results)) {
                         <td>Kilogram</td>
                     </tr>
                 </table>
-            </div>
+             </div>
 
             <style>
                 .credit-info-container {
@@ -852,22 +607,22 @@ if (is_array($results)) {
                     }
                 });
 
-
+             
                 document.querySelector('.eland-pos-button i.fa-credit-card').closest('button').addEventListener('click', openCreditLimitModal);
             </script>
             <!-- bill related fees -->
             <div class="bill-values-container-main">
                 <div class="total-val-indicator-main">
-                    <span class="total-val-label-main">Total Amount</span>
-                    <input type="text" class="total-val-input-main" id="total_amount" value="00.00" style="display: block; visibility: visible; color: #10b981 !important;" disabled>
+                    <span class="total-val-label-main">Total Amount:</span>
+                    <input style="color: #26de81;" type="text" class="total-val-input-main" id="total_amount" value="00.00" disabled>
                 </div>
                 <div class="total-val-indicator-main">
-                    <span class="total-val-label-main">Cash Tendered</span>
-                    <input type="text" class="total-val-input-main" id="total_cash_tendered" value="00.00" style="display: block; visibility: visible; color: #10b981 !important;" onkeyup="balanceHandler()">
+                    <span class="total-val-label-main">Cash Tendered:</span>
+                    <input style="color: #26de81;" type="text" class="total-val-input-main" id="total_cash_tendered" value="00.00" onkeyup="balanceHandler()">
                 </div>
                 <div class="total-val-indicator-main">
-                    <span class="total-val-label-main">Balance</span>
-                    <input type="text" class="total-val-input-main" id="total_balance_final" value="00.00" style="display: block; visibility: visible; color: #f8fafc !important;" disabled>
+                    <span class="total-val-label-main">Balance:</span>
+                    <input type="text" class="total-val-input-main" id="total_balance_final" value="00.00" disabled>
                 </div>
             </div>
         </div>
@@ -938,7 +693,7 @@ if (is_array($results)) {
                             <tr>
                                 <td>
                                     <!-- onchange="getPossibleBarcodeCombinations('<?php echo $user_branch; ?>')" -->
-                                    <input type="text" id="barcode-input" class="barcode-input" placeholder="Enter barcode">
+                                    <input type="text" id="barcode-input" class="barcode-input" placeholder="Enter barcode" >
                                     <div id="suggestion-box"></div>
                                 </td>
                                 <td>
@@ -979,7 +734,7 @@ if (is_array($results)) {
                         const gramQtyHolder = document.getElementById('gram-value-holder')
                         const barcodeInput = document.getElementById("barcode-input").value.trim();
                         let quantity = parseFloat(document.getElementById("quantity").value) || 1;
-                        if (mesUnit.value != "null") {
+                        if(mesUnit.value != "null"){
                             quantity = (parseFloat(gramQtyHolder.value) * quantity) / 1000
                         }
                         const discount = parseInt(document.getElementById("bcode_discount").value) || 0;
@@ -1000,7 +755,7 @@ if (is_array($results)) {
                         // } else {
                         //     processAddToCart(quantity, discount, free_issue, priceValue);
                         // }
-                        processAddToCart(quantity, discount, free_issue, priceValue);
+                            processAddToCart(quantity, discount, free_issue, priceValue);
                     }
 
                     const handleInsertKeyPress = (products) => {
@@ -1089,9 +844,9 @@ if (is_array($results)) {
                                         if (data.products.length === 1) {
                                             const product = data.products[0];
                                             currentProduct = product; // Set the current product
-                                            if (currentProduct.unit === 'coc_oil(kg)') {
+                                            if(currentProduct.unit === 'coc_oil(kg)'){
                                                 showMesUnitModal();
-                                            } else {
+                                            }else{
                                                 updateProductUI(product); // Update the input fields
                                                 resolve(); // Resolve the Promise
                                             }
@@ -1140,11 +895,13 @@ if (is_array($results)) {
                     function updateProductUIEnhanced(product) {
                         let currentPrice = 0;
                         const invoiceType = getSelectedInvoiceType()
-                        if (invoiceType === 'retail') {
+                        if(invoiceType === 'retail'){
                             currentPrice = product.our_price
-                        } else if (invoiceType === 'wholesale') {
-                            currentPrice = product.wholesale_price
-                        } else {
+                        }
+                        else if(invoiceType === 'wholesale'){
+                            currentPrice = product.wholesale_price  
+                        }
+                        else{
                             currentPrice = product.max_retail_price
                         }
 
@@ -1912,98 +1669,54 @@ if (is_array($results)) {
         localStorage.removeItem('shopping_cart')
     }
 
-    var measurementConversions = [];
-    const fetchMeasurementConversions = () => {
-        let notifier = new AWN()
-        fetch('fetch_measurement_convs.php')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.status === 'success') {
-                    measurementConversions = data.data;
-                    console.log('Measurement conversions loaded successfully:', measurementConversions);
-                } else {
-                    console.error('Error fetching measurement conversions:', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching measurement conversions:', error);
-            });
-    }
-
-    document.addEventListener('DOMContentLoaded', fetchMeasurementConversions);
-
-    const measurementConverter = (itemCode, selectedMesUnit) => {
-        const gramQtyHolder = document.getElementById('gram-value-holder')
-        let notifier = new AWN()
-        measurementConversions.forEach((record) => {
-            if (record.item_code == itemCode) {
-                switch (selectedMesUnit) {
-                    case 'litre':
-                        gramQtyHolder.value = record.selling_litre
-                        break;
-                    case 'bottle':
-                        gramQtyHolder.value = record.selling_bottle
-                        break;
-                    case 'kilogram':
-                        gramQtyHolder.value = record.selling_kilo
-                        break;
-                    default:
-                        notifier.alert('invalid measure unit passed!')
-                        return
-                }
+var measurementConversions = [];
+const fetchMeasurementConversions = () => {
+    let notifier = new AWN()
+    fetch('fetch_measurement_convs.php')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                measurementConversions = data.data;
+                console.log('Measurement conversions loaded successfully:', measurementConversions);
+            } else {
+                console.error('Error fetching measurement conversions:', data.message);
             }
         })
-    }
+        .catch(error => {
+            console.error('Error fetching measurement conversions:', error);
+        });
+}
+
+document.addEventListener('DOMContentLoaded', fetchMeasurementConversions);
+
+const measurementConverter = (itemCode, selectedMesUnit) => {
+    const gramQtyHolder = document.getElementById('gram-value-holder')
+    let notifier = new AWN()
+    measurementConversions.forEach((record) => {
+        if(record.item_code == itemCode){
+            switch(selectedMesUnit){
+                case 'litre':
+                    gramQtyHolder.value = record.selling_litre
+                    break;
+                case 'bottle':
+                    gramQtyHolder.value = record.selling_bottle
+                    break;
+                case 'kilogram':
+                    gramQtyHolder.value = record.selling_kilo
+                    break;
+                default:
+                    notifier.alert('invalid measure unit passed!')
+                    return
+            }
+        }
+    })
+}
 </script>
 
-<script>
-    // Make sure the bill values are displayed properly
-    document.addEventListener('DOMContentLoaded', function() {
-        // Set initial values and ensure visibility
-        const totalAmount = document.getElementById('total_amount');
-        const cashTendered = document.getElementById('total_cash_tendered');
-        const balanceFinal = document.getElementById('total_balance_final');
-        
-        // Force visibility and proper styling
-        totalAmount.style.display = 'block';
-        totalAmount.style.visibility = 'visible';
-        totalAmount.style.color = '#10b981';
-        
-        cashTendered.style.display = 'block';
-        cashTendered.style.visibility = 'visible';
-        cashTendered.style.color = '#10b981';
-        
-        balanceFinal.style.display = 'block';
-        balanceFinal.style.visibility = 'visible';
-        balanceFinal.style.color = '#f8fafc';
-        
-        // Update display every second to ensure values show
-        setInterval(function() {
-            if (totalAmount.value === '' || totalAmount.value === '0') {
-                totalAmount.value = '00.00';
-            }
-            if (cashTendered.value === '' || cashTendered.value === '0') {
-                cashTendered.value = '00.00';
-            }
-            if (balanceFinal.value === '' || balanceFinal.value === '0') {
-                balanceFinal.value = '00.00';
-            }
-        }, 1000);
-    });
-
-    // Override any existing balanceHandler to ensure it updates the display
-    function balanceHandler() {
-        const totalAmount = parseFloat(document.getElementById('total_amount').value) || 0;
-        const cashTendered = parseFloat(document.getElementById('total_cash_tendered').value) || 0;
-        const balance = cashTendered - totalAmount;
-        
-        document.getElementById('total_balance_final').value = balance.toFixed(2);
-    }
-</script>
 
 </html>
