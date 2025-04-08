@@ -44,7 +44,7 @@ function getSinhalaText($text) {
         'VOUCHER PAYMENT' => 'වවුචර ගෙවීම්',
         'CREDIT PAYMENT' => 'ණය ගෙවීම',
         'BILL PAYMENT' => 'බිල්පත් ගෙවීම',
-        'Ameena Chilies' => 'Ameena Chilies'
+        'RisiRasa Products' => 'RisiRasa Products'
     ];
     
     return $translations[$text] ?? $text;
@@ -369,7 +369,7 @@ if ($user_branch) {
     <div class="header">
         <div class="header-content">
             <!-- Logo and Company Name on same line -->
-            <span class="company-name">Ameena Chilies</span>
+            <span class="company-name">RisiRasa Products</span>
 
             <div style="display:flex">
                 <div class="logo-section">
@@ -381,7 +381,7 @@ if ($user_branch) {
                 
                 <!-- Sinhala text and address section -->
                 <div class="info-section">
-                    <div><span id="theme">The Best Spicy</span></div>
+                    <div><span id="theme"></span></div>
                     <?php if ($branch_details): ?>
                         <div class="address-section">
                             <!-- <span class="location-icon"></span> -->
@@ -672,7 +672,7 @@ if ($user_branch) {
         </p>
         <p>
             <strong style="font-size: 15px; font-weight:600;" class="<?= $language === 'sinhala' ? 'sinhala-text' : 'english-text' ?>">
-                <?= $language === 'sinhala' ? getSinhalaText('Eggland Super') : 'Eggland Super' ?>
+                <?= $language === 'sinhala' ? getSinhalaText('RisiRasa Products') : 'RisiRasa Products' ?>
             </strong>
         </p>
     </div>

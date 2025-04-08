@@ -124,9 +124,9 @@ if (isset($_GET['action'])) {
                 </div>
 
                 <div class="company-info">
-                    <span class="heading-sinhala">එග්ලන්ඩ් සුපර්</span>
-                    <span class="heading-english">Eggland Super</span>
-                    <span class="company-motto">හොඳම දේ අඩුම මිලට</span>
+                    <!-- <span class="heading-sinhala">එග්ලන්ඩ් සුපර්</span> -->
+                    <span class="heading-english">RisiRasa Products</span>
+                    <!-- <span class="company-motto">හොඳම දේ අඩුම මිලට</span> -->
                 </div>
             </div>
         </div>

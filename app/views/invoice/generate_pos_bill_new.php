@@ -381,17 +381,26 @@ if ($user_branch) {
             <!-- Logo and Company Name on same line -->
             <span class="company-name">RisiRasa Product</span>
 
-            <!-- Address and Phone information -->
-            <div class="info-section">
-                <?php if ($branch_details): ?>
-                    <div class="address-section">
-                        <span class="address">◎ <?= htmlspecialchars($branch_details['address']) ?></span>
-                    </div>
-                    <div class="phone-section">
-                        <span class="phone-icon">☎</span>
-                        <span class="telephone"><?= htmlspecialchars($branch_details['phone']) ?></span>
-                    </div>
-                <?php endif; ?>
+            <div style="display:flex">
+                <div class="logo-section">
+                    <?php if ($logoBase64): ?>
+                        <img id="logoImg" src="<?= $logoBase64 ?>" alt="RisiRasa Logo" class="company-logo">
+                    <?php endif; ?>
+                </div>
+                
+                <!-- Address and Phone information -->
+                <div class="info-section">
+                    <div><span id="theme"></span></div>
+                    <?php if ($branch_details): ?>
+                        <div class="address-section">
+                            <span class="address">◎ <?= htmlspecialchars($branch_details['address']) ?></span>
+                        </div>
+                        <div class="phone-section">
+                            <span class="phone-icon">☎</span>
+                            <span class="telephone"><?= htmlspecialchars($branch_details['phone']) ?></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
         <div class="header-line"></div>

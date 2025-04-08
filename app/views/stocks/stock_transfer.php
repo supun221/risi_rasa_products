@@ -43,7 +43,7 @@ if($user_role === 'admin'){
     <!-- upper ribbon holds currenty signed in user information -->
     <div class="st-upper-ribbon">
         <div class="st-page-title">
-            <span class="st-title-main">Risi Rasa Products</span>
+            <span class="st-title-main">RisiRasa Products</span>
             <span class="st-title-sub">Stock Transferring</span>
         </div>
 

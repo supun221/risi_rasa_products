@@ -7,6 +7,19 @@ function formatAmount($amount) {
     return number_format((float)$amount, 2, '.', ',');
 }
 
+// Function to convert image to base64
+function getBase64Image($imagePath) {
+    if (file_exists($imagePath)) {
+        $imageData = file_get_contents($imagePath);
+        return 'data:image/png;base64,' . base64_encode($imageData);
+    }
+    return false;
+}
+
+// Get logo as base64
+$logoPath = "images/ameena_logo.png";
+$logoBase64 = getBase64Image($logoPath);
+
 // Get invoice number from query parameter
 $invoiceNumber = isset($_GET['invoice']) ? $_GET['invoice'] : '';
 
@@ -56,7 +69,7 @@ try {
     if ($hasChequeNumberColumn) {
         error_log("Invoice cheque number: " . ($invoice['cheque_number'] ?? 'NULL'));
     }
-    
+
     // Fetch invoice items
     $stmt = $conn->prepare("
         SELECT * FROM pos_sale_items WHERE sale_id = ?
@@ -78,7 +91,7 @@ try {
     // Format invoice date
     $invoiceDate = date('Y-m-d', strtotime($invoice['sale_date']));
     $invoiceTime = date('h:i A', strtotime($invoice['sale_date']));
-    
+
     // Payment method display text - ensure it's case insensitive and has a fallback
     $paymentMethodMap = [
         'cash' => 'Cash',
@@ -88,7 +101,7 @@ try {
         'advance' => 'Advance',
         'cheque' => 'Cheque'
     ];
-    
+
     // Get payment method and ensure it's not null (use lowercase for comparison)
     $paymentMethod = strtolower($invoice['payment_method'] ?? '');
     
@@ -99,7 +112,7 @@ try {
         // Get the display text from map or use the original value
         $paymentMethodText = $paymentMethodMap[$paymentMethod] ?? ucfirst($paymentMethod);
     }
-    
+
     // Add cheque number text if payment method is cheque
     if ($paymentMethod == 'cheque') {
         if ($hasChequeNumberColumn && !empty($invoice['cheque_number'])) {
@@ -114,7 +127,6 @@ try {
             $paymentStmt->bind_param('s', $invoiceNumber);
             $paymentStmt->execute();
             $paymentResult = $paymentStmt->get_result();
-            
             if ($paymentResult && $paymentRow = $paymentResult->fetch_assoc()) {
                 if (!empty($paymentRow['cheque_num'])) {
                     $paymentMethodText .= ' #' . $paymentRow['cheque_num'];
@@ -122,12 +134,11 @@ try {
             }
         }
     }
-
 } catch (Exception $e) {
     echo "<div style='color:red; padding:20px; text-align:center;'>Error: " . $e->getMessage() . "</div>";
     exit;
 }
-?>
+?>          
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -154,14 +165,20 @@ try {
             margin: 0 auto;
         }
         .header {
-            text-align: center;
+            text-align: left;
             margin-bottom: 10px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
         }
         .logo {
-            max-width: 60mm;
+            max-width: 30mm;
             height: auto;
-            margin: 0 auto 5px;
-            display: block;
+            margin-right: 5px;
+        }
+        .company-details {
+            display: inline-block;
+            text-align: left;
         }
         .company-name {
             font-size: 14px;
@@ -261,10 +278,15 @@ try {
     <div class="receipt">
         <!-- Header Section -->
         <div class="header">
-            <div class="company-name"><?php echo $companyName; ?></div>
-            <div class="company-info"><?php echo $companyAddress; ?></div>
-            <div class="company-info">Tel: <?php echo $companyPhone; ?></div>
-            <div class="company-info">Email: <?php echo $companyEmail; ?></div>
+            <?php if ($logoBase64): ?>
+                <img src="<?= $logoBase64 ?>" alt="RisiRasa Logo" class="logo">
+            <?php endif; ?>
+            <div class="company-details">
+                <div class="company-name"><?php echo $companyName; ?></div>
+                <div class="company-info"><?php echo $companyAddress; ?></div>
+                <div class="company-info">Tel: <?php echo $companyPhone; ?></div>
+                <div class="company-info">Email: <?php echo $companyEmail; ?></div>
+            </div>
         </div>
         
         <div class="title">SALES INVOICE</div>

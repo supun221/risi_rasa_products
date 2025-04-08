@@ -252,7 +252,7 @@ $totalAmount = $netAmount + $transportFee;
                 <div class="from-to">
                     <div class="from">
                         <strong><?= $language === 'sinhala' ? getSinhalaText('From:') : 'From:' ?></strong><br>
-                        Ameena Chilies<br>
+                        RisiRasa Products<br>
                         <?= htmlspecialchars($userBranchDetails['address'] ?? '') ?><br>
                         <?= htmlspecialchars($userBranchDetails['phone'] ?? '') ?>
                     </div>

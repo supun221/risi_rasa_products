@@ -814,7 +814,7 @@ function fetchStockTransferItemsUpdateInventory(
             <td>
               ${
                 item.state === "not_added"
-                  ? `<button class='st-info-op-btn add-stock-btn' data-stock-id='${item.stock_id}' data-available-stock='${item.num_of_qty}' data-supplier='Ameena Chillies' data-transfer-id='${item.id}' data-stock-transfer-id='${stockTransferId}'>Add</button>
+                  ? `<button class='st-info-op-btn add-stock-btn' data-stock-id='${item.stock_id}' data-available-stock='${item.num_of_qty}' data-supplier='Risi Rasa' data-transfer-id='${item.id}' data-stock-transfer-id='${stockTransferId}'>Add</button>
                   <button class='st-info-op-btn reject-stock-btn' onclick="showRejectTransferModal('${item.id}', '${item.stock_id}', '${item.item_barcode}', '${item.num_of_qty}')">Reject</button>
                   `
                   : ""
