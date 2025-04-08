@@ -1,5 +1,5 @@
 <?php
-$serverName="localhost:3309";
+$serverName="localhost";
 $dbUsername="root";
 $dbPassword="";
 $dbName="nexaraso_risi_rasa";
