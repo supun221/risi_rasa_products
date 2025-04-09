@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 
         // Check if user is a rep and redirect accordingly
         if ($_SESSION['job_role'] === 'rep') {
-            header("Location: ../views/rep/index.php");
+            header("Location: ../views/Rep/index.php");
             exit();
         } else {
             // Redirect to regular dashboard for other roles
