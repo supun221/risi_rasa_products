@@ -68,22 +68,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = $stmt->get_result();
         
         if ($result->num_rows > 0) {
-            // Update existing advance payment
+            // Customer has existing advance payment - get current amount for response
             $existing = $result->fetch_assoc();
             $new_amount = $existing['net_amount'] + $payment_amount;
-            $bill_number = $existing['advance_bill_number'];
             
-            // Update branch along with other fields
+            // IMPORTANT: Always use the new bill number from the form
+            // Insert a new record with the NEW bill number
             $stmt = $conn->prepare("
-                UPDATE advance_payments 
-                SET net_amount = ?, payment_type = ?, reason = CONCAT(IFNULL(reason, ''), '\n', ?), print_bill = ?, branch = ?
-                WHERE id = ?
+                INSERT INTO advance_payments 
+                (customer_id, customer_name, payment_type, reason, net_amount, print_bill, advance_bill_number, branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
-            $stmt->bind_param("dssiis", $new_amount, $payment_type, $reason, $print_bill, $branch, $existing['id']);
+            $stmt->bind_param("isssdiss", $customer_id, $customer_name, $payment_type, $reason, $payment_amount, $print_bill, $advance_bill_number, $branch);
             $stmt->execute();
             
-            $response['message'] = 'Advance payment updated successfully';
-            $response['bill_number'] = $bill_number;
+            $response['message'] = 'Advance payment saved successfully';
+            $response['bill_number'] = $advance_bill_number; // Use the new bill number
             $response['new_amount'] = $new_amount;
         } else {
             // Insert new advance payment

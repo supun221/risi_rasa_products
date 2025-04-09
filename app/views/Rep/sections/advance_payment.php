@@ -357,7 +357,8 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.success && response.has_advance) {
                     $('#customer-advance-display').text(parseFloat(response.amount).toFixed(2));
-                    $('#advance_bill_number').val(response.bill_number);
+                    // Don't set advance_bill_number from existing payment to avoid duplicates
+                    // Keep the newly generated bill number for this transaction
                 } else {
                     $('#customer-advance-display').text('0.00');
                 }
@@ -417,22 +418,42 @@ $(document).ready(function() {
                         text: response.message,
                         showConfirmButton: true
                     }).then((result) => {
-                        // Show refreshing message
-                        Swal.fire({
-                            title: 'Refreshing...',
-                            text: 'Updating system with new advance payment',
-                            icon: 'info',
-                            allowOutsideClick: false,
-                            showConfirmButton: false,
-                            willOpen: () => {
-                                Swal.showLoading();
+                        // Get a new bill number via AJAX before refreshing
+                        $.ajax({
+                            url: 'process/get_new_advance_bill_number.php',
+                            type: 'GET',
+                            dataType: 'json',
+                            success: function(billResponse) {
+                                if (billResponse.success) {
+                                    // Update the bill number in the form
+                                    $('#advance_bill_number').val(billResponse.bill_number);
+                                }
+                                
+                                // Reset the form except customer info
+                                $('#payment_amount').val('');
+                                $('#payment_type').val('');
+                                $('#reason').val('');
+                                
+                                // Update the displayed advance amount
+                                $('#customer-advance-display').text(parseFloat(response.new_amount).toFixed(2));
+                                
+                                // Reset button
+                                $('#advance-payment-form button[type="submit"]').html('<i class="fas fa-save mr-1"></i> Save Payment').prop('disabled', false);
+                                
+                                // Show success notification
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Ready for Next Transaction',
+                                    text: 'New advance bill number generated.',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                            },
+                            error: function() {
+                                // If getting new bill number fails, just refresh the page
+                                window.location.reload();
                             }
                         });
-                        
-                        // Refresh the page after a short delay
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
                     });
                 } else {
                     Swal.fire({

@@ -16,24 +16,40 @@ if (isset($_GET['customer_id']) && !empty($_GET['customer_id'])) {
     $customer_id = (int)$_GET['customer_id'];
     
     try {
-        // Prepare and execute query to check for existing advance payment
+        // Get customer advance amount from customers table
         $stmt = $conn->prepare("
-            SELECT advance_bill_number, net_amount 
-            FROM advance_payments 
-            WHERE customer_id = ? 
-            ORDER BY created_at DESC 
-            LIMIT 1
+            SELECT advance_amount 
+            FROM customers 
+            WHERE id = ?
         ");
         $stmt->bind_param("i", $customer_id);
         $stmt->execute();
         $result = $stmt->get_result();
         
         if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
+            $customer = $result->fetch_assoc();
             
-            $response['has_advance'] = true;
-            $response['amount'] = $row['net_amount'];
-            $response['bill_number'] = $row['advance_bill_number'];
+            // Now get the latest bill number for reference (optional)
+            $stmt = $conn->prepare("
+                SELECT advance_bill_number 
+                FROM advance_payments 
+                WHERE customer_id = ? 
+                ORDER BY created_at DESC 
+                LIMIT 1
+            ");
+            $stmt->bind_param("i", $customer_id);
+            $stmt->execute();
+            $bill_result = $stmt->get_result();
+            $bill_number = '';
+            
+            if ($bill_result->num_rows > 0) {
+                $bill_row = $bill_result->fetch_assoc();
+                $bill_number = $bill_row['advance_bill_number'];
+            }
+            
+            $response['has_advance'] = $customer['advance_amount'] > 0;
+            $response['amount'] = $customer['advance_amount'];
+            $response['bill_number'] = $bill_number;
         }
         
         $response['success'] = true;
