@@ -80,11 +80,11 @@ foreach ($stock_items as $item) {
                             <i class="fas fa-plus-circle"></i> Add to Lorry Stock
                         </a>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <!-- <div class="col-md-6 mb-3">
                         <a href="#" class="btn btn-info btn-block stock-action-btn" id="retrieve-stock-btn">
                             <i class="fas fa-dolly"></i> Retrieve from Lorry
                         </a>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>

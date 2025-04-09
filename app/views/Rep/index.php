@@ -174,10 +174,10 @@ try {
             </div>
             
             <!-- Retrieve from Lorry Tile -->
-            <div class="tile" id="retrieve-from-lorry-tile" data-target="retrieve-section" data-file="retrieve_stock">
+            <!-- <div class="tile" id="retrieve-from-lorry-tile" data-target="retrieve-section" data-file="retrieve_stock">
                 <i class="fas fa-dolly"></i>
                 <div class="tile-title">Sales Stock</div>
-            </div>
+            </div> -->
             
             <!-- Advance Payment Tile -->
             <div class="tile" id="advance-payment-tile" data-target="advance-payment-section" data-file="advance_payment">
