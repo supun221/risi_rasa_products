@@ -12,6 +12,31 @@ $user_name = $_SESSION['username'];
 $user_role = $_SESSION['job_role'];
 $user_branch = $_SESSION['store'];
 
+// Fetch user permissions
+$perm_query = "SELECT * FROM user_permissions WHERE username = ?";
+$perm_stmt = $db_conn->prepare($perm_query);
+$perm_stmt->bind_param("s", $user_name);
+$perm_stmt->execute();
+$perm_result = $perm_stmt->get_result();
+$permissions = $perm_result->fetch_assoc();
+
+if (!$permissions) {
+    // Default permissions if none exist
+    $permissions = [
+        'can_edit_price' => 0,
+        'can_edit_discount' => 0,
+        'can_edit_free_issue' => 0,
+        'can_view_wholesale' => 0,
+        'can_view_scg_price' => 0,
+        'can_view_cost' => 0,
+        'can_view_rem_stock' => 0
+    ];
+}
+if ($user_role === 'admin') {
+    $permissions = array_map(function () {
+        return 1;
+    }, $permissions);
+}
 if (!$user_name && !$user_branch) {
     header("Location: ../unauthorized/unauthorized_access.php");
     exit();
@@ -61,7 +86,8 @@ if (is_array($results)) {
     .modal {
         display: none;
         position: fixed;
-        z-index: 1005; /* Increased z-index */
+        z-index: 1005;
+        /* Increased z-index */
         left: 0;
         top: 0;
         width: 100%;
@@ -196,103 +222,110 @@ if (is_array($results)) {
         cursor: pointer;
     }
 
-.dropdown-item:hover {
-    background-color: #f0f0f0; 
-}
+    .dropdown-item:hover {
+        background-color: #f0f0f0;
+    }
 
-.modal-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1005; /* Increased z-index */
-  }
-  
-  .modal-content {
-    background-color: white;
-    border-radius: 5px;
-    width: 39%;
-    height: 90%;
-    max-width: 1200px;
-    max-height: 90vh;
-    position: relative;
-    overflow: hidden;
-    padding: 10;
-  }
-  
-  .close-modal {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 1007; /* One higher than modal content */
-    color: #333;
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+    .modal-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1005;
+        /* Increased z-index */
+    }
 
-  /* Added new styles to ensure elements stay on top of modals */
-.bill-values-container-main {
-    position: relative; 
-    z-index: 1000;
-}
+    .modal-content {
+        background-color: white;
+        border-radius: 5px;
+        width: 39%;
+        height: 90%;
+        max-width: 1200px;
+        max-height: 90vh;
+        position: relative;
+        overflow: hidden;
+        padding: 10;
+    }
 
-.opt-btn {
-    position: relative;
-    z-index: 1000;
-}
+    .close-modal {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 24px;
+        cursor: pointer;
+        z-index: 1007;
+        /* One higher than modal content */
+        color: #333;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-.opt-menu {
-    z-index: 1000;
-}
+    /* Added new styles to ensure elements stay on top of modals */
+    .bill-values-container-main {
+        position: relative;
+        z-index: 1000;
+    }
 
-/* Updating modal z-index to be lower than our key elements */
-.modal-container {
-    z-index: 1005; /* Increased z-index */
-}
+    .opt-btn {
+        position: relative;
+        z-index: 1000;
+    }
 
-.modal {
-    z-index: 1005; /* Increased z-index */
-}
+    .opt-menu {
+        z-index: 1000;
+    }
 
-.multiple-item-selector-modal,
-.short-cut-keys-modal,
-.bill-cancellation-modal,
-.attendance-mark-modal,
-.mes-unit-modal {
-    z-index: 1005; /* Increased z-index for all modals */
-}
+    /* Updating modal z-index to be lower than our key elements */
+    .modal-container {
+        z-index: 1005;
+        /* Increased z-index */
+    }
 
-/* Make sure modal content is above the overlay */
-.modal-content,
-.bc-form-area,
-.mis-modal-area {
-    position: relative;
-    z-index: 1006; /* One higher than the modal background */
-}
+    .modal {
+        z-index: 1005;
+        /* Increased z-index */
+    }
 
-/* Close buttons should be above modal content */
-.close,
-.close-modal,
-.bc-close-btn,
-.mis-modal-close {
-    z-index: 1007; /* One higher than modal content */
-}
+    .multiple-item-selector-modal,
+    .short-cut-keys-modal,
+    .bill-cancellation-modal,
+    .attendance-mark-modal,
+    .mes-unit-modal {
+        z-index: 1005;
+        /* Increased z-index for all modals */
+    }
+
+    /* Make sure modal content is above the overlay */
+    .modal-content,
+    .bc-form-area,
+    .mis-modal-area {
+        position: relative;
+        z-index: 1006;
+        /* One higher than the modal background */
+    }
+
+    /* Close buttons should be above modal content */
+    .close,
+    .close-modal,
+    .bc-close-btn,
+    .mis-modal-close {
+        z-index: 1007;
+        /* One higher than modal content */
+    }
 </style>
 
 <body>
-<?php include '../customers/add_customer.php';?>
+    <?php include '../customers/add_customer.php'; ?>
     <!-- bill cancel confirmation -->
     <div class="bill-cancellation-modal" id="bill-cancellation-modal">
         <div class="bc-form-area">
@@ -567,7 +600,7 @@ if (is_array($results)) {
             </div>
 
             <!-- measurement unit changer -->
-             <div class="mes-unit-modal" id="mes-unit-modal">
+            <div class="mes-unit-modal" id="mes-unit-modal">
                 <table>
                     <tr onclick="setMeasurementUnit('litre')">
                         <td>Litre</td>
@@ -579,7 +612,7 @@ if (is_array($results)) {
                         <td>Kilogram</td>
                     </tr>
                 </table>
-             </div>
+            </div>
 
             <style>
                 .credit-info-container {
@@ -655,7 +688,7 @@ if (is_array($results)) {
                     }
                 });
 
-             
+
                 document.querySelector('.eland-pos-button i.fa-credit-card').closest('button').addEventListener('click', openCreditLimitModal);
             </script>
             <!-- bill related fees -->
@@ -741,7 +774,7 @@ if (is_array($results)) {
                             <tr>
                                 <td>
                                     <!-- onchange="getPossibleBarcodeCombinations('<?php echo $user_branch; ?>')" -->
-                                    <input type="text" id="barcode-input" class="barcode-input" placeholder="Enter barcode" >
+                                    <input type="text" id="barcode-input" class="barcode-input" placeholder="Enter barcode">
                                     <div id="suggestion-box"></div>
                                 </td>
                                 <td>
@@ -750,12 +783,12 @@ if (is_array($results)) {
                                 <td>
                                     <input type="number" id="quantity" class="barcode-quantity" value="1" oninput="updatePriceAndAddToCart()" onkeyup="itemPromotionCheck()">
                                 </td>
-                                <td>
-                                    <input type="text" id="our-price" class="barcode-our-price">
+                                <td style="width: 80px;">
+                                    <input type="text" id="our-price" class="barcode-our-price" oninput="tempPriceFieldHandler()" onchange="validPriceMonitor()" <?php echo $permissions['can_edit_price'] ? '' : 'readonly'; ?>>
                                 </td>
-                                <td>
-                                    <input type="text" id="bcode_discount" class="barcode-tb-inp">
-                                    <input type="text" id="bcode_discount_amount" class="barcode-tb-inp" value="0" hidden>
+                                <td style="width: 80px;">
+                                    <input type="text" id="bcode_discount" placeholder="%" oninput="disocuntPercentageCalibrator()" class="barcode-tb-inp" <?php echo $permissions['can_edit_discount'] ? '' : 'readonly'; ?>>
+                                    <input type="text" id="bcode_discount_amount" class="barcode-tb-inp" oninput="disocuntAmountCalibrator()" <?php echo $permissions['can_edit_discount'] ? '' : 'readonly'; ?>>
                                 </td>
                                 <td>
                                     <input type="text" id="bcode_fi" class="barcode-tb-inp">
@@ -782,7 +815,7 @@ if (is_array($results)) {
                         const gramQtyHolder = document.getElementById('gram-value-holder')
                         const barcodeInput = document.getElementById("barcode-input").value.trim();
                         let quantity = parseFloat(document.getElementById("quantity").value) || 1;
-                        if(mesUnit.value != "null"){
+                        if (mesUnit.value != "null") {
                             quantity = (parseFloat(gramQtyHolder.value) * quantity) / 1000
                         }
                         const discount = parseInt(document.getElementById("bcode_discount").value) || 0;
@@ -803,7 +836,7 @@ if (is_array($results)) {
                         // } else {
                         //     processAddToCart(quantity, discount, free_issue, priceValue);
                         // }
-                            processAddToCart(quantity, discount, free_issue, priceValue);
+                        processAddToCart(quantity, discount, free_issue, priceValue);
                     }
 
                     const handleInsertKeyPress = (products) => {
@@ -892,9 +925,9 @@ if (is_array($results)) {
                                         if (data.products.length === 1) {
                                             const product = data.products[0];
                                             currentProduct = product; // Set the current product
-                                            if(currentProduct.unit === 'coc_oil(kg)'){
+                                            if (currentProduct.unit === 'coc_oil(kg)') {
                                                 showMesUnitModal();
-                                            }else{
+                                            } else {
                                                 updateProductUI(product); // Update the input fields
                                                 resolve(); // Resolve the Promise
                                             }
@@ -943,13 +976,11 @@ if (is_array($results)) {
                     function updateProductUIEnhanced(product) {
                         let currentPrice = 0;
                         const invoiceType = getSelectedInvoiceType()
-                        if(invoiceType === 'retail'){
+                        if (invoiceType === 'retail') {
                             currentPrice = product.our_price
-                        }
-                        else if(invoiceType === 'wholesale'){
-                            currentPrice = product.wholesale_price  
-                        }
-                        else{
+                        } else if (invoiceType === 'wholesale') {
+                            currentPrice = product.wholesale_price
+                        } else {
                             currentPrice = product.max_retail_price
                         }
 
@@ -986,19 +1017,19 @@ if (is_array($results)) {
                     })
 
                     function addToCart(product) {
-                        let cart = loadCartState()
+                        let cart = loadCartState();
                         if (!Array.isArray(cart)) {
                             cart = [];
                         }
 
                         let notifier = new AWN();
                         const mesUnit = document.getElementById("mes-unit-name");
-                        const invoiceType = getSelectedInvoiceType()
+                        const invoiceType = getSelectedInvoiceType();
                         const discountAmountHolder = document.getElementById("bcode_discount_amount");
-                        const discountAmount = parseFloat(discountAmountHolder.value)
+                        const discountAmount = parseFloat(discountAmountHolder.value);
 
                         if (parseInt(product.available_stock) < 0) {
-                            notifier.warning("Remaining stock are below than zero!")
+                            notifier.warning("Remaining stock are below than zero!");
                         }
 
                         const quantityInput = document.getElementById("quantity");
@@ -1023,41 +1054,59 @@ if (is_array($results)) {
                                 finalPrice = product.unitPrice || product.our_price;
                             }
                         } else if (invoiceType === "wholesale") {
-                            finalPrice = product.unitPrice
-                            isPromotion = false
+                            finalPrice = product.unitPrice;
+                            isPromotion = false;
                         } else {
-                            notifier.alert("Feature not available")
-                            return
+                            notifier.alert("Feature not available");
+                            return;
                         }
-                        const wholesalePrice = document.getElementById("alt-wholesale");
-                        const mrp = document.getElementById("alt-mrp");
-                        const remStock = document.getElementById("rem-stock");
-                        const itemName = document.getElementById("info-item");
+
+                        // Safely get DOM elements or create defaults
+                        const wholesalePrice = document.getElementById("alt-wholesale") || {
+                            textContent: ''
+                        };
+                        const mrp = document.getElementById("alt-mrp") || {
+                            textContent: ''
+                        };
+                        const remStock = document.getElementById("rem-stock") || {
+                            textContent: ''
+                        };
+                        const itemName = document.getElementById("info-item") || {
+                            textContent: ''
+                        };
                         const cartTableBody = document.querySelector("#pos-cart-tb tbody");
                         const cartItemCount = Array.from(cartTableBody.rows).length;
                         const rowId = `${product.stock_id}_${product.itemcode}`;
                         const existingRow = Array.from(cartTableBody.rows).find(
                             (row) => row.dataset.rowId === rowId
                         );
-                        const selectedProductImage = document.getElementById("selected-product-image");
-                        const altOurPrice = document.getElementById("alt-our-price");
-                        const scgPrice = document.getElementById("alt-scg-price");
-                        const mrpPrice = document.getElementById("alt-mrprice");
+                        const selectedProductImage = document.getElementById("selected-product-image") || {
+                            src: ''
+                        };
+                        const altOurPrice = document.getElementById("alt-our-price") || {
+                            textContent: ''
+                        };
+                        const scgPrice = document.getElementById("alt-scg-price") || {
+                            textContent: ''
+                        };
+                        const mrpPrice = document.getElementById("alt-mrprice") || {
+                            textContent: ''
+                        };
 
-                        // Update product details
-                        wholesalePrice.textContent = parseFloat(product.wholesale_price).toFixed(2);
-                        mrp.textContent = parseFloat(product.cost_price).toFixed(2);
-                        remStock.textContent = parseInt(product.available_stock)
-                        itemName.textContent = product.product_name;
-                        selectedProductImage.src = `../inventory/${product.image_path}`;
-                        altOurPrice.textContent = parseFloat(product.our_price).toFixed(2);
-                        scgPrice.textContent = parseFloat(product.super_customer_price).toFixed(2);
-                        mrpPrice.textContent = parseFloat(product.max_retail_price).toFixed(2);
+                        // Update product details only if elements exist
+                        if (wholesalePrice) wholesalePrice.textContent = parseFloat(product.wholesale_price).toFixed(2);
+                        if (mrp) mrp.textContent = parseFloat(product.cost_price).toFixed(2);
+                        if (remStock) remStock.textContent = parseInt(product.available_stock);
+                        if (itemName) itemName.textContent = product.product_name;
+                        if (selectedProductImage) selectedProductImage.src = `../inventory/${product.image_path}`;
+                        if (altOurPrice) altOurPrice.textContent = parseFloat(product.our_price).toFixed(2);
+                        if (scgPrice) scgPrice.textContent = parseFloat(product.super_customer_price).toFixed(2);
+                        if (mrpPrice) mrpPrice.textContent = parseFloat(product.max_retail_price).toFixed(2);
 
                         if (existingRow) {
                             const qtyCell = existingRow.querySelector(`.qty_${rowId}`);
                             const subtotalCell = existingRow.querySelector(`.subtotal_${rowId}`);
-                            const newQty = parseFloat(qtyCell.value) + quantity; // Increment existing quantity
+                            const newQty = parseFloat(qtyCell.value) + quantity;
                             qtyCell.value = newQty;
                             subtotalCell.textContent = (newQty * finalPrice).toFixed(2);
                         } else {
@@ -1082,42 +1131,38 @@ if (is_array($results)) {
       )`
                             );
 
-
-                            const grossTotal = parseFloat(quantity * finalPrice)
+                            const grossTotal = parseFloat(quantity * finalPrice);
                             let subtotal = 0;
                             if (product.discount > 0) {
-                                const discountFee = parseFloat(grossTotal * (product.discount / 100))
-                                subtotal = parseFloat(grossTotal - discountFee)
+                                const discountFee = parseFloat(grossTotal * (product.discount / 100));
+                                subtotal = parseFloat(grossTotal - discountFee);
                             } else {
-                                subtotal = grossTotal
+                                subtotal = grossTotal;
                             }
 
                             newRow.innerHTML = `
-            <td class="item_no_${rowId}">${cartItemCount + 1}</td>
-            <td class="stock_id_${rowId}">${product.stock_id}</td>
-            <td class="item_id_${rowId}">${product.barcode}</td>
-            <td style="text-transform: capitalize;" class="product_name_${rowId}">${product.product_name} ${mesUnit.value != "null" ? ` (${mesUnit.value})` : ""}</td>
-            <td class="mrp_${rowId}">${parseFloat(
-      product.max_retail_price
-    ).toFixed(2)}</td>
-            <td class="unit_price_${rowId}">${parseFloat(finalPrice).toFixed(
-      2
-    )} ${isPromotion ? '<i class="fa-solid fa-certificate"></i>' : ""} </td>
-            <td><input type="number" class="qty-indicator qty_${rowId}" value="${product.quantity || quantity}" min="1" oninput="updateCartTotal()" readonly/></td>
-            <td class="discount_${rowId}">
-                <input type="text" class="disc-percentage" id="discount_val_${rowId}" value="${product.discount}" onkeyup="updateCartTotal()" readonly/>
-                <input type="text" class="disc-percentage" id="discount_amount_val_${rowId}" value="${product.discountAmount || parseFloat(discountAmountHolder.value) || 0}" hidden/>
-            </td>
-            <td class="free_${rowId}">${product.freeIssueCount}</td>
-            <td class="subtotal_${rowId}">${subtotal.toFixed(2)}</td>
-     <td><i class="fa-solid fa-delete-left" onclick="removeFromCart('${rowId}')" style="color: crimson;"></i></td>`;
+      <td class="item_no_${rowId}">${cartItemCount + 1}</td>
+      <td class="stock_id_${rowId}">${product.stock_id}</td>
+      <td class="item_id_${rowId}">${product.barcode}</td>
+      <td style="text-transform: capitalize;" class="product_name_${rowId}">${product.product_name} ${mesUnit.value != "null" ? ` (${mesUnit.value})` : ""}</td>
+      <td class="mrp_${rowId}">${parseFloat(product.max_retail_price).toFixed(2)}</td>
+      <td class="unit_price_${rowId}">${parseFloat(finalPrice).toFixed(2)} ${isPromotion ? '<i class="fa-solid fa-certificate"></i>' : ""} </td>
+      <td><input type="number" class="qty-indicator qty_${rowId}" value="${product.quantity || quantity}" min="1" oninput="updateCartTotal()" readonly/></td>
+      <td class="discount_${rowId}">
+          <input type="text" class="disc-percentage" id="discount_val_${rowId}" value="${product.discount}" onkeyup="updateCartTotal()" readonly/>
+          <input type="text" class="disc-percentage" id="discount_amount_val_${rowId}" value="${product.discountAmount || parseFloat(discountAmountHolder.value) || 0}" hidden/>
+      </td>
+      <td class="free_${rowId}">${product.freeIssueCount}</td>
+      <td class="subtotal_${rowId}">${subtotal.toFixed(2)}</td>
+      <td><i class="fa-solid fa-delete-left" onclick="removeFromCart('${rowId}')" style="color: crimson;"></i></td>`;
+
                             cartTableBody.appendChild(newRow);
                         }
 
                         const currentRow = Array.from(cartTableBody.rows).find(
                             (row) => row.dataset.rowId === rowId
                         );
-                        const currentQty = parseFloat(document.querySelector(`.qty_${rowId}`).value)
+                        const currentQty = parseFloat(document.querySelector(`.qty_${rowId}`).value);
                         const existingItem = cart.find((item) => item.id === product.id);
                         if (existingItem) {
                             existingItem.quantity;
@@ -1128,20 +1173,178 @@ if (is_array($results)) {
                                 discountAmount: discountAmount
                             });
                         }
-                        saveCartState(cart)
+                        saveCartState(cart);
 
                         if (parseFloat(discountAmountHolder.value) > 0) {
-                            notifier.info(`Discount: ${parseFloat(discountAmountHolder.value)} off!`)
-                            discountAmountHolder.value = 0
+                            notifier.info(`Discount: ${parseFloat(discountAmountHolder.value)} off!`);
+                            discountAmountHolder.value = 0;
                         }
 
                         itemCounter();
                         updateCartTotal();
                         if (product.freeIssueCount > 0) {
-                            notifier.info(`Promotion: ${product.freeIssueCount} free items!`)
+                            notifier.info(`Promotion: ${product.freeIssueCount} free items!`);
                         }
-                        mesUnit.value = "null"
+                        mesUnit.value = "null";
                     }
+
+                    //                 function addToCart(product) {
+                    //                     let cart = loadCartState()
+                    //                     if (!Array.isArray(cart)) {
+                    //                         cart = [];
+                    //                     }
+
+                    //                     let notifier = new AWN();
+                    //                     const mesUnit = document.getElementById("mes-unit-name");
+                    //                     const invoiceType = getSelectedInvoiceType()
+                    //                     const discountAmountHolder = document.getElementById("bcode_discount_amount");
+                    //                     const discountAmount = parseFloat(discountAmountHolder.value)
+
+                    //                     if (parseInt(product.available_stock) < 0) {
+                    //                         notifier.warning("Remaining stock are below than zero!")
+                    //                     }
+
+                    //                     const quantityInput = document.getElementById("quantity");
+                    //                     const quantity = parseFloat(quantityInput.value) || 1; // Get quantity from input, default to 1 if invalid
+                    //                     let finalPrice = 0;
+                    //                     let isPromotion = false;
+
+                    //                     if (invoiceType === "retail") {
+                    //                         const promoStartDate = new Date(product.start_date);
+                    //                         const promoEndDate = new Date(product.end_date);
+                    //                         const currentDate = new Date();
+
+                    //                         promoStartDate.setHours(0, 0, 0, 0);
+                    //                         promoEndDate.setHours(23, 59, 59, 999);
+                    //                         currentDate.setHours(0, 0, 0, 0);
+
+                    //                         if (currentDate >= promoStartDate && currentDate <= promoEndDate) {
+                    //                             isPromotion = true;
+                    //                             finalPrice = product.deal_price;
+                    //                         } else {
+                    //                             isPromotion = false;
+                    //                             finalPrice = product.unitPrice || product.our_price;
+                    //                         }
+                    //                     } else if (invoiceType === "wholesale") {
+                    //                         finalPrice = product.unitPrice
+                    //                         isPromotion = false
+                    //                     } else {
+                    //                         notifier.alert("Feature not available")
+                    //                         return
+                    //                     }
+                    //                     const wholesalePrice = document.getElementById("alt-wholesale");
+                    //                     const mrp = document.getElementById("alt-mrp");
+                    //                     const remStock = document.getElementById("rem-stock");
+                    //                     const itemName = document.getElementById("info-item");
+                    //                     const cartTableBody = document.querySelector("#pos-cart-tb tbody");
+                    //                     const cartItemCount = Array.from(cartTableBody.rows).length;
+                    //                     const rowId = `${product.stock_id}_${product.itemcode}`;
+                    //                     const existingRow = Array.from(cartTableBody.rows).find(
+                    //                         (row) => row.dataset.rowId === rowId
+                    //                     );
+                    //                     const selectedProductImage = document.getElementById("selected-product-image");
+                    //                     const altOurPrice = document.getElementById("alt-our-price");
+                    //                     const scgPrice = document.getElementById("alt-scg-price");
+                    //                     const mrpPrice = document.getElementById("alt-mrprice");
+
+                    //                     // Update product details
+                    //                     wholesalePrice.textContent = parseFloat(product.wholesale_price).toFixed(2);
+                    //                     mrp.textContent = parseFloat(product.cost_price).toFixed(2);
+                    //                     remStock.textContent = parseInt(product.available_stock)
+                    //                     itemName.textContent = product.product_name;
+                    //                     selectedProductImage.src = `../inventory/${product.image_path}`;
+                    //                     altOurPrice.textContent = parseFloat(product.our_price).toFixed(2);
+                    //                     scgPrice.textContent = parseFloat(product.super_customer_price).toFixed(2);
+                    //                     mrpPrice.textContent = parseFloat(product.max_retail_price).toFixed(2);
+
+                    //                     if (existingRow) {
+                    //                         const qtyCell = existingRow.querySelector(`.qty_${rowId}`);
+                    //                         const subtotalCell = existingRow.querySelector(`.subtotal_${rowId}`);
+                    //                         const newQty = parseFloat(qtyCell.value) + quantity; // Increment existing quantity
+                    //                         qtyCell.value = newQty;
+                    //                         subtotalCell.textContent = (newQty * finalPrice).toFixed(2);
+                    //                     } else {
+                    //                         // Add new row for the product
+                    //                         const newRow = document.createElement("tr");
+                    //                         newRow.dataset.rowId = rowId;
+                    //                         newRow.dataset.remainingStock = product.available_stock;
+                    //                         newRow.dataset.productRealId = product.id;
+                    //                         newRow.dataset.ourPrice = finalPrice;
+                    //                         newRow.dataset.wholesalePrice = product.wholesale_price;
+                    //                         newRow.setAttribute(
+                    //                             "onclick",
+                    //                             `alternatePricePopulator(
+                    //     ${parseFloat(product.wholesale_price).toFixed(2)},
+                    //     ${parseFloat(product.cost_price).toFixed(2)},
+                    //     ${parseFloat(product.available_stock).toFixed(2)},
+                    //     '${product.product_name}',
+                    //     '${product.image_path}',
+                    //     ${parseFloat(product.our_price).toFixed(2)},
+                    //     ${parseFloat(product.super_customer_price).toFixed(2)},
+                    //     ${parseFloat(product.max_retail_price).toFixed(2)},
+                    //   )`
+                    //                         );
+
+
+                    //                         const grossTotal = parseFloat(quantity * finalPrice)
+                    //                         let subtotal = 0;
+                    //                         if (product.discount > 0) {
+                    //                             const discountFee = parseFloat(grossTotal * (product.discount / 100))
+                    //                             subtotal = parseFloat(grossTotal - discountFee)
+                    //                         } else {
+                    //                             subtotal = grossTotal
+                    //                         }
+
+                    //                         newRow.innerHTML = `
+                    //         <td class="item_no_${rowId}">${cartItemCount + 1}</td>
+                    //         <td class="stock_id_${rowId}">${product.stock_id}</td>
+                    //         <td class="item_id_${rowId}">${product.barcode}</td>
+                    //         <td style="text-transform: capitalize;" class="product_name_${rowId}">${product.product_name} ${mesUnit.value != "null" ? ` (${mesUnit.value})` : ""}</td>
+                    //         <td class="mrp_${rowId}">${parseFloat(
+                    //   product.max_retail_price
+                    // ).toFixed(2)}</td>
+                    //         <td class="unit_price_${rowId}">${parseFloat(finalPrice).toFixed(
+                    //   2
+                    // )} ${isPromotion ? '<i class="fa-solid fa-certificate"></i>' : ""} </td>
+                    //         <td><input type="number" class="qty-indicator qty_${rowId}" value="${product.quantity || quantity}" min="1" oninput="updateCartTotal()" readonly/></td>
+                    //         <td class="discount_${rowId}">
+                    //             <input type="text" class="disc-percentage" id="discount_val_${rowId}" value="${product.discount}" onkeyup="updateCartTotal()" readonly/>
+                    //             <input type="text" class="disc-percentage" id="discount_amount_val_${rowId}" value="${product.discountAmount || parseFloat(discountAmountHolder.value) || 0}" hidden/>
+                    //         </td>
+                    //         <td class="free_${rowId}">${product.freeIssueCount}</td>
+                    //         <td class="subtotal_${rowId}">${subtotal.toFixed(2)}</td>
+                    //  <td><i class="fa-solid fa-delete-left" onclick="removeFromCart('${rowId}')" style="color: crimson;"></i></td>`;
+                    //                         cartTableBody.appendChild(newRow);
+                    //                     }
+
+                    //                     const currentRow = Array.from(cartTableBody.rows).find(
+                    //                         (row) => row.dataset.rowId === rowId
+                    //                     );
+                    //                     const currentQty = parseFloat(document.querySelector(`.qty_${rowId}`).value)
+                    //                     const existingItem = cart.find((item) => item.id === product.id);
+                    //                     if (existingItem) {
+                    //                         existingItem.quantity;
+                    //                     } else {
+                    //                         cart.push({
+                    //                             ...product,
+                    //                             quantity: currentQty || 1,
+                    //                             discountAmount: discountAmount
+                    //                         });
+                    //                     }
+                    //                     saveCartState(cart)
+
+                    //                     if (parseFloat(discountAmountHolder.value) > 0) {
+                    //                         notifier.info(`Discount: ${parseFloat(discountAmountHolder.value)} off!`)
+                    //                         discountAmountHolder.value = 0
+                    //                     }
+
+                    //                     itemCounter();
+                    //                     updateCartTotal();
+                    //                     if (product.freeIssueCount > 0) {
+                    //                         notifier.info(`Promotion: ${product.freeIssueCount} free items!`)
+                    //                     }
+                    //                     mesUnit.value = "null"
+                    //                 }
 
                     // Automatically update the price and add to cart when quantity changes
                     function updatePriceAndAddToCart() {
@@ -1322,26 +1525,34 @@ if (is_array($results)) {
                             <span class="alt-price-val-visible" id="alt-our-price">00.00</span>
                             <!-- <button class="alt-toggle-btn" id="alt-wholesale-btn" onclick="alternateWholesale()">show</button> -->
                         </div>
-                        <div class="alt-price-box">
-                            <span class="alt-price-label">wholesale</span>
-                            <span class="alt-price-val" id="alt-wholesale">00.00</span>
-                            <button class="alt-toggle-btn" id="alt-wholesale-btn" onclick="alternateWholesale()">show</button>
-                        </div>
-                        <div class="alt-price-box">
-                            <span class="alt-price-label">SCG Price</span>
-                            <span class="alt-price-val" id="alt-scg-price">00.00</span>
-                            <button class="alt-toggle-btn" id="alt-scg-btn" onclick="alternateSCGP()">show</button>
-                        </div>
-                        <div class="alt-price-box">
-                            <span class="alt-price-label">cost</span>
-                            <span class="alt-price-val" id="alt-mrp">00.00</span>
-                            <button class="alt-toggle-btn" id="alt-mrp-btn" onclick="alternateMRP()">show</button>
-                        </div>
-                        <div class="alt-price-box">
-                            <span class="alt-price-label">rem. stock</span>
-                            <span class="alt-price-val" id="rem-stock">00.00</span>
-                            <button class="alt-toggle-btn" id="rem-stock-price-btn" onclick="alternateRemainingStock()">show</button>
-                        </div>
+                        <?php if ($permissions['can_view_wholesale']): ?>
+                            <div class="alt-price-box">
+                                <span class="alt-price-label">wholesale</span>
+                                <span class="alt-price-val" id="alt-wholesale">00.00</span>
+                                <button class="alt-toggle-btn" id="alt-wholesale-btn" onclick="alternateWholesale()">show</button>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($permissions['can_view_scg_price']): ?>
+                            <div class="alt-price-box">
+                                <span class="alt-price-label">SCG Price</span>
+                                <span class="alt-price-val" id="alt-scg-price">00.00</span>
+                                <button class="alt-toggle-btn" id="alt-scg-btn" onclick="alternateSCGP()">show</button>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($permissions['can_view_cost']): ?>
+                            <div class="alt-price-box">
+                                <span class="alt-price-label">cost</span>
+                                <span class="alt-price-val" id="alt-mrp">00.00</span>
+                                <button class="alt-toggle-btn" id="alt-mrp-btn" onclick="alternateMRP()">show</button>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($permissions['can_view_rem_stock']): ?>
+                            <div class="alt-price-box">
+                                <span class="alt-price-label">rem. stock</span>
+                                <span class="alt-price-val" id="rem-stock">00.00</span>
+                                <button class="alt-toggle-btn" id="rem-stock-price-btn" onclick="alternateRemainingStock()">show</button>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -1717,53 +1928,53 @@ if (is_array($results)) {
         localStorage.removeItem('shopping_cart')
     }
 
-var measurementConversions = [];
-const fetchMeasurementConversions = () => {
-    let notifier = new AWN()
-    fetch('fetch_measurement_convs.php')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === 'success') {
-                measurementConversions = data.data;
-                console.log('Measurement conversions loaded successfully:', measurementConversions);
-            } else {
-                console.error('Error fetching measurement conversions:', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching measurement conversions:', error);
-        });
-}
+    var measurementConversions = [];
+    const fetchMeasurementConversions = () => {
+        let notifier = new AWN()
+        fetch('fetch_measurement_convs.php')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    measurementConversions = data.data;
+                    console.log('Measurement conversions loaded successfully:', measurementConversions);
+                } else {
+                    console.error('Error fetching measurement conversions:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching measurement conversions:', error);
+            });
+    }
 
-document.addEventListener('DOMContentLoaded', fetchMeasurementConversions);
+    document.addEventListener('DOMContentLoaded', fetchMeasurementConversions);
 
-const measurementConverter = (itemCode, selectedMesUnit) => {
-    const gramQtyHolder = document.getElementById('gram-value-holder')
-    let notifier = new AWN()
-    measurementConversions.forEach((record) => {
-        if(record.item_code == itemCode){
-            switch(selectedMesUnit){
-                case 'litre':
-                    gramQtyHolder.value = record.selling_litre
-                    break;
-                case 'bottle':
-                    gramQtyHolder.value = record.selling_bottle
-                    break;
-                case 'kilogram':
-                    gramQtyHolder.value = record.selling_kilo
-                    break;
-                default:
-                    notifier.alert('invalid measure unit passed!')
-                    return
+    const measurementConverter = (itemCode, selectedMesUnit) => {
+        const gramQtyHolder = document.getElementById('gram-value-holder')
+        let notifier = new AWN()
+        measurementConversions.forEach((record) => {
+            if (record.item_code == itemCode) {
+                switch (selectedMesUnit) {
+                    case 'litre':
+                        gramQtyHolder.value = record.selling_litre
+                        break;
+                    case 'bottle':
+                        gramQtyHolder.value = record.selling_bottle
+                        break;
+                    case 'kilogram':
+                        gramQtyHolder.value = record.selling_kilo
+                        break;
+                    default:
+                        notifier.alert('invalid measure unit passed!')
+                        return
+                }
             }
-        }
-    })
-}
+        })
+    }
 </script>
 
 

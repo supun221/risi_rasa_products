@@ -22,8 +22,6 @@ $productList = $returnData['productList'] ?? [];
 $totalAmount = $returnData['totalAmount'] ?? 0;
 $supplierName = $returnData['supplierName'] ?? 'Unknown Supplier';
 
-$imagePath = "https://egg.land.nexarasolutions.site/app/views/invoice/images/bill-header.png";
-
 function formatToTwoDecimalPoints($number) {
     return number_format($number, 2, '.', '');
 }
@@ -45,9 +43,40 @@ function formatToTwoDecimalPoints($number) {
             width: 80mm;
             margin: 0 auto;
         }
-        .header img {
-            max-width: 300px;
-            max-height: 260px;
+        .header {
+            margin-bottom: 10px;
+        }
+        .brand-info {
+            margin-bottom: 5px;
+        }
+        .brand-name .main-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .brand-name .sub-text {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .brand-tagline {
+            font-size: 10px;
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+        .contact-section {
+            margin-bottom: 10px;
+        }
+        .contact-title {
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .contact-item {
+            font-size: 10px;
+            margin: 2px 0;
+        }
+        .contact-icon {
+            margin-right: 5px;
         }
         .highlight {
             background-color: black; 
@@ -86,7 +115,30 @@ function formatToTwoDecimalPoints($number) {
 </head>
 <body>
     <div class="header">
-        <img src="<?= $imagePath; ?>" alt="Logo">
+        <div class="brand-info">
+            <div class="brand-name">
+                <h1 class="main-text">RISI RASA</h1>
+                <h2 class="sub-text">PRODUCTS</h2>
+            </div>
+            <div class="brand-tagline">Delicious Treats Since 1995</div>
+        </div>
+        <div class="contact-section">
+            <div class="contact-title">Contact Us</div>
+            <div class="contact-details">
+                <div class="contact-item">
+                    <span class="contact-icon">📞</span>
+                    <span class="contact-text">075 1234567 / 075 7204220</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">✉️</span>
+                    <span class="contact-text">info@risirasa.lk</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">🏢</span>
+                    <span class="contact-text">45 Main Street, Colombo</span>
+                </div>
+            </div>
+        </div>
         <h2>Return Invoice</h2>
     </div>
     <!-- <div class="highlight">Return Invoice</div> -->

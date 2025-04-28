@@ -1,4 +1,3 @@
-<!-- authController.php -->
 <?php
 require_once '../../config/databade.php';
 require_once '../models/User.php';
@@ -57,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $username = htmlspecialchars(trim($_POST['username']));
     $password = $_POST['password'];
     $store = htmlspecialchars(trim($_POST['store']));
-    $job_role = isset($_POST['job_role']) ? htmlspecialchars(trim($_POST['job_role'])) : '';
 
     // Validate inputs
     if (empty($username) || empty($password) || empty($store)) {
@@ -66,30 +64,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 
     // Get the user by username and store
     $user = $userModel->getUserByUsernameAndStore($username, $store);
-    
     if ($user && password_verify($password, $user['password'])) {
         // Set session variables
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['store'] = $user['store'];
-        
-        // If job_role was selected in the form and it matches the user's actual role, use it
-        // Otherwise use the role from the database
-        if (!empty($job_role) && $job_role === $user['job_role']) {
-            $_SESSION['job_role'] = $job_role;
-        } else {
-            $_SESSION['job_role'] = $user['job_role'];
-        }
+        $_SESSION['job_role'] = $user['job_role'];
 
-        // Check if user is a rep and redirect accordingly
-        if ($_SESSION['job_role'] === 'rep') {
-            header("Location: ../views/Rep/index.php");
-            exit();
-        } else {
-            // Redirect to regular dashboard for other roles
-            header("Location: ../views/dashboard/index.php");
-            exit();
-        }
+        // Redirect to the dashboard
+        header("Location: ../views/dashboard/index.php");
+        exit();
     } else {
         // Redirect with error parameter instead of using redirectWithMessage
         header("Location: ../views/auth/login.php?error=invalid");
@@ -125,7 +109,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
     exit();
 }
 
+// Add this code to handle the update_user form submission
+if (isset($_POST['update_user'])) {
+    $original_username = $_POST['original_username'];
+    $username = $_POST['username'];
+    $store = $_POST['store'];
+    $job_role = $_POST['job_role'];
+    $email = $_POST['email'];
+    $telephone = $_POST['telephone'];
+    $password = $_POST['password'];
 
+    // Check if we need to update the password
+    $password_update = '';
+    if (!empty($password)) {
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $password_update = ", password = '$hashed_password'";
+    }
+
+    // Update user information
+    $sql = "UPDATE signup SET 
+            username = '$username', 
+            store = '$store', 
+            job_role = '$job_role', 
+            Email = '$email', 
+            telephone = '$telephone'
+            $password_update 
+            WHERE username = '$original_username'";
+
+    if ($conn->query($sql) === TRUE) {
+        // Redirect to user list with success message
+        header("Location: ../views/users/users_list.php?update=success");
+        exit();
+    } else {
+        // Redirect back with error
+        header("Location: ../views/auth/update_user.php?username=$original_username&error=1");
+        exit();
+    }
+}
 
 // Show User Logic
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['user_id'])) {

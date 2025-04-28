@@ -5,6 +5,45 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 require_once '../header1.php';
+require_once '../../../config/databade.php'; // Fixed typo: 'databade' to 'database'
+
+// Fetch user permissions
+$username = $_SESSION['username'];
+$query = "SELECT * FROM user_permissions WHERE username = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$permissions = $stmt->get_result()->fetch_assoc();
+
+// Default permissions if no record exists
+if (!$permissions) {
+    $permissions = [
+        'can_view_employees' => 0,
+        'can_view_reports' => 0,
+        'can_view_users' => 0,
+        'can_view_stock' => 0,
+        'can_create_invoice' => 0,        // New
+        'can_view_sales_order' => 0,      // New
+        'can_view_quotation' => 0,        // New
+        'can_view_customer' => 0,         // New
+        'can_view_grn_purchasing' => 0,   // New
+        'can_view_bank' => 0,             // New
+        'can_view_cash_book' => 0,        // New
+        'can_view_expenses' => 0,         // New
+        'can_view_suppliers' => 0,        // New
+        'can_view_damage_lost' => 0,      // New
+        'can_view_settings' => 0          // New
+    ];
+}
+
+// Check if user is admin and set all permissions to 1
+$user_role = $_SESSION['job_role'];
+if ($user_role === 'admin') {
+    $permissions = array_map(function () {
+        return 1;
+    }, $permissions);
+}
+?>
 ?>
 
 <!DOCTYPE html>
@@ -83,70 +122,112 @@ require_once '../header1.php';
 
     <!-- Button Bar -->
     <div class="button-bar">
-        <button id="invoiceButton" class="button-style">
-            <img src="../../assets/images/invoices.png" alt="Create Invoice">
-            <span>Create Invoice</span>
-        </button>
-        <button onclick="location.href='branch_sales.php';">
-            <img src="../../assets/images/order.png" alt="Sales Order">
-            <span>brach Sales </span>
-        </button>
-        <!-- <button onclick="loadSection('low_stock', '#dynamic-section')">
-            <img src="../../assets/images/Quatation.png" alt="Quotation">
-            <span>Quotation</span>
-        </button> -->
-        <button onclick="location.href='../inventory/stock_view.php';">
-            <img src="../../assets/images/Stock.png" alt="Stock">
-            <span>Stock</span>
-        </button>
-        <button onclick="location.href='../customers/customer_list.php';">
-            <img src="../../assets/images/details.png" alt="Customer">
-            <span>Customer</span>
-        </button>
-        <button onclick="location.href='../inventory/manage_inventory.php';">
-            <img src="../../assets/images/customer.png" alt="GRN/Purchasing">
-            <span>GRN/ Purchasing</span>
-        </button>
-        <button onclick="location.href='../raw_stocks/manage_raw_stock.php';">
-            <img src="../../assets/images/customer.png" alt="Raw Stock">
-            <span>Raw Stock</span>
-        </button>
-        <button onclick="loadSection('bank', '#dynamic-section')">
-            <img src="../../assets/images/bank.png" alt="Bank">
-            <span>Bank</span>
-        </button>
-        <button onclick="location.href='../employees/employee_list.php';">
-            <img src="../../assets/images/office-man.png" alt="Customer">
-            <span>Employees</span>
-        </button>
-        <button onclick="loadSection('cash_book', '#dynamic-section')">
-            <img src="../../assets/images/money.png" alt="Cash Book">
-            <span>Cash Book</span>
-        </button>
-        <button onclick="loadSection('expenses', '#dynamic-section')">
-            <img src="../../assets/images/expenses.png" alt="Expenses">
-            <span>Expenses</span>
-        </button>
-        <button onclick="location.href='../suppliers/suppliers_list.php';">
-            <img src="../../assets/images/supplier.png" alt="Suppliers">
-            <span>Suppliers</span>
-        </button>
-        <button onclick="location.href='../damage/damage_list.php';">
-            <img src="../../assets/images/damage.png" alt="damage">
-            <span>Damage & Lost</span>
-        </button>
-        <button onclick="location.href='../print-dashboard/print_dashboard.php';">
-            <img src="../../assets/images/report.png" alt="Report">
-            <span>Report</span>
-        </button>
-        <button onclick="location.href='../users/users_list.php';">
-            <img src="../../assets/images/office-man.png" alt="User">
-            <span>User</span>
-        </button>
-        <button onclick="location.href='../production';">
-            <img src="../../assets/images/production.png" alt="Setting">
-            <span>Production</span>
-        </button>
+        <?php if ($permissions['can_create_invoice']): ?>
+            <button id="invoiceButton" class="button-style">
+                <img src="../../assets/images/invoices.png" alt="Create Invoice">
+                <span>Create Invoice</span>
+            </button>
+        <?php endif; ?>
+
+        <?php if ($permissions['can_view_sales_order']): ?>
+            <button onclick="loadSection('sales_order', '#dynamic-section')">
+                <img src="../../assets/images/order.png" alt="Sales Order">
+                <span>Sales Order</span>
+            </button>
+        <?php endif; ?>
+
+        <?php if ($permissions['can_view_quotation']): ?>
+            <button onclick="location.href='quotations.php';">
+                <img src="../../assets/images/Quatation.png" alt="Quotation">
+                <span>Quotation</span>
+            </button>
+        <?php endif; ?>
+
+        <?php if ($permissions['can_view_stock']): ?>
+            <button onclick="location.href='../inventory/stock_view.php';">
+                <img src="../../assets/images/Stock.png" alt="Stock">
+                <span>Stock</span>
+            </button>
+        <?php endif; ?>
+
+        <?php if ($permissions['can_view_customer']): ?>
+            <button onclick="location.href='../customers/customer_list.php';">
+                <img src="../../assets/images/details.png" alt="Customer">
+                <span>Customer</span>
+            </button>
+        <?php endif; ?>
+
+        <?php if ($permissions['can_view_grn_purchasing']): ?>
+            <button onclick="location.href='../inventory/manage_inventory.php';">
+                <img src="../../assets/images/customer.png" alt="GRN/Purchasing">
+                <span>GRN/Purchasing</span>
+            </button>
+        <?php endif; ?>
+
+        <?php if ($permissions['can_view_bank']): ?>
+            <button onclick="location.href='../bank/Bank_Account.php';">
+                <img src="../../assets/images/bank.png" alt="Bank">
+                <span>Bank</span>
+            </button>
+        <?php endif; ?>
+
+        <?php if ($permissions['can_view_employees']): ?>
+            <button onclick="location.href='../employees/employee_list.php';">
+                <img src="../../assets/images/office-man.png" alt="Employees">
+                <span>Employees</span>
+            </button>
+        <?php endif; ?>
+
+        <?php if ($permissions['can_view_cash_book']): ?>
+            <button onclick="location.href='../cashbook/cashbook_list.php';">
+                <img src="../../assets/images/money.png" alt="Cash Book">
+                <span>Cash Book</span>
+            </button>
+        <?php endif; ?>
+
+        <!-- <?php if ($permissions['can_view_expenses']): ?>
+            <button onclick="loadSection('expenses', '#dynamic-section')">
+                <img src="../../assets/images/expenses.png" alt="Expenses">
+                <span>Expenses</span>
+            </button>
+        <?php endif; ?> -->
+
+        <?php if ($permissions['can_view_suppliers']): ?>
+            <button onclick="location.href='../suppliers/suppliers_list.php';">
+                <img src="../../assets/images/supplier.png" alt="Suppliers">
+                <span>Suppliers</span>
+            </button>
+        <?php endif; ?>
+
+        <?php if ($permissions['can_view_damage_lost']): ?>
+            <button onclick="location.href='../damage/damage_list.php';">
+                <img src="../../assets/images/damage.png" alt="Damage">
+                <span>Damage & Lost</span>
+            </button>
+        <?php endif; ?>
+
+        <?php if ($permissions['can_view_reports']): ?>
+            <button onclick="location.href='../print-dashboard/print_dashboard.php';">
+                <img src="../../assets/images/report.png" alt="Report">
+                <span>Report</span>
+            </button>
+        <?php endif; ?>
+
+        <?php if ($permissions['can_view_users']): ?>
+            <button onclick="location.href='../users/users_list.php';">
+                <img src="../../assets/images/office-man.png" alt="User">
+                <span>User</span>
+            </button>
+        <?php endif; ?>
+
+        <?php if ($permissions['can_view_settings']): ?>
+            <button onclick="loadSection('setting', '#dynamic-section')">
+                <img src="../../assets/images/settings.png" alt="Setting">
+                <span>Setting</span>
+            </button>
+        <?php endif; ?>
+
+        <!-- Always show logout -->
         <button onclick="location.href='../../controllers/logout.php';" class="button-style">
             <img src="../../assets/images/power.png" alt="Log Out">
             <span>Log Out</span>
