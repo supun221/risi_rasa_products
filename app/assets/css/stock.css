@@ -902,3 +902,14 @@ tr.selected {
 .prodMgr_dataTable tr:hover {
     background-color: #f0f0f0;
 }
+
+.editBtn{
+    background-color: #2980b9;
+    width:16px;
+    margin-right: 3px;
+}
+
+.deleteBtn{
+    background-color: #ba3751;
+    width:16px;
+}

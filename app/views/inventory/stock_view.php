@@ -4,49 +4,51 @@ require_once 'connection_db.php';
 // Handle AJAX requests
 if (isset($_GET['action'])) {
     header('Content-Type: application/json');
-    
+
     if ($_GET['action'] === 'getProduct') {
         $item_code = $_GET['item_code'] ?? '';
-        
+
         if (empty($item_code)) {
             echo json_encode(['success' => false, 'message' => 'Item code is required']);
             exit;
         }
-        
+
         $stmt = $conn->prepare("SELECT product_name FROM products WHERE item_code = ?");
         $stmt->bind_param("s", $item_code);
         $stmt->execute();
         $result = $stmt->get_result();
         $product = $result->fetch_assoc();
-        
-        echo json_encode($product ? 
-            ['success' => true, 'product_name' => $product['product_name']] : 
-            ['success' => false, 'message' => 'Product not found']
+
+        echo json_encode(
+            $product ?
+                ['success' => true, 'product_name' => $product['product_name']] :
+                ['success' => false, 'message' => 'Product not found']
         );
         exit;
     }
-    
+
     if ($_GET['action'] === 'saveConversion') {
         $data = json_decode(file_get_contents('php://input'), true);
-        
+
         if (!$data) {
             echo json_encode(['success' => false, 'message' => 'Invalid input']);
             exit;
         }
-        
+
         try {
             // Check if record exists
             $check_stmt = $conn->prepare("SELECT id FROM measurement_conversions WHERE item_code = ?");
             $check_stmt->bind_param("s", $data['item_code']);
             $check_stmt->execute();
             $result = $check_stmt->get_result();
-            
+
             if ($result->num_rows > 0) {
                 // Update existing record
                 $stmt = $conn->prepare("UPDATE measurement_conversions 
                     SET product_name = ?, selling_bottle = ?, selling_litre = ? 
                     WHERE item_code = ?");
-                $stmt->bind_param("sdds", 
+                $stmt->bind_param(
+                    "sdds",
                     $data['product_name'],
                     $data['kilo_to_bottle'],
                     $data['kilo_to_litter'],
@@ -57,14 +59,15 @@ if (isset($_GET['action'])) {
                 $stmt = $conn->prepare("INSERT INTO measurement_conversions 
                     (item_code, product_name, selling_bottle, selling_litre) 
                     VALUES (?, ?, ?, ?)");
-                $stmt->bind_param("ssdd", 
+                $stmt->bind_param(
+                    "ssdd",
                     $data['item_code'],
                     $data['product_name'],
                     $data['kilo_to_bottle'],
                     $data['kilo_to_litter']
                 );
             }
-            
+
             if ($stmt->execute()) {
                 echo json_encode(['success' => true]);
             } else {
@@ -80,7 +83,7 @@ if (isset($_GET['action'])) {
         $query = "SELECT * FROM measurement_conversions ORDER BY id DESC";
         $result = $conn->query($query);
         $conversions = [];
-        
+
         if ($result) {
             while ($row = $result->fetch_assoc()) {
                 $conversions[] = $row;
@@ -110,10 +113,30 @@ if (isset($_GET['action'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 
+<style>
+    #stockTable tbody tr.highlighted {
+        background-color: #e0f7fa;
+        /* Light blue background */
+        font-weight: bold;
+        /* Bold text */
+    }
+
+    .selected-stock-row{
+        background-color: #a0c1df;
+        /* color: white; */
+    }
+</style>
+
 <body>
 <?php require_once '../header1.php'; ?>
 
-    <h1>Manage Stock Entries</h1>
+    <div style="position: relative; text-align: center; margin-bottom: 10px; margin-top: 10px;">
+        <h1 style="display: inline-block; margin: 0;">Manage Stocks</h1>
+        <button id="stockCreationHistoryBtn" class="btn btn-primary" style="position: absolute; right: 5%; top: 50%; transform: translateY(-50%); background-color: #e05b5b;"
+            onclick="location.href='stock_creation_history_view.php';"><i class="fas fa-history"></i>
+            Stock Creation History
+        </button>
+    </div>
     <div id="searchWrapper">
         <label for="searchInput">🔍 Search:</label>
         <input type="text" id="searchInput" placeholder="Type product name or barcode">
@@ -122,7 +145,7 @@ if (isset($_GET['action'])) {
     <div id="promotionSection">
         <div id="promoButtonContainer">
             <button id="prodMgr_openBtn" class="prodMgr_btn">
-                <i class="fas fa-cog"></i> Manage Conversions
+                <i class="fas fa-cog"></i> Oil Conversions
             </button>
         </div>
         <a href="../stocks/stock_transfer.php" >
@@ -156,7 +179,7 @@ if (isset($_GET['action'])) {
             </button>
         </a> -->
 
-        <div id="dealModal" class="modal" style="display: none;">
+        <div id="dealModal" class="modal" style="display: none; z-index: 9999;">
             <div class="modal-content">
                 <h3>Add a Promotion Deal</h3>
                 <form id="dealForm">
@@ -166,7 +189,7 @@ if (isset($_GET['action'])) {
                     </select>
 
                     <label for="barcodeField">Barcode:</label>
-                    <input type="text" id="barcodeField" >
+                    <input type="text" id="barcodeField">
 
                     <label for="dealPrice">Deal Price:</label>
                     <input type="number" id="dealPrice" step="0.01" required>
@@ -246,7 +269,7 @@ if (isset($_GET['action'])) {
             </div>
         </div>
 
-        <div id="promotionDiscountModal" style="display: none;">
+        <div id="promotionDiscountModal" style="display: none; z-index: 9999; ">
             <button id="promotionDiscountModalCloseBtn" class="close-button" onclick="closeDiscountPromotionModal()">&times;</button>
             <div id="promotion-discount-modal-content">
 
@@ -321,7 +344,7 @@ if (isset($_GET['action'])) {
         </div>
 
 
-        <div id="promotionSupplierModal" style="display: none;">
+        <div id="promotionSupplierModal" style="display: none; z-index: 9999;">
             <button id="promotionSupplierModalCloseBtn" class="close-button" onclick="closeSupplierPromotionModal()">&times;</button>
             <div id="promotion-supplier-modal-content">
                 <div id="add-promotion-supplier-form-container">
@@ -398,17 +421,17 @@ if (isset($_GET['action'])) {
                     <!-- Left side - Form -->
                     <div class="prodMgr_formSection">
                         <h2>Manage Conversions</h2>
-                        
+
                         <div class="prodMgr_formGroup">
                             <label for="prodMgr_itemCode">Item Code</label>
                             <input type="text" id="prodMgr_itemCode" name="itemCode">
                         </div>
-                        
+
                         <div class="prodMgr_formGroup">
                             <label for="prodMgr_productName">Product Name</label>
                             <input type="text" id="prodMgr_productName" name="productName" readonly>
                         </div>
-                        
+
                         <div class="prodMgr_formGroup">
                             <label>Selling Type</label>
                             <div class="prodMgr_sellingTypeRow">
@@ -420,7 +443,7 @@ if (isset($_GET['action'])) {
                                 <input type="number" id="prodMgr_kiloToLitter" step="0.01">
                             </div>
                         </div>
-                        
+
                         <div class="prodMgr_modalFooter">
                             <button id="prodMgr_btnSave" class="prodMgr_btnSave">Save</button>
                             <button id="prodMgr_btnExit" class="prodMgr_btnExit">Exit</button>
@@ -457,22 +480,26 @@ if (isset($_GET['action'])) {
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Supplier Name</th>
-                    <th>Product Name</th>
+                    <th>Stock ID</th>
+                    <!-- <th>Supplier Name</th> -->
+                    <th>Product</th>
+                    <th>Barcode</th>
                     <th>Available Stock</th>
+                    <th>Unit</th>
                     <th>Cost Price</th>
                     <th>Wholesale Price</th>
                     <th>Max Retail Price</th>
                     <th>Super Customer Price</th>
                     <th>Our Price</th>
                     <th>Low Stock</th>
-                    <th>Expire Date</th>
-                    <th>Discount Percent</th>
-                    <th>Barcode</th>
-                    <th>Free</th>
+
+                    <!-- <th>Expire Date</th>
+                    <th>Discount Percent</th> -->
+
+                    <!-- <th>Free</th>
                     <th>Gift</th>
-                    <th>Voucher</th>
-                    <th>Actions</th>
+                    <th>Voucher</th> -->
+                    <!-- <th>Actions</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -481,14 +508,14 @@ if (isset($_GET['action'])) {
         </table>
     </div>
 
-    <div id="pagination">
+    <!-- <div id="pagination">
         <button id="prevPage" disabled>Previous</button>
         <span id="currentPage">1</span> / <span id="totalPages">1</span>
         <button id="nextPage">Next</button>
-    </div>
+    </div> -->
 
     <!-- Edit Modal -->
-    <div id="editModal" class="modal" style="display: none;">
+    <!-- <div id="editModal" class="modal" style="display: none;">
         <div class="modal-content">
             <h2>Edit Stock Entry</h2>
             <form id="editForm">
@@ -539,13 +566,174 @@ if (isset($_GET['action'])) {
                 </div>
             </form>
         </div>
-    </div>
+    </div> -->
     <script>
         $(document).ready(function() {
             let currentPage = 1;
-            const itemsPerPage = 10;
+            const itemsPerPage = 100;
+            let isLoading = false;
+            let hasMoreData = true;
+
+            // Add CSS for the table and loading spinner (already present)
+            $('head').append(`
+            <style>
+                #stockTableWrapper {
+                    max-height: 600px;
+                    overflow-y: auto;
+                    width: 98%;
+                    margin: 0 auto;
+                    margin-bottom:45px;
+                }
+                #stockTable {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                #stockTable th {
+                    position: sticky;
+                    top: 0;
+                }
+                .spinner {
+                    width: 40px;
+                    height: 40px;
+                    margin: 0 auto;
+                    border: 4px solid #f3f3f3;
+                    border-top: 4px solid #3498db;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                #loading-indicator {
+                    text-align: center;
+                    padding: 10px;
+                }
+                /* Add this for row highlighting */
+                #stockTable tbody tr.selected {
+                    background-color: #e0e0e0;
+                    outline: 2px solid #007bff;
+                }
+            </style>
+        `);
+
+            // Function to enable arrow key navigation for the stock table
+            // function enableStockTableNavigation() {
+            //     const stockTable = document.getElementById('stockTable');
+            //     const tableBody = stockTable.querySelector('tbody');
+
+            //     // Make the table focusable
+            //     stockTable.setAttribute('tabindex', '0');
+
+            //     // Add keydown event listener for navigation
+            //     stockTable.addEventListener('keydown', (e) => {
+            //         const rows = Array.from(tableBody.getElementsByTagName('tr'));
+            //         const selectedRow = tableBody.querySelector('tr.selected');
+            //         let currentIndex = selectedRow ? rows.indexOf(selectedRow) : -1;
+
+            //         if (e.key === 'ArrowDown') {
+            //             e.preventDefault();
+            //             e.stopPropagation();
+            //             if (currentIndex < rows.length - 1) {
+            //                 const nextRow = rows[currentIndex + 1];
+            //                 rows.forEach(row => row.classList.remove('selected')); // Remove previous selection
+            //                 nextRow.classList.add('selected'); // Highlight new row
+            //                 nextRow.scrollIntoView({
+            //                     block: 'nearest'
+            //                 }); // Scroll into view
+            //                 stockTable.focus(); // Keep focus on the table
+            //             }
+            //         } else if (e.key === 'ArrowUp') {
+            //             e.preventDefault();
+            //             e.stopPropagation();
+            //             if (currentIndex > 0) {
+            //                 const prevRow = rows[currentIndex - 1];
+            //                 rows.forEach(row => row.classList.remove('selected')); // Remove previous selection
+            //                 prevRow.classList.add('selected'); // Highlight new row
+            //                 prevRow.scrollIntoView({
+            //                     block: 'nearest'
+            //                 }); // Scroll into view
+            //                 stockTable.focus(); // Keep focus on the table
+            //             }
+            //         }
+            //     });
+
+            //     // Optional: Add click event to select a row and focus the table
+            //     tableBody.addEventListener('click', (e) => {
+            //         const row = e.target.closest('tr');
+            //         if (row) {
+            //             rows.forEach(r => r.classList.remove('selected')); // Remove previous selection
+            //             row.classList.add('selected'); // Highlight clicked row
+            //             stockTable.focus(); // Focus the table for arrow key navigation
+            //         }
+            //     });
+            // }
+
+            function loadMoreData() {
+                isLoading = true;
+                $('#loading-indicator').show();
+
+                currentPage++;
+
+                $.ajax({
+                    url: '../../controllers/stockController.php',
+                    method: 'GET',
+                    data: {
+                        action: 'getEntries',
+                        page: currentPage,
+                        limit: itemsPerPage,
+                        search: $('#searchInput').val().trim() || ''
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.entries && data.entries.length > 0) {
+                            const tableBody = $('#stockTable tbody');
+
+                            data.entries.forEach(entry => {
+                                const row = `
+                                <tr data-id="${entry.id}" data-supplier-id="${entry.supplier_id}">
+                                    <td>${entry.id}</td>
+                                    <td>${entry.stock_id}</td>            
+                                    <td>${entry.product_name}</td>
+                                    <td>${entry.barcode}</td>
+                                    <td class="editable-stock" data-id="${entry.id}" data-original-value="${entry.available_stock}">${entry.available_stock}</td>
+                                    <td>${entry.unit}</td>
+                                    <td>${entry.cost_price}</td>
+                                    <td>${entry.wholesale_price}</td>
+                                    <td>${entry.max_retail_price}</td>
+                                    <td>${entry.super_customer_price}</td>
+                                    <td>${entry.our_price}</td>
+                                    <td>${entry.low_stock}</td>    
+                                </tr>
+                            `;
+                                tableBody.append(row);
+                            });
+
+                            initializeEditableStockCells();
+                            enableStockTableNavigation(); // Re-apply navigation after adding new rows
+
+                            if (currentPage >= data.totalPages) {
+                                hasMoreData = false;
+                            }
+                        } else {
+                            hasMoreData = false;
+                        }
+
+                        isLoading = false;
+                        $('#loading-indicator').hide();
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Failed to load more stock entries', 'error');
+                        isLoading = false;
+                        $('#loading-indicator').hide();
+                    }
+                });
+            }
 
             function fetchStockEntries(page, searchQuery = '') {
+                isLoading = true;
+                $('#loading-indicator').show();
+
                 $.ajax({
                     url: '../../controllers/stockController.php',
                     method: 'GET',
@@ -563,64 +751,147 @@ if (isset($_GET['action'])) {
                         if (data.entries && data.entries.length > 0) {
                             data.entries.forEach(entry => {
                                 const row = `
-                                    <tr data-id="${entry.id}" data-supplier-id="${entry.supplier_id}">
-                                        <td>${entry.id}</td>
-                                        <td>${entry.supplier_name}</td>
-                                        <td>${entry.product_name}</td>
-                                        <td>${entry.available_stock}</td>
-                                        <td>${entry.cost_price}</td>
-                                        <td>${entry.wholesale_price}</td>
-                                        <td>${entry.max_retail_price}</td>
-                                        <td>${entry.super_customer_price}</td>
-                                        <td>${entry.our_price}</td>
-                                        <td>${entry.low_stock}</td>
-                                        <td>${entry.expire_date}</td>
-                                        <td>${entry.discount_percent}</td>
-                                        <td>${entry.itemcode}</td>
-                                        <td>${entry.free === '1' ? 'Yes' : 'No'}</td>
-                                        <td>${entry.gift === '1' ? 'Yes' : 'No'}</td>
-                                        <td>${entry.voucher === '1' ? 'Yes' : 'No'}</td>
-                                        <td><button class="editBtn"><i class="fas fa-edit"></i></button></td>
-                                    </tr>
-                                `;
+                                <tr data-id="${entry.id}" data-supplier-id="${entry.supplier_id}">
+                                    <td>${entry.id}</td>
+                                    <td>${entry.stock_id}</td>            
+                                    <td>${entry.product_name}</td>
+                                    <td>${entry.barcode}</td>
+                                    <td class="editable-stock" data-id="${entry.id}" data-original-value="${entry.available_stock}">${entry.available_stock}</td>
+                                    <td>${entry.unit}</td>
+                                    <td>${entry.cost_price}</td>
+                                    <td>${entry.wholesale_price}</td>
+                                    <td>${entry.max_retail_price}</td>
+                                    <td>${entry.super_customer_price}</td>
+                                    <td>${entry.our_price}</td>
+                                    <td>${entry.low_stock}</td>   
+                                </tr>
+                            `;
                                 tableBody.append(row);
                             });
+
+                            initializeEditableStockCells();
+                            enableStockTableNavigation(); // Apply navigation after initial load
+
+                            hasMoreData = (currentPage < data.totalPages);
+                            currentPage = data.currentPage;
                         } else {
-                            tableBody.append('<tr><td colspan="17">No data available</td></tr>');
+                            tableBody.append('<tr><td colspan="13">No data available</td></tr>');
+                            hasMoreData = false;
                         }
 
-                        // Update pagination
-                        currentPage = data.currentPage;
-                        $('#currentPage').text(currentPage);
-                        $('#totalPages').text(data.totalPages);
-                        $('#prevPage').prop('disabled', currentPage === 1);
-                        $('#nextPage').prop('disabled', currentPage >= data.totalPages);
+                        isLoading = false;
+                        $('#loading-indicator').hide();
                     },
                     error: function() {
                         Swal.fire('Error', 'Failed to load stock entries', 'error');
+                        isLoading = false;
+                        $('#loading-indicator').hide();
+                    }
+                });
+            }
+            // Initialize editable cells
+            function initializeEditableStockCells() {
+                $('.editable-stock').off('click').on('click', function() {
+                    const cell = $(this);
+                    const currentValue = cell.text();
+                    const stockId = cell.data('id');
+
+                    // Store original value in data attribute if not already set
+                    if (!cell.data('original-value')) {
+                        cell.data('original-value', currentValue);
+                    }
+
+                    // Create input element
+                    const input = $('<input>', {
+                        type: 'number',
+                        step: '0.01',
+                        min: '0',
+                        value: currentValue,
+                        class: 'form-control stock-edit-input'
+                    });
+
+                    // Replace cell content with input
+                    cell.html(input);
+                    input.focus();
+
+                    // Handle blur event (when focus is lost) - revert to original value
+                    input.on('blur', function() {
+                        const originalValue = cell.data('original-value');
+                        cell.text(originalValue);
+                    });
+
+                    // Handle enter key press - only update on Enter
+                    input.on('keypress', function(e) {
+                        if (e.which === 13) { // Enter key
+                            e.preventDefault(); // Prevent default behavior
+                            const newValue = $(this).val();
+                            updateStockValue(stockId, newValue, cell);
+                            $(this).blur(); // Remove focus from input
+                        }
+                    });
+                });
+            }
+
+            // Function to update stock value in the database
+            function updateStockValue(stockId, newValue, cell) {
+                if (isNaN(newValue) || newValue === '') {
+                    Swal.fire('Error', 'Please enter a valid number', 'error');
+                    cell.text(cell.data('original-value'));
+                    return;
+                }
+
+                newValue = parseFloat(newValue).toFixed(2);
+
+                $.ajax({
+                    url: '../../controllers/stockController.php',
+                    method: 'POST',
+                    data: {
+                        action: 'updateAvailableStock',
+                        id: stockId,
+                        available_stock: newValue
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            // Update cell text and original-value attribute
+                            cell.text(newValue);
+                            cell.data('original-value', newValue);
+
+                            Swal.fire({
+                                title: 'Success',
+                                text: 'Stock updated successfully',
+                                icon: 'success',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
+                        } else {
+                            Swal.fire('Error', response.message || 'Failed to update stock', 'error');
+                            cell.text(cell.data('original-value'));
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Failed to update stock', 'error');
+                        cell.text(cell.data('original-value'));
                     }
                 });
             }
 
-            // Real-time search
+            // Real-time search with reset
             $('#searchInput').on('input', function() {
                 const searchQuery = $(this).val().trim();
+                currentPage = 1;
+                hasMoreData = true;
                 fetchStockEntries(1, searchQuery); // Reset to page 1 when searching
             });
 
-            // Pagination button handlers
-            $('#prevPage').click(function() {
-                if (currentPage > 1) {
-                    fetchStockEntries(--currentPage, $('#searchInput').val().trim());
-                }
-            });
-
-            $('#nextPage').click(function() {
-                fetchStockEntries(++currentPage, $('#searchInput').val().trim());
-            });
+            // Remove pagination buttons functionality (not needed with infinite scroll)
+            // But keep them in the DOM if you want to repurpose them later
 
             // Fetch initial stock entries
             fetchStockEntries(currentPage);
+
 
 
 
@@ -897,20 +1168,20 @@ if (isset($_GET['action'])) {
 
         let products = [];
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            try {
-                const response = await fetch("getAllProducts.php");
-                const data = await response.json();
-                if (data.error) {
-                    console.error(data.error);
-                    return;
-                }
-                products = data;
-                populateDropdown(products);
-            } catch (error) {
-                console.error("Failed to fetch products:", error);
-            }
-        });
+        // document.addEventListener("DOMContentLoaded", async () => {
+        //     try {
+        //         const response = await fetch("getAllProducts.php");
+        //         const data = await response.json();
+        //         if (data.error) {
+        //             console.error(data.error);
+        //             return;
+        //         }
+        //         products = data;
+        //         populateDropdown(products);
+        //     } catch (error) {
+        //         console.error("Failed to fetch products:", error);
+        //     }
+        // });
 
 
         function populateDropdown(products) {
@@ -935,35 +1206,33 @@ if (isset($_GET['action'])) {
                 }
             });
         }
-        
-        // Remove duplicate datetime update code - already in header1.php
-        // document.addEventListener('DOMContentLoaded', () => {
-        //     updateDateTime();
-        //     setInterval(updateDateTime, 1000);
-        // });
-        // 
-        // function updateDateTime() {
-        //     const now = new Date();
-        //     const timeElement = document.getElementById('current-time');
-        //     timeElement.textContent = now.toLocaleTimeString('en-US', {
-        //         hour: 'numeric',
-        //         minute: '2-digit',
-        //         second: '2-digit',
-        //         hour12: true
-        //     });
-        // 
-        //     const dateElement = document.getElementById('current-date');
-        //     dateElement.textContent = now.toLocaleDateString('en-US', {
-        //         month: 'long',
-        //         day: 'numeric',
-        //         year: 'numeric'
-        //     });
-        // }
-        // 
-        // document.addEventListener('DOMContentLoaded', () => {
-        //     updateDateTime();
-        //     setInterval(updateDateTime, 1000);
-        // });
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
+
+        function updateDateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            timeElement.textContent = now.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+
+            const dateElement = document.getElementById('current-date');
+            dateElement.textContent = now.toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
 
         document.getElementById("addPromoBtn").addEventListener("click", function() {
             document.getElementById("promotionModal").style.display = "block";
@@ -1468,13 +1737,13 @@ if (isset($_GET['action'])) {
             }
         });
         document.addEventListener("keydown", function(event) {
-        if (event.code === "Home") {
-            window.location.href = "../dashboard/index.php";
-        }
-    });
+            if (event.code === "Home") {
+                window.location.href = "../dashboard/index.php";
+            }
+        });
 
 
-    document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('prodMgr_modal');
             const openBtn = document.getElementById('prodMgr_openBtn');
             const closeBtn = document.querySelector('.prodMgr_close');
@@ -1492,7 +1761,7 @@ if (isset($_GET['action'])) {
             const closeModal = () => modal.style.display = "none";
             closeBtn.onclick = closeModal;
             exitBtn.onclick = closeModal;
-        
+
 
             function fetchConversionData() {
                 fetch('?action=getConversions')
@@ -1501,7 +1770,7 @@ if (isset($_GET['action'])) {
                         if (data.success) {
                             const tbody = document.getElementById('prodMgr_conversionData');
                             tbody.innerHTML = '';
-                            
+
                             data.data.forEach(conversion => {
                                 const row = document.createElement('tr');
                                 row.innerHTML = `
@@ -1538,7 +1807,7 @@ if (isset($_GET['action'])) {
                     });
             }
 
-            
+
             //itemCodeInput.addEventListener('blur', fetchProductName);
             itemCodeInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
@@ -1562,34 +1831,180 @@ if (isset($_GET['action'])) {
                 }
 
                 fetch('?action=saveConversion', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Conversion saved successfully!');
-                        fetchConversionData(); // Refresh data after saving
-                        // Clear form
-                        document.getElementById('prodMgr_itemCode').value = '';
-                        document.getElementById('prodMgr_productName').value = '';
-                        document.getElementById('prodMgr_kiloToBottle').value = '';
-                        document.getElementById('prodMgr_kiloToLitter').value = '';
-                    } else {
-                        alert('Error saving conversion: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error saving conversion');
-                });
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Conversion saved successfully!');
+                            fetchConversionData(); // Refresh data after saving
+                            // Clear form
+                            document.getElementById('prodMgr_itemCode').value = '';
+                            document.getElementById('prodMgr_productName').value = '';
+                            document.getElementById('prodMgr_kiloToBottle').value = '';
+                            document.getElementById('prodMgr_kiloToLitter').value = '';
+                        } else {
+                            alert('Error saving conversion: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error saving conversion');
+                    });
             });
         });
 
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('prodMgr_modal2');
+            const openBtn = document.getElementById('prodMgr_openBtn2');
+            const closeBtn = document.querySelector('.prodMgr_close2');
+            const exitBtn = document.getElementById('prodMgr_btnExit2');
+            const itemCodeInput = document.getElementById('prodMgr_itemCode2');
+            const saveBtn = document.getElementById('prodMgr_btnSave2');
+
+            // Open modal
+            document.getElementById('prodMgr_openBtn2').onclick = function() {
+                modal.style.display = "block";
+                fetchConversionData(); // Fetch data when modal opens
+            };
+
+            // Close modal
+            const closeModal = () => modal.style.display = "none";
+            closeBtn.onclick = closeModal;
+            exitBtn.onclick = closeModal;
+
+
+            function fetchConversionData() {
+                fetch('?action=getStringConversions')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const tbody = document.getElementById('prodMgr_conversionData2');
+                            tbody.innerHTML = '';
+
+                            data.data.forEach(conversion => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${conversion.item_code}</td>
+                                    <td>${conversion.product_name}</td>
+                                    <td>${conversion.selling_meter}g</td>
+                                    <td>${conversion.selling_yard}g</td>
+                                `;
+                                tbody.appendChild(row);
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error fetching conversions:', error));
+            }
+
+            // Fetch product name when item code is entered
+            function fetchProductName() {
+                const itemCode = document.getElementById('prodMgr_itemCode2').value.trim();
+                if (!itemCode) return;
+
+                fetch(`?action=getProduct&item_code=${itemCode}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('prodMgr_productName2').value = data.product_name;
+                        } else {
+                            alert('Product not found!');
+                            document.getElementById('prodMgr_productName2').value = '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error fetching product details');
+                    });
+            }
+
+
+            //itemCodeInput.addEventListener('blur', fetchProductName);
+            itemCodeInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Prevent form submission if inside a form
+                    fetchProductName();
+                }
+            });
+
+            // Save conversion
+            saveBtn.addEventListener('click', function() {
+                const formData = {
+                    item_code: document.getElementById('prodMgr_itemCode2').value.trim(),
+                    product_name: document.getElementById('prodMgr_productName2').value.trim(),
+                    kilo_to_meter: document.getElementById('prodMgr_kiloToMeter').value,
+                    kilo_to_yard: document.getElementById('prodMgr_kiloToYard').value
+                };
+
+                if (!formData.item_code || !formData.product_name) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+
+                fetch('?action=saveStringConversion', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Conversion saved successfully!');
+                            fetchConversionData(); // Refresh data after saving
+                            // Clear form
+                            document.getElementById('prodMgr_itemCode').value = '';
+                            document.getElementById('prodMgr_productName').value = '';
+                            document.getElementById('prodMgr_kiloToMeter').value = '';
+                            document.getElementById('prodMgr_kiloToYard').value = '';
+                        } else {
+                            alert('Error saving conversion: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error saving conversion');
+                    });
+            });
+        });
+
+
+        document.addEventListener("keydown", function(event) {
+            if (event.code === "Home") {
+                window.location.href = "../dashboard/index.php";
+            }
+        });
+
+        let stockRowIndex = -1
+        document.addEventListener('keydown' , (e) => {
+            const rows = document.querySelectorAll("#stockTable tbody tr")
+            if(rows.length == 0){
+                return
+            }
+            if(e.key == "ArrowDown"){
+                if(stockRowIndex < rows.length - 1){
+                    stockRowIndex++
+                }else{
+                    stockRowIndex = 0
+                }
+            }
+            if(e.key == "ArrowUp"){
+                if(stockRowIndex > 0){
+                    stockRowIndex--
+                }else{
+                    stockRowIndex = rows.length - 1
+                }
+            }
+            rows.forEach((row) => row.classList.remove("selected-stock-row"))
+            rows[stockRowIndex].classList.add("selected-stock-row")
+            rows[stockRowIndex].scrollIntoView({behavior: "smooth" ,  block: "center"})
+        })
     </script>
 </body>
 
