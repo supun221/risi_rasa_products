@@ -70,137 +70,12 @@ if (isset($_POST['invoice_number']) && !empty($_POST['invoice_number']) && empty
     exit;
 }
 
-// Check for return submission
-if (isset($_POST['submit_return'])) {
-    try {
-        require_once '../../../../config/databade.php';
-        
-        // Get session rep_id
-        session_start();
-        $rep_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
-        
-        $original_invoice = $conn->real_escape_string($_POST['original_invoice']);
-        $sale_id = (int)$_POST['sale_id'];
-        $customer_id = !empty($_POST['customer_id']) ? (int)$_POST['customer_id'] : null;
-        $customer_name = $conn->real_escape_string($_POST['customer_name']);
-        $reason = $conn->real_escape_string($_POST['return_reason']);
-        $notes = $conn->real_escape_string($_POST['return_notes']);
-        $total_amount = 0;
-        
-        // Generate return bill number
-        $date_prefix = date('Ymd');
-        $random_suffix = mt_rand(1000, 9999);
-        $return_bill_number = "RTN-{$date_prefix}-{$random_suffix}";
-        
-        // Start transaction
-        $conn->begin_transaction();
-        
-        // Insert return header
-        $header_query = "INSERT INTO return_collections 
-                        (return_bill_number, original_invoice_number, sale_id, customer_id, 
-                         customer_name, reason, notes, rep_id, total_amount) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)";
-                        
-        $stmt = $conn->prepare($header_query);
-        $stmt->bind_param("sssisssi", $return_bill_number, $original_invoice, $sale_id, 
-                         $customer_id, $customer_name, $reason, $notes, $rep_id);
-        $stmt->execute();
-        
-        $return_id = $conn->insert_id;
-        
-        // Process return items
-        foreach ($_POST['item_id'] as $key => $sale_item_id) {
-            $return_qty = (int)$_POST['return_qty'][$key];
-            $original_qty = (int)$_POST['original_qty'][$key];
-            
-            if ($return_qty > 0) {
-                $product_name = $conn->real_escape_string($_POST['product_name'][$key]);
-                $unit_price = (float)$_POST['unit_price'][$key];
-                $return_amount = $unit_price * $return_qty;
-                $item_reason = $conn->real_escape_string($reason);
-                
-                // Insert return item
-                $item_query = "INSERT INTO return_collection_items 
-                              (return_id, sale_item_id, product_name, unit_price, 
-                               return_qty, return_amount, reason) 
-                              VALUES (?, ?, ?, ?, ?, ?, ?)";
-                               
-                $stmt = $conn->prepare($item_query);
-                $stmt->bind_param("iisdids", $return_id, $sale_item_id, $product_name, 
-                                $unit_price, $return_qty, $return_amount, $item_reason);
-                $stmt->execute();
-                
-                // Add to total
-                $total_amount += $return_amount;
-                
-                // Update pos_sale_items table - reduce quantity and subtotal
-                $new_qty = $original_qty - $return_qty;
-                $new_subtotal = $unit_price * $new_qty;
-                
-                $update_item_query = "UPDATE pos_sale_items 
-                                     SET quantity = ?, subtotal = ? 
-                                     WHERE id = ?";
-                $stmt = $conn->prepare($update_item_query);
-                $stmt->bind_param("idi", $new_qty, $new_subtotal, $sale_item_id);
-                $stmt->execute();
-                
-                // Add products back to lorry stock
-                $check_stock_query = "SELECT id FROM lorry_stock 
-                                     WHERE rep_id = ? AND product_name = ? AND status = 'active' 
-                                     LIMIT 1";
-                $stmt = $conn->prepare($check_stock_query);
-                $stmt->bind_param("is", $rep_id, $product_name);
-                $stmt->execute();
-                $stock_result = $stmt->get_result();
-                
-                if ($stock_result->num_rows > 0) {
-                    // Update existing lorry stock
-                    $stock_row = $stock_result->fetch_assoc();
-                    $lorry_stock_id = $stock_row['id'];
-                    
-                    $update_stock_query = "UPDATE lorry_stock 
-                                          SET quantity = quantity + ?, 
-                                              total_amount = total_amount + ? 
-                                          WHERE id = ?";
-                    $stmt = $conn->prepare($update_stock_query);
-                    $stmt->bind_param("idi", $return_qty, $return_amount, $lorry_stock_id);
-                    $stmt->execute();
-                } else {
-                    // Insert new lorry stock record
-                    $insert_stock_query = "INSERT INTO lorry_stock 
-                                          (rep_id, product_name, quantity, unit_price, total_amount, status) 
-                                          VALUES (?, ?, ?, ?, ?, 'active')";
-                    $stmt = $conn->prepare($insert_stock_query);
-                    $stmt->bind_param("isids", $rep_id, $product_name, $return_qty, $unit_price, $return_amount);
-                    $stmt->execute();
-                }
-            }
-        }
-        
-        // Update pos_sales table - reduce total amount
-        $update_sale_query = "UPDATE pos_sales 
-                              SET total_amount = total_amount - ?, 
-                                  net_amount = net_amount - ? 
-                              WHERE id = ?";
-        $stmt = $conn->prepare($update_sale_query);
-        $stmt->bind_param("ddi", $total_amount, $total_amount, $sale_id);
-        $stmt->execute();
-        
-        // Update return header total
-        $update_query = "UPDATE return_collections SET total_amount = ? WHERE id = ?";
-        $stmt = $conn->prepare($update_query);
-        $stmt->bind_param("di", $total_amount, $return_id);
-        $stmt->execute();
-        
-        $conn->commit();
-        $success_message = "Return processed successfully. Return Bill Number: " . $return_bill_number;
-    } 
-    catch (Exception $e) {
-        if (isset($conn) && $conn->connect_errno === 0) {
-            $conn->rollback();
-        }
-        $error_message = "Error processing return: " . $e->getMessage();
-    }
+// Check for success message from process file
+$success_message = '';
+$return_bill_number = '';
+if (isset($_GET['success']) && $_GET['success'] == 1 && isset($_GET['return_bill'])) {
+    $return_bill_number = htmlspecialchars($_GET['return_bill']);
+    $success_message = "Return processed successfully. Return Bill Number: " . $return_bill_number;
 }
 ?>
 
@@ -210,15 +85,15 @@ if (isset($_POST['submit_return'])) {
     </div>
     
     <div class="section-body">
-        <?php if (isset($success_message)): ?>
+        <?php if (!empty($success_message)): ?>
             <div class="alert alert-success">
                 <?php echo $success_message; ?>
             </div>
         <?php endif; ?>
         
-        <?php if (isset($error_message)): ?>
+        <?php if (isset($_GET['error'])): ?>
             <div class="alert alert-danger">
-                <?php echo $error_message; ?>
+                <?php echo htmlspecialchars($_GET['error']); ?>
             </div>
         <?php endif; ?>
         
@@ -252,7 +127,7 @@ if (isset($_POST['submit_return'])) {
                     <h5 class="mb-0">Process Return</h5>
                 </div>
                 <div class="card-body">
-                    <form id="return-form" method="POST">
+                    <form id="return-form" method="POST" action="../process/process_return_collection.php">
                         <input type="hidden" name="original_invoice" id="original_invoice">
                         <input type="hidden" name="sale_id" id="sale_id">
                         <input type="hidden" name="customer_id" id="customer_id">
@@ -492,16 +367,38 @@ $(document).ready(function() {
         // Show processing indicator and disable button to prevent multiple submissions
         $('#submit-return-btn').html('<i class="fas fa-spinner fa-spin"></i> Processing...').prop('disabled', true);
         
-        // Confirm return submission
-        if (confirm('Are you sure you want to process this return? This action cannot be undone.')) {
-            // Form will be submitted
-            return true;
-        } else {
-            // Reset button if user cancels
-            $('#submit-return-btn').html('<i class="fas fa-save"></i> Process Return').prop('disabled', false);
-            e.preventDefault();
-            return false;
-        }
+        // Use AJAX to submit the form to ensure proper handling
+        e.preventDefault();
+        
+        // Get form data and explicitly add the submit_return parameter
+        var formData = $(this).serialize();
+        formData += '&submit_return=1'; // Add the missing parameter
+        
+        $.ajax({
+            // Use absolute path from web root instead of relative path
+            url: '/internship project/risi_rasa_products/app/views/Rep/process/process_return_collection.php',
+            type: 'POST',
+            data: formData, // Use our modified formData that includes submit_return
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    // Show success message and redirect if needed
+                    window.location.href = response.redirect_url;
+                } else {
+                    // Show error message
+                    alert('Error: ' + response.message);
+                    // Re-enable the submit button
+                    $('#submit-return-btn').html('<i class="fas fa-save"></i> Process Return').prop('disabled', false);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX Error:", status, error);
+                console.log("Response:", xhr.responseText);
+                alert('Error processing return. Please check the console for details.');
+                // Re-enable the submit button
+                $('#submit-return-btn').html('<i class="fas fa-save"></i> Process Return').prop('disabled', false);
+            }
+        });
     });
     
     // Show a print view of the return receipt after successful submission
