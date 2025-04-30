@@ -214,7 +214,8 @@ try {
     $response['success'] = true;
     $response['message'] = "Return processed successfully. Return Bill Number: " . $return_bill_number;
     $response['return_bill_number'] = $return_bill_number;
-    $response['redirect_url'] = "../sections/return_collection.php?success=1&return_bill=" . $return_bill_number;
+    // Update redirect URL to point to the return receipt page
+    $response['redirect_url'] = "/internship project/risi_rasa_products/app/views/invoice/pos_return_receipt.php?return_bill=" . $return_bill_number;
     
 } catch (Exception $e) {
     // Roll back transaction on error
