@@ -34,9 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signup'])) {
         redirectWithMessage("Invalid email format!", "../views/auth/signup.php");
     }
 
-    // if ($userModel->emailExists($email)) {
-    //     redirectWithMessage("Email already exists!", "../views/auth/signup.php");
-    // }
     if ($userModel->usernameExists($username)) {
         redirectWithMessage("Username already exists!", "../views/auth/signup.php");
     }
@@ -71,8 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         $_SESSION['store'] = $user['store'];
         $_SESSION['job_role'] = $user['job_role'];
 
-        // Redirect to the dashboard
-        header("Location: ../views/dashboard/index.php");
+        // Redirect based on user role
+        if (strtolower($user['job_role']) === 'rep') {
+            header("Location: ../views/Rep/index.php");
+        } else {
+            header("Location: ../views/dashboard/index.php");
+        }
         exit();
     } else {
         // Redirect with error parameter instead of using redirectWithMessage
