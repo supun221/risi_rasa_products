@@ -165,20 +165,14 @@ try {
             margin: 0 auto;
         }
         .header {
-            text-align: left;
+            text-align: center;
             margin-bottom: 10px;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
         }
         .logo {
-            max-width: 30mm;
+            max-width: 60mm;
             height: auto;
-            margin-right: 5px;
-        }
-        .company-details {
-            display: inline-block;
-            text-align: left;
+            margin: 0 auto 5px;
+            display: block;
         }
         .company-name {
             font-size: 14px;
@@ -281,12 +275,10 @@ try {
             <?php if ($logoBase64): ?>
                 <img src="<?= $logoBase64 ?>" alt="RisiRasa Logo" class="logo">
             <?php endif; ?>
-            <div class="company-details">
-                <div class="company-name"><?php echo $companyName; ?></div>
-                <div class="company-info"><?php echo $companyAddress; ?></div>
-                <div class="company-info">Tel: <?php echo $companyPhone; ?></div>
-                <div class="company-info">Email: <?php echo $companyEmail; ?></div>
-            </div>
+            <div class="company-name"><?php echo $companyName; ?></div>
+            <div class="company-info"><?php echo $companyAddress; ?></div>
+            <div class="company-info">Tel: <?php echo $companyPhone; ?></div>
+            <div class="company-info">Email: <?php echo $companyEmail; ?></div>
         </div>
         
         <div class="title">SALES INVOICE</div>

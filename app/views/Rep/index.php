@@ -184,6 +184,12 @@ try {
                 <i class="fas fa-money-check-alt"></i>
                 <div class="tile-title">Advance Payment</div>
             </div>
+            
+            <!-- Return Collection Tile -->
+            <div class="tile" id="return-collection-tile" data-target="return-collection-section" data-file="return_collection">
+                <i class="fas fa-undo-alt"></i>
+                <div class="tile-title">Return Collection</div>
+            </div>
         </div>
         
         <!-- Dynamic Content Container -->
