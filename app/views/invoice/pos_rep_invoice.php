@@ -347,6 +347,12 @@ try {
                 <div>Rs.<?php echo formatAmount($invoice['discount_amount']); ?></div>
             </div>
             <?php endif; ?>
+            <?php if (isset($invoice['return_bill_amount']) && $invoice['return_bill_amount'] > 0): ?>
+            <div class="total-row">
+                <div>Return Credit:</div>
+                <div>Rs.<?php echo formatAmount($invoice['return_bill_amount']); ?></div>
+            </div>
+            <?php endif; ?>
             <div class="total-row final">
                 <div>Total:</div>
                 <div>Rs.<?php echo formatAmount($invoice['net_amount']); ?></div>
@@ -373,6 +379,12 @@ try {
             <div class="total-row">
                 <div>Credit Amount:</div>
                 <div>Rs.<?php echo formatAmount($invoice['credit_amount']); ?></div>
+            </div>
+            <?php endif; ?>
+            <?php if (!empty($invoice['return_bill_number'])): ?>
+            <div class="total-row">
+                <div>Return Bill #:</div>
+                <div><?php echo htmlspecialchars($invoice['return_bill_number']); ?></div>
             </div>
             <?php endif; ?>
         </div>

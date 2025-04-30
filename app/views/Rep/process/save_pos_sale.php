@@ -35,6 +35,10 @@ try {
     $print_invoice = $data['print_invoice'] ?? 0;
     $cheque_number = null;  // Default to null
     
+    // Return bill data
+    $return_bill_number = $data['return_bill_number'] ?? null;
+    $return_bill_amount = $data['return_bill_amount'] ?? 0;
+    
     // If payment method is cheque, get the cheque number
     if ($payment_method === 'cheque' && isset($data['cheque_number'])) {
         $cheque_number = $data['cheque_number'];
@@ -82,18 +86,55 @@ try {
     // Start transaction
     $conn->begin_transaction();
     
-    // Insert into sales table - FIX: Correct the type definition string
+    // Validate return bill if one is provided
+    if ($return_bill_number && $return_bill_amount > 0) {
+        // Verify the return bill is valid and not already used
+        $stmt = $conn->prepare("
+            SELECT id, total_amount, used_in_invoice
+            FROM return_collections
+            WHERE return_bill_number = ?
+        ");
+        $stmt->bind_param("s", $return_bill_number);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            throw new Exception("Return bill not found: " . $return_bill_number);
+        }
+        
+        $return_bill = $result->fetch_assoc();
+        
+        if ($return_bill['used_in_invoice']) {
+            throw new Exception("This return bill has already been used in invoice: " . $return_bill['used_in_invoice']);
+        }
+        
+        // Verify the amount matches
+        if (abs($return_bill['total_amount'] - $return_bill_amount) > 0.01) {
+            throw new Exception("Return bill amount mismatch. Expected: " . $return_bill['total_amount'] . ", Got: " . $return_bill_amount);
+        }
+        
+        // Mark the return bill as used
+        $stmt = $conn->prepare("
+            UPDATE return_collections
+            SET used_in_invoice = ?, used_date = NOW()
+            WHERE return_bill_number = ?
+        ");
+        $stmt->bind_param("ss", $invoice_number, $return_bill_number);
+        $stmt->execute();
+    }
+    
+    // Insert into sales table - Update to include return bill fields
     $stmt = $conn->prepare("
         INSERT INTO pos_sales (
             invoice_number, customer_id, customer_name, total_amount, 
-            discount_amount, net_amount, payment_method, paid_amount, 
-            change_amount, credit_amount, advance_used, rep_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            discount_amount, net_amount, payment_method, cheque_number, paid_amount, 
+            change_amount, credit_amount, advance_used, return_bill_number, return_bill_amount, rep_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     
-    // Fix: Update the type string to match the 12 parameters
+    // Update the type string to match the 15 parameters
     $stmt->bind_param(
-        "sisdddsdddii", 
+        "sisdddssdddssdi", 
         $invoice_number, 
         $customer_id, 
         $customer_name, 
@@ -101,10 +142,13 @@ try {
         $discount_amount, 
         $net_amount, 
         $payment_method, 
+        $cheque_number,
         $paid_amount,
         $change_amount, 
         $credit_amount, 
         $advance_used,
+        $return_bill_number,
+        $return_bill_amount,
         $rep_id
     );
     

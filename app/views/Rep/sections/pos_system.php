@@ -376,6 +376,24 @@ $invoiceNumber = generateInvoiceNumber($conn);
                                     <input type="text" class="form-control" id="cheque-number" placeholder="Enter cheque number">
                                 </div>
                                 
+                                <!-- Return Bill Field -->
+                                <div class="form-group">
+                                    <label for="return-bill-number">Return Bill Number</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="return-bill-number" placeholder="Enter RTN-XXXXXXXX-XXXX">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-primary" type="button" id="verify-return-bill">
+                                                <i class="fas fa-check"></i> Verify
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted">Enter a valid return bill number to deduct the amount.</small>
+                                </div>
+
+                                <div class="alert alert-success" id="return-bill-info" style="display: none;">
+                                    <i class="fas fa-check-circle mr-1"></i> Return amount: Rs. <span id="return-bill-amount">0.00</span>
+                                </div>
+                                
                                 <div class="form-group">
                                     <label for="modal-paid-amount">Amount Paid</label>
                                     <input type="number" class="form-control" id="modal-paid-amount" min="0" step="0.01">
@@ -492,6 +510,8 @@ $(document).ready(function() {
         paidAmount: 0,                // Amount paid by customer
         changeAmount: 0,              // Change to be returned to customer
         creditAmount: 0,              // Amount on credit
+        returnBillNumber: null,       // Return bill number if applicable
+        returnBillAmount: 0,          // Return bill amount if applicable
         invoiceNumber: generateInvoiceNumber() // Current invoice number
     };
     
@@ -571,7 +591,9 @@ $(document).ready(function() {
         creditAmount: 0,
         paymentMethod: 'cash',
         advanceAmount: 0,
-        advanceUsed: 0
+        advanceUsed: 0,
+        returnBillNumber: null,
+        returnBillAmount: 0
     };
     
     // Toggle customer search section
@@ -1281,6 +1303,12 @@ $(document).ready(function() {
         let remainingTotal = posData.grandTotal;
         let useAdvance = $('#use-advance-payment').is(':checked');
         
+        // Deduct return bill amount if present
+        const returnBillAmount = posData.returnBillAmount || 0;
+        if (returnBillAmount > 0) {
+            remainingTotal = Math.max(0, remainingTotal - returnBillAmount);
+        }
+        
         // Calculate advance usage if checkbox is checked
         if (useAdvance && posData.advanceAmount > 0) {
             // Determine how much advance to use (up to the available amount or remaining total)
@@ -1290,18 +1318,15 @@ $(document).ready(function() {
             // Show advance usage in summary
             $('#summary-used-advance-row').show();
             $('#summary-used-advance').text(posData.advanceUsed.toFixed(2));
-            
-            // Don't automatically set the paid amount - keep it as user entered
-            // This allows users to type additional payment amounts
         } else {
             posData.advanceUsed = 0;
             $('#summary-used-advance-row').hide();
         }
         
         // Calculate change or credit amount
-        if (paidAmount + posData.advanceUsed >= posData.grandTotal) {
-            // Paid in full (combination of advance and payment)
-            posData.changeAmount = (paidAmount + posData.advanceUsed) - posData.grandTotal;
+        if (paidAmount + posData.advanceUsed + returnBillAmount >= posData.grandTotal) {
+            // Paid in full (combination of advance, payment, and return bill)
+            posData.changeAmount = (paidAmount + posData.advanceUsed + returnBillAmount) - posData.grandTotal;
             posData.creditAmount = 0;
             
             // Update UI
@@ -1311,7 +1336,7 @@ $(document).ready(function() {
         } else {
             // Partial payment (credit)
             posData.changeAmount = 0;
-            posData.creditAmount = posData.grandTotal - (paidAmount + posData.advanceUsed);
+            posData.creditAmount = posData.grandTotal - (paidAmount + posData.advanceUsed + returnBillAmount);
             
             // Update UI
             $('#modal-change-amount-group').hide();
@@ -1322,6 +1347,83 @@ $(document).ready(function() {
         // Store paid amount
         posData.paidAmount = paidAmount;
     }
+    
+    // Return bill verification
+    $('#verify-return-bill').click(function() {
+        const returnBillNumber = $('#return-bill-number').val().trim();
+        
+        if (!returnBillNumber) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Empty Return Bill',
+                text: 'Please enter a return bill number.'
+            });
+            return;
+        }
+        
+        // Show loading state
+        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+        
+        // Verify return bill via AJAX
+        $.ajax({
+            url: 'process/check_return_bill.php',
+            type: 'GET',
+            data: { return_bill_number: returnBillNumber },
+            dataType: 'json',
+            success: function(response) {
+                // Reset button state
+                $('#verify-return-bill').prop('disabled', false).html('<i class="fas fa-check"></i> Verify');
+                
+                if (response.success && response.valid) {
+                    // Valid return bill
+                    posData.returnBillNumber = returnBillNumber;
+                    posData.returnBillAmount = response.amount;
+                    
+                    // Show return bill info
+                    $('#return-bill-info').show();
+                    $('#return-bill-amount').text(response.amount.toFixed(2));
+                    
+                    // Update payment calculation
+                    updateModalPaymentCalculations();
+                    
+                    // Flash the return bill info with success effect
+                    $('#return-bill-info').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+                    
+                } else {
+                    // Invalid return bill
+                    posData.returnBillNumber = null;
+                    posData.returnBillAmount = 0;
+                    
+                    // Hide return bill info
+                    $('#return-bill-info').hide();
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Return Bill',
+                        text: response.message || 'The return bill number is invalid or has already been used.'
+                    });
+                    
+                    // Reset the field
+                    $('#return-bill-number').val('');
+                }
+            },
+            error: function() {
+                // Reset button state
+                $('#verify-return-bill').prop('disabled', false).html('<i class="fas fa-check"></i> Verify');
+                
+                // Reset return bill data
+                posData.returnBillNumber = null;
+                posData.returnBillAmount = 0;
+                
+                // Show error
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: 'Could not verify return bill. Please try again.'
+                });
+            }
+        });
+    });
     
     // Confirm payment button click with enhanced processing
     $('#confirm-payment').click(function() {
@@ -1394,6 +1496,8 @@ $(document).ready(function() {
             credit_amount: posData.creditAmount,
             advance_used: posData.advanceUsed,
             cheque_number: posData.chequeNumber,
+            return_bill_number: posData.returnBillNumber,
+            return_bill_amount: posData.returnBillAmount,
             print_invoice: $('#print-invoice').is(':checked') ? 1 : 0
         };
         
@@ -1523,283 +1627,15 @@ $(document).ready(function() {
         $('#cheque-number-group').hide();
         posData.chequeNumber = null;
         
+        // Reset return bill data
+        posData.returnBillNumber = null;
+        posData.returnBillAmount = 0;
+        $('#return-bill-number').val('');
+        $('#return-bill-info').hide();
+        
         // Log reset completion
         console.log("POS system reset with new invoice:", posData.invoice);
     }
-    
-    // Function to handle using advance payment
-    $(document).ready(function() {
-        // Add variables to track advance payment
-        let customerAdvanceAmount = 0;
-        let advanceUsed = 0;
-        let grandTotal = 0;
-        
-        // When customer is selected - check for advance payment
-        $('#customer-results').on('click', '.customer-row', function() {
-            // ...existing customer selection code...
-            
-            const customerId = $(this).data('id');
-            const customerName = $(this).data('name');
-            const advance = parseFloat($(this).data('advance')) || 0;
-            
-            // Store values in posData
-            posData.customerId = customerId;
-            posData.customerName = customerName;
-            posData.advanceAmount = advance;
-            
-            // Update local variable
-            customerAdvanceAmount = advance;
-            
-            console.log("Customer selected with advance amount:", customerAdvanceAmount);
-            
-            // Check if customer has advance payment
-            if (customerAdvanceAmount > 0) {
-                // Show advance payment section
-                $('#available-advance-amount').text('Rs. ' + customerAdvanceAmount.toFixed(2));
-                $('#advance-payment-section').show();
-            } else {
-                // Hide advance payment section
-                $('#advance-payment-section').hide();
-                $('#advance-amount-container').hide();
-                $('#remaining-payment-section').hide();
-            }
-            
-            // Reset advance usage
-            $('#use-advance').prop('checked', false);
-            advanceUsed = 0;
-            posData.advanceUsed = 0;
-            
-            // Update payment calculations
-            updatePaymentAmounts();
-        });
-        
-        // Use advance payment toggle
-        $('#use-advance').change(function() {
-            if ($(this).is(':checked')) {
-                // User wants to use advance payment
-                
-                // Calculate how much advance to use (either full amount or total due, whichever is less)
-                grandTotal = parseFloat(posData.grandTotal) || 0;
-                const maxAdvanceToUse = Math.min(customerAdvanceAmount, grandTotal);
-                
-                // Set the advance amount
-                advanceUsed = maxAdvanceToUse;
-                posData.advanceUsed = maxAdvanceToUse;
-                
-                // Show advance amount input with default value set to maximum usable
-                $('#advance-amount').val(maxAdvanceToUse.toFixed(2));
-                $('#advance-amount-container').slideDown();
-                
-                // Calculate remaining amount to pay after advance
-                const remainingToPay = Math.max(0, grandTotal - advanceUsed);
-                
-                // Update the UI to show remaining amount
-                $('#remaining-amount').text('Rs. ' + remainingToPay.toFixed(2));
-                $('#remaining-payment-section').show();
-                
-                // Update paid amount field based on remaining to pay
-                $('#paid-amount').val(remainingToPay.toFixed(2));
-                
-                console.log("Using advance payment:", advanceUsed, "Remaining to pay:", remainingToPay);
-            } else {
-                // User doesn't want to use advance payment
-                $('#advance-amount-container').slideUp();
-                $('#remaining-payment-section').hide();
-                
-                // Reset advance usage
-                advanceUsed = 0;
-                posData.advanceUsed = 0;
-                
-                // Reset paid amount to full grand total
-                $('#paid-amount').val(posData.grandTotal.toFixed(2));
-                
-                console.log("Not using advance payment");
-            }
-            
-            // Update payment calculations
-            updatePaymentAmounts();
-        });
-        
-        // Handle changes to advance amount input
-        $('#advance-amount').on('input', function() {
-            const inputAmount = parseFloat($(this).val()) || 0;
-            
-            // Ensure amount doesn't exceed limits
-            let actualAmount = inputAmount;
-            
-            // Don't exceed available advance
-            if (actualAmount > customerAdvanceAmount) {
-                actualAmount = customerAdvanceAmount;
-                $(this).val(actualAmount.toFixed(2));
-            }
-            
-            // Don't exceed grand total
-            if (actualAmount > grandTotal) {
-                actualAmount = grandTotal;
-                $(this).val(actualAmount.toFixed(2));
-            }
-            
-            // Update the advance used variables
-            advanceUsed = actualAmount;
-            posData.advanceUsed = actualAmount;
-            
-            // Calculate remaining amount to pay
-            const remainingToPay = Math.max(0, grandTotal - advanceUsed);
-            
-            // Update UI
-            $('#remaining-amount').text('Rs. ' + remainingToPay.toFixed(2));
-            
-            // Update paid amount field to match remaining
-            $('#paid-amount').val(remainingToPay.toFixed(2));
-            
-            console.log("Advance amount updated:", advanceUsed, "Remaining to pay:", remainingToPay);
-            
-            // Update payment calculations
-            updatePaymentAmounts();
-        });
-        
-        // "Use Max" button for advance payment
-        $('#use-max-advance').click(function() {
-            const maxAdvanceToUse = Math.min(customerAdvanceAmount, grandTotal);
-            
-            // Set the advance amount input
-            $('#advance-amount').val(maxAdvanceToUse.toFixed(2));
-            
-            // Update the advance used variables
-            advanceUsed = maxAdvanceToUse;
-            posData.advanceUsed = maxAdvanceToUse;
-            
-            // Calculate remaining amount to pay
-            const remainingToPay = Math.max(0, grandTotal - advanceUsed);
-            
-            // Update UI
-            $('#remaining-amount').text('Rs. ' + remainingToPay.toFixed(2));
-            
-            // Update paid amount field
-            $('#paid-amount').val(remainingToPay.toFixed(2));
-            
-            console.log("Max advance used:", advanceUsed, "Remaining to pay:", remainingToPay);
-            
-            // Update payment calculations
-            updatePaymentAmounts();
-        });
-        
-        // Function to update payment amounts based on current state
-        function updatePaymentAmounts() {
-            const paidAmount = parseFloat($('#paid-amount').val()) || 0;
-            const paymentMethod = $('#payment-method').val();
-            
-            // Calculate the effective total (grand total minus advance used)
-            const effectiveTotal = Math.max(0, posData.grandTotal - advanceUsed);
-            
-            // Calculate change based on payment method and effective total
-            if (paymentMethod === 'credit') {
-                // For credit payments, there's no change
-                posData.changeAmount = 0;
-                posData.creditAmount = effectiveTotal;
-                posData.paidAmount = 0;
-            } else {
-                // For cash/card payments
-                posData.changeAmount = paidAmount > effectiveTotal ? paidAmount - effectiveTotal : 0;
-                posData.creditAmount = 0;
-                posData.paidAmount = paidAmount;
-            }
-            
-            // Update any UI elements showing the change amount
-            if ($('#change-amount').length) {
-                $('#change-amount').text('Rs. ' + posData.changeAmount.toFixed(2));
-            }
-            
-            console.log("Payment amounts updated:", {
-                method: paymentMethod,
-                grandTotal: posData.grandTotal,
-                advanceUsed: advanceUsed,
-                effectiveTotal: effectiveTotal,
-                paidAmount: posData.paidAmount,
-                changeAmount: posData.changeAmount,
-                creditAmount: posData.creditAmount
-            });
-        }
-        
-        // Update payment amounts when paid amount changes
-        $('#paid-amount').on('input', function() {
-            updatePaymentAmounts();
-        });
-        
-        // Update payment amounts when payment method changes
-        $('#payment-method').change(function() {
-            const method = $(this).val();
-            
-            if (method === 'credit') {
-                // If credit, set paid amount to 0
-                $('#paid-amount').val('0.00');
-            } else {
-                // For cash/card, set paid amount to remaining after advance
-                const remainingToPay = Math.max(0, posData.grandTotal - advanceUsed);
-                $('#paid-amount').val(remainingToPay.toFixed(2));
-            }
-            
-            // Update payment calculations
-            updatePaymentAmounts();
-        });
-        
-        // Ensure grand total is updated whenever cart changes
-        const originalUpdateTotals = updateTotals;
-        updateTotals = function() {
-            // Call original function if it exists
-            if (typeof originalUpdateTotals === 'function') {
-                originalUpdateTotals();
-            }
-            
-            // Update local grandTotal variable
-            grandTotal = parseFloat(posData.grandTotal) || 0;
-            
-            // If advance is being used, update the advance amount input max value
-            if ($('#use-advance').is(':checked')) {
-                const currentAdvanceUsed = parseFloat($('#advance-amount').val()) || 0;
-                
-                // If current advance used is more than new grand total, adjust it
-                if (currentAdvanceUsed > grandTotal) {
-                    const newAdvanceUsed = Math.min(customerAdvanceAmount, grandTotal);
-                    $('#advance-amount').val(newAdvanceUsed.toFixed(2));
-                    advanceUsed = newAdvanceUsed;
-                    posData.advanceUsed = newAdvanceUsed;
-                }
-                
-                // Update remaining to pay
-                const remainingToPay = Math.max(0, grandTotal - advanceUsed);
-                $('#remaining-amount').text('Rs. ' + remainingToPay.toFixed(2));
-                
-                // Update paid amount field
-                if ($('#payment-method').val() !== 'credit') {
-                    $('#paid-amount').val(remainingToPay.toFixed(2));
-                }
-            } else {
-                // Not using advance, update paid amount to full grand total
-                if ($('#payment-method').val() !== 'credit') {
-                    $('#paid-amount').val(grandTotal.toFixed(2));
-                }
-            }
-            
-            // Update payment calculations
-            updatePaymentAmounts();
-        };
-        
-        // Complete sale handler - ensure advance payment is included
-        $('#complete-sale').click(function() {
-        
-            // Prepare sale data 
-            const saleData = {
-                // ...existing properties...
-                advance_used: advanceUsed,
-                // ...existing properties...
-            };
-            
-  
-        });
-        
-       
-    });
 });
 
 // Add the missing updateTotals function
