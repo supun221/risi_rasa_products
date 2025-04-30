@@ -190,6 +190,12 @@ try {
                 <i class="fas fa-undo-alt"></i>
                 <div class="tile-title">Return Collection</div>
             </div>
+            
+            <!-- Return History Tile -->
+            <div class="tile" id="return-history-tile" data-target="return-history-section" data-file="return_history">
+                <i class="fas fa-history"></i>
+                <div class="tile-title">Return History</div>
+            </div>
         </div>
         
         <!-- Dynamic Content Container -->
