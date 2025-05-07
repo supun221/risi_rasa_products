@@ -617,7 +617,7 @@ $(document).ready(function() {
         
         // AJAX call to fetch phone suggestions
         $.ajax({
-            url: 'process/get_phone_suggestions.php',
+            url: 'process/get_name_suggestions.php',
             type: 'GET',
             data: { term: searchTerm },
             dataType: 'json',
