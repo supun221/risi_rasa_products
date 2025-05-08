@@ -174,6 +174,12 @@ try {
             margin: 0 auto 5px;
             display: block;
         }
+        .logo12 {
+            max-width: 30mm; /* Reduced from 60mm to 40mm */
+            height: auto;
+            margin: 0 auto 5px;
+            display: block;
+        }
         .company-name {
             font-size: 14px;
             font-weight: bold;
