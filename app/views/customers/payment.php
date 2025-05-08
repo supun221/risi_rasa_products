@@ -118,6 +118,18 @@ $generatedInvoiceNumber = generateInvoiceNumber();
             border: 1px dashed #e74c3c;
         }
 
+        .credit-limit {
+            font-size: 20px;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px dashed #e74c3c;
+        }
+
         /* Payment Form */
         .payment-form {
             margin-top: 20px;
@@ -290,12 +302,12 @@ $generatedInvoiceNumber = generateInvoiceNumber();
     ?>
 
     <div class="content-wrapper">
-        <div class="page-header">
+        <!-- <div class="page-header">
             <h1>Customer Payment</h1>
             <a href="customer_list.php" class="back-button no-print">
                 <i class="fas fa-arrow-left"></i> Back to Customers
             </a>
-        </div>
+        </div> -->
 
         <?php if (isset($_SESSION['payment_error'])): ?>
             <div class="alert alert-danger">
@@ -324,26 +336,28 @@ $generatedInvoiceNumber = generateInvoiceNumber();
                     <span class="detail-label">Address:</span>
                     <?php echo htmlspecialchars($customer['address']); ?>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Credit Limit:</span>
-                    Rs. <?php echo number_format((float)$customer['credit_limit'], 2); ?>
-                </div>
             </div>
             <div class="credit-balance">
                 <span class="detail-label">Current Credit Balance:</span>
                 Rs. <?php echo number_format((float)$creditBalance, 2); ?>
             </div>
+            <div class="credit-limit">
+                <span class="detail-label">Credit Limit:</span>
+                Rs. <?php echo number_format((float)$customer['credit_limit'], 2); ?>
+            </div>
         </div>
 
         <div class="payment-form no-print">
             <h3>Record Payment</h3>
-            <form method="post" action="process_payment.php">
+            <form method="post" action="process_payment.php" id="paymentForm">
                 <input type="hidden" name="customer_id" value="<?php echo htmlspecialchars($customerId); ?>">
                 <input type="hidden" id="invoice_number" name="invoice_number" value="<?php echo htmlspecialchars($generatedInvoiceNumber); ?>">
+                <input type="hidden" id="current_balance" value="<?php echo $creditBalance; ?>">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="amount">Payment Amount (Rs.)</label>
-                        <input type="number" id="amount" name="amount" class="form-control" step="0.01" required>
+                        <input type="number" id="amount" name="amount" class="form-control" step="0.01" required min="0.01" max="<?php echo $creditBalance; ?>">
+                        <small class="form-text text-muted">Maximum payment amount: Rs. <?php echo number_format($creditBalance, 2); ?></small>
                     </div>
                     <div class="form-group">
                         <label for="payment_method">Payment Method</label>
@@ -440,6 +454,22 @@ $generatedInvoiceNumber = generateInvoiceNumber();
                 } else {
                     chequeNumberContainer.style.display = 'none';
                     document.getElementById('cheque_number').removeAttribute('required');
+                }
+            });
+
+            // Validate payment amount
+            document.getElementById('paymentForm').addEventListener('submit', function(e) {
+                const amount = parseFloat(document.getElementById('amount').value);
+                const currentBalance = parseFloat(document.getElementById('current_balance').value);
+                
+                if (amount > currentBalance) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Invalid Amount!',
+                        text: 'Payment amount cannot exceed current credit balance.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
         });

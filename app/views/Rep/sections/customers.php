@@ -1,6 +1,9 @@
 <?php
 // Customers management logic
 require_once '../../../../config/databade.php';
+
+// Define base URL
+$base_url = '/internship project/risi_rasa_products';
 ?>
 
 <div class="section-card fade-transition" id="customer-section">
@@ -88,6 +91,9 @@ require_once '../../../../config/databade.php';
                                         <button class='btn btn-sm btn-primary edit-customer' data-id='{$customer['id']}' title='Edit'>
                                             <i class='fas fa-edit'></i>
                                         </button>
+                                        <a href='{$base_url}/app/views/customers/payment.php?id={$customer['id']}' class='btn btn-sm btn-success' title='Make Payment'>
+                                            <i class='fas fa-money-bill-wave'></i>
+                                        </a>
                                     </td>
                                 </tr>";
                             }
@@ -184,6 +190,9 @@ require_once '../../../../config/databade.php';
                             <button class='btn btn-sm btn-primary edit-customer' data-id='${customer.id}' title='Edit'>
                                 <i class='fas fa-edit'></i>
                             </button>
+                            <a href='{$base_url}/app/views/customers/payment.php?id=${customer.id}' class='btn btn-sm btn-success' title='Make Payment'>
+                                <i class='fas fa-money-bill-wave'></i>
+                            </a>
                         </td>
                     </tr>`;
                 });

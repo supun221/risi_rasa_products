@@ -40,14 +40,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Get current credit balance before update
-    $getBalanceQuery = "SELECT credit_balance FROM customers WHERE id = '$customerId'";
-    $balanceResult = mysqli_query($conn, $getBalanceQuery);
+    $getBalanceQuery = "SELECT credit_balance, credit_limit FROM customers WHERE id = ?";
+    $stmt = mysqli_prepare($conn, $getBalanceQuery);
+    mysqli_stmt_bind_param($stmt, "i", $customerId);
+    mysqli_stmt_execute($stmt);
+    $balanceResult = mysqli_stmt_get_result($stmt);
     $previousCreditBalance = 0;
+    $creditLimit = 0;
     
     if ($balanceResult && $customerData = mysqli_fetch_assoc($balanceResult)) {
         $previousCreditBalance = $customerData['credit_balance'];
+        $creditLimit = $customerData['credit_limit'];
     }
-    
+
+    // Validate payment amount against credit balance
+    if ($amount > $previousCreditBalance) {
+        $_SESSION['payment_error'] = "Payment amount cannot exceed current credit balance.";
+        header("Location: payment.php?id=" . urlencode($customerId));
+        exit;
+    }
+
     // Check if the cheque_number column exists in the customer_payments table
     $columnCheckQuery = "SHOW COLUMNS FROM customer_payments LIKE 'cheque_number'";
     $columnCheckResult = mysqli_query($conn, $columnCheckQuery);
@@ -112,7 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'invoice_number' => $invoiceNumber,
             'payment_date' => date('Y-m-d H:i:s'),
             'previous_balance' => $previousCreditBalance,
-            'new_balance' => $newCreditBalance
+            'new_balance' => $newCreditBalance,
+            'credit_limit' => $creditLimit
         ];
         
         // Redirect to receipt page

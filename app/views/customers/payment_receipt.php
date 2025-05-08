@@ -33,7 +33,7 @@ if (!$paymentId && !isset($_SESSION['payment_details'])) {
     exit;
 }
 
-// Try to get payment details from database if we have payment ID
+// Get payment details from database if we have payment ID
 if ($paymentId) {
     // Check if cheque_number column exists before querying with it
     $columnCheckQuery = "SHOW COLUMNS FROM customer_payments LIKE 'cheque_number'";
@@ -41,7 +41,7 @@ if ($paymentId) {
     $chequeNumberColumnExists = mysqli_num_rows($columnCheckResult) > 0;
     
     // Build the query based on column existence
-    $paymentQuery = "SELECT cp.*, c.name, c.telephone, c.address, c.nic 
+    $paymentQuery = "SELECT cp.*, c.name, c.telephone, c.address, c.nic, c.credit_limit 
                     FROM customer_payments cp
                     JOIN customers c ON cp.customer_id = c.id
                     WHERE cp.id = ?";
@@ -72,7 +72,7 @@ if ($paymentId) {
     }
     
     // Get previous and new balance by calculating
-    $customerQuery = "SELECT credit_balance FROM customers WHERE id = ?";
+    $customerQuery = "SELECT credit_balance, credit_limit FROM customers WHERE id = ?";
     $stmt = mysqli_prepare($conn, $customerQuery);
     mysqli_stmt_bind_param($stmt, "i", $paymentData['customer_id']);
     mysqli_stmt_execute($stmt);
@@ -81,14 +81,15 @@ if ($paymentId) {
     
     $currentBalance = $customerData['credit_balance'];
     $previousBalance = $currentBalance + $paymentData['amount'];
+    $paymentData['credit_limit'] = $customerData['credit_limit'];
 } 
 // Use session data if available
 else if (isset($_SESSION['payment_details'])) {
     $paymentData = $_SESSION['payment_details'];
     
-    // Get customer information
+    // Get customer information including credit_limit
     $customerId = $paymentData['customer_id'];
-    $customerQuery = "SELECT name, telephone, address, nic FROM customers WHERE id = ?";
+    $customerQuery = "SELECT name, telephone, address, nic, credit_limit FROM customers WHERE id = ?";
     $stmt = mysqli_prepare($conn, $customerQuery);
     mysqli_stmt_bind_param($stmt, "i", $customerId);
     mysqli_stmt_execute($stmt);
@@ -322,6 +323,10 @@ $paymentTime = date('h:i A', strtotime($paymentData['payment_date']));
                     <td><?php echo htmlspecialchars($paymentData['reference']); ?></td>
                 </tr>
                 <?php endif; ?>
+                <tr>
+                    <td>Credit Limit:</td>
+                    <td>Rs.<?php echo formatAmount($paymentData['credit_limit']); ?></td>
+                </tr>
             </table>
         </div>
         
