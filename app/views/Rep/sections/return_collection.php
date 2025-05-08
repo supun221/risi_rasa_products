@@ -376,7 +376,7 @@ $(document).ready(function() {
         
         $.ajax({
             // Use absolute path from web root instead of relative path
-            url: '/internship project/risi_rasa_products/app/views/Rep/process/process_return_collection.php',
+            url: '../Rep/process/process_return_collection.php',
             type: 'POST',
             data: formData, // Use our modified formData that includes submit_return
             dataType: 'json',
