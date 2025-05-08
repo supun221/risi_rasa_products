@@ -274,7 +274,7 @@ $(document).ready(function() {
         const returnBill = $(this).data('return-bill');
         
         // Set the print button URL
-        $('#printReturnBtn').attr('href', '/internship project/risi_rasa_products/app/views/invoice/pos_return_receipt.php?return_bill=' + returnBill);
+        $('#printReturnBtn').attr('href', '../../invoice/pos_return_receipt.php?return_bill=' + returnBill);
         
         // Show the modal
         $('#returnDetailsModal').modal('show');

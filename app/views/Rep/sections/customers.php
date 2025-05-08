@@ -1,7 +1,10 @@
 <?php
 // Customers management logic
 require_once '../../../../config/databade.php';
-?>
+
+// Define base URL
+// $base_url = '/risi_rasa_products';
+// ?>
 
 <div class="section-card fade-transition" id="customer-section">
     <div class="section-header">
@@ -36,6 +39,7 @@ require_once '../../../../config/databade.php';
                         <th>Phone</th>
                         <th>NIC</th>
                         <th>Credit Limit</th>
+                        <th>Credit Balance</th>
                         <th>Advance</th>
                         <th>Actions</th>
                     </tr>
@@ -47,7 +51,7 @@ require_once '../../../../config/databade.php';
                     
                     try {
                         $stmt = $conn->prepare("
-                            SELECT c.id, c.name, c.telephone, c.nic, c.address, c.whatsapp, c.credit_limit,
+                            SELECT c.id, c.name, c.telephone, c.nic, c.address, c.whatsapp, c.credit_limit, c.credit_balance,
                                    COALESCE(ap.net_amount, 0) as advance_amount
                             FROM customers c
                             LEFT JOIN (
@@ -72,14 +76,20 @@ require_once '../../../../config/databade.php';
                                 // Format advance amount - add text color based on value
                                 $advanceClass = $customer['advance_amount'] > 0 ? 'text-success font-weight-bold' : '';
                                 $advanceAmount = $customer['advance_amount'] > 0 ? 
-                                    "<span class='$advanceClass'>Rs. " . number_format($customer['advance_amount'], 2) . '</span>' : 
+                                    "<span class='$advanceClass'>Rs. " . number_format((float)$customer['advance_amount'], 2) . '</span>' : 
                                     'Rs. 0.00';
+                                
+                                // Format credit balance - add text color based on value
+                                $creditBalance = (float)$customer['credit_balance'];
+                                $creditBalanceClass = $creditBalance > 0 ? 'text-danger font-weight-bold' : '';
+                                $creditBalanceFormatted = "<span class='$creditBalanceClass'>Rs. " . number_format($creditBalance, 2) . '</span>';
                                 
                                 echo "<tr>
                                     <td>{$customer['name']}</td>
                                     <td>{$customer['telephone']}</td>
                                     <td>{$customer['nic']}</td>
-                                    <td>Rs. {$customer['credit_limit']}</td>
+                                    <td>Rs. " . number_format((float)$customer['credit_limit'], 2) . "</td>
+                                    <td>{$creditBalanceFormatted}</td>
                                     <td>{$advanceAmount}</td>
                                     <td>
                                         <button class='btn btn-sm btn-info view-customer' data-id='{$customer['id']}' title='View Details'>
@@ -88,14 +98,17 @@ require_once '../../../../config/databade.php';
                                         <button class='btn btn-sm btn-primary edit-customer' data-id='{$customer['id']}' title='Edit'>
                                             <i class='fas fa-edit'></i>
                                         </button>
+                                        <a href='../customers/payment.php?id={$customer['id']}' class='btn btn-sm btn-success' title='Make Payment'>
+                                            <i class='fas fa-money-bill-wave'></i>
+                                        </a>
                                     </td>
                                 </tr>";
                             }
                         } else {
-                            echo "<tr><td colspan='6' class='text-center'>No customers found</td></tr>";
+                            echo "<tr><td colspan='7' class='text-center'>No customers found</td></tr>";
                         }
                     } catch (Exception $e) {
-                        echo "<tr><td colspan='6' class='text-center text-danger'>Error: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                        echo "<tr><td colspan='7' class='text-center text-danger'>Error: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
                     }
                     ?>
                 </tbody>
@@ -176,6 +189,7 @@ require_once '../../../../config/databade.php';
                         <td>${customer.telephone}</td>
                         <td>${customer.nic}</td>
                         <td>Rs. ${customer.credit_limit}</td>
+                        <td>Rs. ${customer.credit_balance}</td>
                         <td>${advanceAmount}</td>
                         <td>
                             <button class='btn btn-sm btn-info view-customer' data-id='${customer.id}' title='View Details'>
@@ -184,11 +198,14 @@ require_once '../../../../config/databade.php';
                             <button class='btn btn-sm btn-primary edit-customer' data-id='${customer.id}' title='Edit'>
                                 <i class='fas fa-edit'></i>
                             </button>
+                            <a href='{$base_url}/app/views/customers/payment.php?id=${customer.id}' class='btn btn-sm btn-success' title='Make Payment'>
+                                <i class='fas fa-money-bill-wave'></i>
+                            </a>
                         </td>
                     </tr>`;
                 });
             } else {
-                html = "<tr><td colspan='6' class='text-center'>No customers found</td></tr>";
+                html = "<tr><td colspan='7' class='text-center'>No customers found</td></tr>";
             }
             
             $('#customers-table tbody').html(html);
@@ -261,6 +278,11 @@ require_once '../../../../config/databade.php';
                                 <div class="row mb-2">
                                     <div class="col-4 font-weight-bold">Credit Limit:</div>
                                     <div class="col-8">Rs. ${customer.credit_limit}</div>
+                                </div>
+                                
+                                <div class="row mb-2">
+                                    <div class="col-4 font-weight-bold">Credit Balance:</div>
+                                    <div class="col-8">Rs. ${customer.credit_balance}</div>
                                 </div>
                                 
                                 <div class="row mb-2">
