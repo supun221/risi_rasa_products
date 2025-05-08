@@ -273,7 +273,7 @@ try {
         <!-- Header Section -->
         <div class="header">
             <?php if ($logoBase64): ?>
-                <img src="<?= $logoBase64 ?>" alt="RisiRasa Logo" class="logo">
+                <img src="<?= $logoBase64 ?>" alt="RisiRasa Logo" class="logo12">
             <?php endif; ?>
             <div class="company-name"><?php echo $companyName; ?></div>
             <div class="company-info"><?php echo $companyAddress; ?></div>
