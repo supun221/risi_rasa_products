@@ -84,6 +84,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute();
                 
                 $success_message = "Item marked as resolved (discarded).";
+            } elseif ($action === 'reset_item') {
+                $item_id = (int)$_POST['item_id'];
+                
+                // Get item details to check how many items were added to stock
+                $item_query = "SELECT * FROM return_collection_items WHERE id = ?";
+                $stmt = $conn->prepare($item_query);
+                $stmt->bind_param("i", $item_id);
+                $stmt->execute();
+                $item_result = $stmt->get_result();
+                $item = $item_result->fetch_assoc();
+                
+                if ($item && $item['resolved'] == 1) {
+                    // Only proceed if items were previously added to stock
+                    $stock_added = (int)$item['stock_added'];
+                    
+                    if ($stock_added > 0) {
+                        // Remove previously added stock from inventory
+                        $update_inventory = "UPDATE stock_entries SET available_stock = available_stock - ? WHERE product_name = ? AND branch = ?";
+                        $stmt = $conn->prepare($update_inventory);
+                        $branch = $_SESSION['store'];
+                        $stmt->bind_param("iss", $stock_added, $item['product_name'], $branch);
+                        $stmt->execute();
+                        
+                        if ($stmt->affected_rows <= 0) {
+                            throw new Exception("Failed to update inventory. Stock may not have been found.");
+                        }
+                    }
+                    
+                    // Reset item to pending status
+                    $reset_item = "UPDATE return_collection_items SET stock_added = 0, resolved = 0, resolved_by = NULL, resolved_at = NULL WHERE id = ?";
+                    $stmt = $conn->prepare($reset_item);
+                    $stmt->bind_param("i", $item_id);
+                    $stmt->execute();
+                    
+                    $success_message = "Item has been reset. " . ($stock_added > 0 ? "$stock_added items were removed from inventory." : "");
+                } else {
+                    $error_message = "Item not found or not yet resolved.";
+                }
             }
             
             // Redirect to refresh the page using output buffering for safe redirects
@@ -434,14 +472,20 @@ try {
                                                         </form>
                                                     <?php endif; ?>
                                                     
-                                                    <?php if ($return['status'] === 'approved' && !$return['is_resolved']): ?>
+                                                    <?php if ($return['status'] === 'approved'): ?>
                                                         <button type="button" class="btn btn-sm btn-warning handle-stock-btn" 
                                                            data-return-id="<?php echo $return['id']; ?>">
                                                             <i class="fas fa-boxes"></i> Handle Stock
                                                         </button>
+                                                        
+                                                        <?php if ($return['is_resolved']): ?>
+                                                            <span class="badge badge-success ml-1">All Items Resolved</span>
+                                                        <?php else: ?>
+                                                            <span class="badge badge-warning ml-1">Items Pending</span>
+                                                        <?php endif; ?>
                                                     <?php endif; ?>
                                                     
-                                                    <a href="/internship project/risi_rasa_products/app/views/invoice/pos_return_receipt.php?return_bill=<?php echo urlencode($return['return_bill_number']); ?>" 
+                                                    <a href="../invoice/pos_return_receipt.php?return_bill=<?php echo urlencode($return['return_bill_number']); ?>" 
                                                        class="btn btn-sm btn-secondary" target="_blank">
                                                         <i class="fas fa-print"></i>
                                                     </a>
@@ -680,6 +724,54 @@ try {
             }
             
             return true;
+        });
+        
+        // Handle reset form submission from the handle stock modal
+        $(document).on('submit', '.reset-item-form', function(e) {
+            e.preventDefault();
+            
+            const form = $(this);
+            const returnId = form.find('input[name="return_id"]').val();
+            const itemId = form.find('input[name="item_id"]').val();
+            
+            // Submit the form via AJAX with the correct URL path
+            $.ajax({
+                url: 'Return_rep_order.php', // Use current file path instead of relative path
+                method: 'POST',
+                data: form.serialize(),
+                success: function(response) {
+                    // Reload the handle stock modal content
+                    $.ajax({
+                        url: 'process/get_return_items.php',
+                        method: 'GET',
+                        data: { return_id: returnId },
+                        dataType: 'html',
+                        success: function(response) {
+                            $('#handleStockContent').html(response);
+                            
+                            // Show success message inside the modal
+                            $('#handleStockContent').prepend(`
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <strong>Success!</strong> Item has been reset successfully.
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            `);
+                        },
+                        error: function(xhr, status, error) {
+                            $('#handleStockContent').html(`
+                                <div class="alert alert-danger">
+                                    Error reloading items: ${error}
+                                </div>
+                            `);
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    alert('Error processing reset: ' + error);
+                }
+            });
         });
         
         // Date range validation
