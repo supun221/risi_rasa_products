@@ -9,10 +9,15 @@ require_once '../../../../config/databade.php';
 
 // Get return ID from request
 $return_id = isset($_GET['return_id']) ? (int)$_GET['return_id'] : 0;
+$include_items_only = isset($_GET['include_items_only']) ? (bool)$_GET['include_items_only'] : false;
 
 // Validate return ID
 if ($return_id <= 0) {
-    echo '<div class="alert alert-danger">Invalid return ID provided</div>';
+    if ($include_items_only) {
+        echo json_encode(['success' => false, 'message' => 'Invalid return ID provided']);
+    } else {
+        echo '<div class="alert alert-danger">Invalid return ID provided</div>';
+    }
     exit;
 }
 
@@ -35,7 +40,11 @@ try {
     $result = $stmt->get_result();
     
     if ($result->num_rows === 0) {
-        echo '<div class="alert alert-warning">Return record not found</div>';
+        if ($include_items_only) {
+            echo json_encode(['success' => false, 'message' => 'Return record not found']);
+        } else {
+            echo '<div class="alert alert-warning">Return record not found</div>';
+        }
         exit;
     }
     
@@ -55,6 +64,16 @@ try {
     $items = [];
     while ($item = $items_result->fetch_assoc()) {
         $items[] = $item;
+    }
+    
+    // If we only need items data for JSON response
+    if ($include_items_only) {
+        echo json_encode([
+            'success' => true,
+            'return' => $return,
+            'items' => $items
+        ]);
+        exit;
     }
     
     // Output HTML content for modal
@@ -130,6 +149,10 @@ try {
     <?php
     
 } catch (Exception $e) {
-    echo '<div class="alert alert-danger">Error: ' . htmlspecialchars($e->getMessage()) . '</div>';
+    if ($include_items_only) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    } else {
+        echo '<div class="alert alert-danger">Error: ' . htmlspecialchars($e->getMessage()) . '</div>';
+    }
 }
 ?>

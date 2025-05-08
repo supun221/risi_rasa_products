@@ -130,9 +130,9 @@ if ($user_role === 'admin') {
         <?php endif; ?>
 
         <?php if ($permissions['can_view_sales_order']): ?>
-            <button onclick="loadSection('sales_order', '#dynamic-section')">
+            <button onclick="location.href='Return_rep_order.php'">
                 <img src="../../assets/images/order.png" alt="Sales Order">
-                <span>Sales Order</span>
+                <span>Sales Order return</span>
             </button>
         <?php endif; ?>
 
