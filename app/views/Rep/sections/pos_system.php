@@ -49,8 +49,8 @@ $invoiceNumber = generateInvoiceNumber($conn);
         <div class="card mb-4" id="customer-search-card" style="display: none;">
             <div class="card-body">
                 <div class="form-group position-relative">
-                    <label for="customer-phone-search"><i class="fas fa-search mr-1"></i> Search Customer by Phone</label>
-                    <input type="text" class="form-control" id="customer-phone-search" placeholder="Enter phone number" autocomplete="off">
+                    <label for="customer-phone-search"><i class="fas fa-search mr-1"></i> Search Customer by Name</label>
+                    <input type="text" class="form-control" id="customer-phone-search" placeholder="Enter name" autocomplete="off">
                     <div id="customer-phone-suggestions" class="phone-suggestions"></div>
                 </div>
                 
