@@ -249,9 +249,9 @@
     require_once '../header1.php';
     require_once '../../../config/databade.php'; // Database connection
 
-    // Fetch customers from the database
+    // Fetch customers from the database with credit_balance included
     $customers = [];
-    $query = "SELECT id, name, telephone, nic,credit_limit, address FROM customers";
+    $query = "SELECT id, name, telephone, nic, credit_limit, credit_balance, address FROM customers";
     $result = mysqli_query($conn, $query);
 
     if ($result) {
@@ -262,7 +262,9 @@
         echo "<p>Error fetching customers: " . mysqli_error($conn) . "</p>";
     }
 
-    // Fetch credit balances for each customer
+    // The credit balance calculation is no longer needed since we're using the credit_balance column directly
+    // Commenting out the old credit balance calculation code
+    /*
     $creditBalances = [];
     $creditQuery = "SELECT customer_id, SUM(gross_amount) AS total_credit 
                 FROM bill_records 
@@ -277,6 +279,7 @@
     } else {
         echo "<p>Error fetching credit balances: " . mysqli_error($conn) . "</p>";
     }
+    */
 
     include 'update_customer.php'; // Include update customer modal
     ?>
@@ -310,7 +313,9 @@
                     if (!empty($customers)) {
                         foreach ($customers as $index => $customer) {
                             $customerId = $customer['id'];
-                            $creditBalance = isset($creditBalances[$customerId]) ? $creditBalances[$customerId] : 0.00;
+                            
+                            // Use the credit_balance directly from customers table
+                            $creditBalance = isset($customer['credit_balance']) ? $customer['credit_balance'] : 0.00;
                             
                             // Ensure credit_limit is numeric
                             $creditLimit = is_numeric($customer['credit_limit']) ? $customer['credit_limit'] : 0.00;

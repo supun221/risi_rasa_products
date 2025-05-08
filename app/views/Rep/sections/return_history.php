@@ -190,12 +190,7 @@ try {
                                         <td>Rs. <?php echo number_format($return['total_amount'], 2); ?></td>
                                         <td><?php echo htmlspecialchars($return['reason']); ?></td>
                                         <td>
-                                            <!-- <a href="javascript:void(0)" class="btn btn-sm btn-info view-return-btn" 
-                                               data-return-id="<?php echo $return['id']; ?>" 
-                                               data-return-bill="<?php echo $return['return_bill_number']; ?>">
-                                                <i class="fas fa-eye"></i>
-                                            </a> -->
-                                            <a href="/internship project/risi_rasa_products/app/views/invoice/pos_return_receipt.php?return_bill=<?php echo urlencode($return['return_bill_number']); ?>" 
+                                            <a href="../invoice/pos_return_receipt.php?return_bill=<?php echo urlencode($return['return_bill_number']); ?>" 
                                                class="btn btn-sm btn-secondary" target="_blank">
                                                 <i class="fas fa-print"></i>
                                             </a>
