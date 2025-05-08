@@ -312,9 +312,88 @@ try {
             background-color: #ffc107;
             color: #212529;
         }
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 4px;
+            color: white;
+            z-index: 9999;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+        .notification.success {
+            background-color: #28a745;
+        }
+        .notification.error {
+            background-color: #dc3545;
+        }
+        .notification.warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        /* Custom confirmation dialog styles */
+        .confirmation-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 10000;
+            display: none;
+            max-width: 400px;
+            width: 90%;
+        }
+        .confirmation-dialog .message {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        .confirmation-dialog .buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .confirmation-dialog .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <!-- Add notification container -->
+    <div id="notification" class="notification"></div>
+    
+    <!-- Add confirmation dialog -->
+    <div class="confirmation-dialog" id="confirmationDialog">
+        <div class="message"></div>
+        <div class="buttons">
+            <button class="btn btn-secondary" id="cancelConfirm">Cancel</button>
+            <button class="btn btn-danger" id="confirmAction">Confirm</button>
+        </div>
+    </div>
+    <div class="overlay" id="confirmationOverlay"></div>
+    
     <div class="container-fluid mt-4">
         <div class="row">
             <div class="col-12">
@@ -634,6 +713,47 @@ try {
     
     <script>
     $(document).ready(function() {
+        // Notification function
+        function showNotification(message, type = 'success') {
+            const notification = $('#notification');
+            notification.removeClass('success error warning').addClass(type);
+            notification.text(message);
+            notification.fadeIn();
+            
+            setTimeout(() => {
+                notification.fadeOut();
+            }, 3000);
+        }
+        
+        // Custom confirmation dialog function
+        function showConfirmation(message, onConfirm) {
+            const dialog = $('#confirmationDialog');
+            const overlay = $('#confirmationOverlay');
+            
+            dialog.find('.message').text(message);
+            dialog.fadeIn();
+            overlay.fadeIn();
+            
+            // Handle confirm button click
+            $('#confirmAction').off('click').on('click', function() {
+                dialog.fadeOut();
+                overlay.fadeOut();
+                onConfirm();
+            });
+            
+            // Handle cancel button click
+            $('#cancelConfirm').off('click').on('click', function() {
+                dialog.fadeOut();
+                overlay.fadeOut();
+            });
+            
+            // Handle overlay click
+            overlay.off('click').on('click', function() {
+                dialog.fadeOut();
+                overlay.fadeOut();
+            });
+        }
+        
         // Handle view return button clicks
         $('.view-return-btn').click(function() {
             const returnId = $(this).data('return-id');
@@ -714,12 +834,12 @@ try {
             const availableQty = parseInt($('#available_qty').val());
             
             if (isNaN(qtyToAdd) || qtyToAdd <= 0) {
-                alert('Please enter a valid quantity.');
+                showNotification('Please enter a valid quantity.', 'error');
                 return false;
             }
             
             if (qtyToAdd > availableQty) {
-                alert('Cannot add more than the available return quantity.');
+                showNotification('Cannot add more than the available return quantity.', 'error');
                 return false;
             }
             
@@ -734,43 +854,81 @@ try {
             const returnId = form.find('input[name="return_id"]').val();
             const itemId = form.find('input[name="item_id"]').val();
             
-            // Submit the form via AJAX with the correct URL path
-            $.ajax({
-                url: 'Return_rep_order.php', // Use current file path instead of relative path
-                method: 'POST',
-                data: form.serialize(),
-                success: function(response) {
-                    // Reload the handle stock modal content
-                    $.ajax({
-                        url: 'process/get_return_items.php',
-                        method: 'GET',
-                        data: { return_id: returnId },
-                        dataType: 'html',
-                        success: function(response) {
-                            $('#handleStockContent').html(response);
-                            
-                            // Show success message inside the modal
-                            $('#handleStockContent').prepend(`
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <strong>Success!</strong> Item has been reset successfully.
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                            `);
-                        },
-                        error: function(xhr, status, error) {
-                            $('#handleStockContent').html(`
-                                <div class="alert alert-danger">
-                                    Error reloading items: ${error}
-                                </div>
-                            `);
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    alert('Error processing reset: ' + error);
-                }
+            // Show custom confirmation dialog
+            showConfirmation('Are you sure you want to reset this item? This will remove the previously added stock from inventory.', function() {
+                // Submit the form via AJAX
+                $.ajax({
+                    url: 'Return_rep_order.php',
+                    method: 'POST',
+                    data: form.serialize(),
+                    success: function(response) {
+                        // Reload the handle stock modal content
+                        $.ajax({
+                            url: 'process/get_return_items.php',
+                            method: 'GET',
+                            data: { return_id: returnId },
+                            dataType: 'html',
+                            success: function(response) {
+                                $('#handleStockContent').html(response);
+                                showNotification('Item has been reset successfully.', 'success');
+                            },
+                            error: function(xhr, status, error) {
+                                $('#handleStockContent').html(`
+                                    <div class="alert alert-danger">
+                                        Error reloading items: ${error}
+                                    </div>
+                                `);
+                                showNotification('Error reloading items: ' + error, 'error');
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        showNotification('Error processing reset: ' + error, 'error');
+                    }
+                });
+            });
+        });
+        
+        // Handle discard form submission
+        $(document).on('submit', '.discard-item-form', function(e) {
+            e.preventDefault();
+            
+            const form = $(this);
+            const returnId = form.find('input[name="return_id"]').val();
+            const itemId = form.find('input[name="item_id"]').val();
+            
+            // Show custom confirmation dialog
+            showConfirmation('Are you sure you want to discard this item? This will mark it as resolved without adding stock.', function() {
+                // Submit the form via AJAX
+                $.ajax({
+                    url: 'Return_rep_order.php',
+                    method: 'POST',
+                    data: form.serialize(),
+                    success: function(response) {
+                        // Reload the handle stock modal content
+                        $.ajax({
+                            url: 'process/get_return_items.php',
+                            method: 'GET',
+                            data: { return_id: returnId },
+                            dataType: 'html',
+                            success: function(response) {
+                                $('#handleStockContent').html(response);
+                                showNotification('Item has been discarded successfully.', 'success');
+                            },
+                            error: function(xhr, status, error) {
+                                $('#handleStockContent').html(`
+                                    <div class="alert alert-danger">
+                                        Error reloading items: ${error}
+                                    </div>
+                                `);
+                                showNotification('Error reloading items: ' + error, 'error');
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        showNotification('Error processing discard: ' + error, 'error');
+                    }
+                });
             });
         });
         
@@ -780,7 +938,7 @@ try {
             const dateTo = $('#date_to').val();
             
             if (dateFrom && dateTo && new Date(dateFrom) > new Date(dateTo)) {
-                alert('Date From cannot be later than Date To');
+                showNotification('Date From cannot be later than Date To', 'warning');
                 return false;
             }
             

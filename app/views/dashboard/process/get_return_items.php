@@ -137,12 +137,11 @@ try {
                                                 <i class="fas fa-plus-circle"></i> Add Stock
                                             </button>
                                             
-                                            <form method="post" action="../../process/Return_rep_order.php" style="display:inline;">
+                                            <form method="post" action="../../process/Return_rep_order.php" class="discard-item-form" style="display:inline;">
                                                 <input type="hidden" name="action" value="discard_item">
                                                 <input type="hidden" name="item_id" value="<?php echo $item['id']; ?>">
                                                 <input type="hidden" name="return_id" value="<?php echo $return_id; ?>">
-                                                <button type="submit" class="btn btn-sm btn-danger" 
-                                                        onclick="return confirm('Are you sure you want to discard this item? This will mark it as resolved without adding stock.')">
+                                                <button type="submit" class="btn btn-sm btn-danger">
                                                     <i class="fas fa-ban"></i> Discard
                                                 </button>
                                             </form>
@@ -152,8 +151,7 @@ try {
                                                 <input type="hidden" name="action" value="reset_item">
                                                 <input type="hidden" name="item_id" value="<?php echo $item['id']; ?>">
                                                 <input type="hidden" name="return_id" value="<?php echo $return_id; ?>">
-                                                <button type="submit" class="btn btn-sm btn-warning reset-item-btn" 
-                                                        onclick="return confirm('Are you sure you want to reset this item? This will remove the previously added stock from inventory.')">
+                                                <button type="submit" class="btn btn-sm btn-warning reset-item-btn">
                                                     <i class="fas fa-redo"></i> Reset
                                                 </button>
                                                 
