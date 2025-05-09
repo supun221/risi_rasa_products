@@ -243,15 +243,29 @@ try {
         
         $stmt->execute();
         
-        // If credit amount is present, update customer credit balance
-        if ($credit_amount > 0) {
+        // Handle credit updates - check both credit_amount and payment_method
+        if ($credit_amount > 0 || $payment_method === 'credit') {
+            // For payment method 'credit', make sure we're using the net_amount if credit_amount is 0
+            $amount_to_credit = $payment_method === 'credit' ? max($credit_amount, $net_amount) : $credit_amount;
+            
+            // Update customer credit balance
             $stmt = $conn->prepare("
                 UPDATE customers
                 SET credit_balance = credit_balance + ?,
                     last_purchase_date = NOW()
                 WHERE id = ?
             ");
-            $stmt->bind_param("di", $credit_amount, $customer_id);
+            $stmt->bind_param("di", $amount_to_credit, $customer_id);
+            $stmt->execute();
+            
+            // Log the credit transaction
+            $stmt = $conn->prepare("
+                INSERT INTO lorry_transactions 
+                (rep_id, transaction_type, reason, customer_name, total_amount) 
+                VALUES (?, 'credit_added', ?, ?, ?)
+            ");
+            $reason = "Credit sale for invoice " . $invoice_number;
+            $stmt->bind_param("issd", $rep_id, $reason, $customer_name, $amount_to_credit);
             $stmt->execute();
         }
         
