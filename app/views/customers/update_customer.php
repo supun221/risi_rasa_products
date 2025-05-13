@@ -1,3 +1,16 @@
+<?php
+// Fetch routes for dropdown
+$routes = [];
+$routeQuery = "SELECT id, name FROM routes ORDER BY name ASC";
+$routeResult = mysqli_query($conn, $routeQuery);
+
+if ($routeResult) {
+    while ($row = mysqli_fetch_assoc($routeResult)) {
+        $routes[] = $row;
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -67,6 +80,15 @@
                             <label for="update-price-type">Price Type</label>
                             <input type="text" class="form-control" id="update-price-type" name="price_type">
                         </div>
+                        <div class="form-group">
+                            <label for="update-route-id">Route</label>
+                            <select class="form-control" id="update-route-id" name="route_id">
+                                <option value="">-- Select Route --</option>
+                                <?php foreach($routes as $route): ?>
+                                    <option value="<?php echo $route['id']; ?>"><?php echo htmlspecialchars($route['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="modal-footer">
@@ -109,6 +131,7 @@
                         $('#update-credit-limit').val(customer.credit_limit);
                         $('#update-discount').val(customer.discount);
                         $('#update-price-type').val(customer.price_type);
+                        $('#update-route-id').val(customer.route_id);
 
                         // Show the modal
                         $('#updateCustomerModal').modal('show');
@@ -132,22 +155,41 @@
         $('#updateCustomerForm').on('submit', function (event) {
             event.preventDefault();
 
+            // Debug the form data
+            console.log('Update form data:', $(this).serialize());
+            
+            // Explicitly check route_id value
+            const routeId = $('#update-route-id').val();
+            console.log('Selected route ID for update:', routeId);
+
+            // Gather form data and ensure route_id is properly included
+            const formData = new FormData(this);
+            
             // Perform AJAX to update customer
             $.ajax({
                 url: '../../controllers/customer_controller.php',
                 method: 'POST',
-                data: $(this).serialize(),
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function (response) {
+                    console.log('Update response:', response);
                     if (response.status === 'success') {
-                        alert('Customer updated successfully.');
-                        $('#updateCustomerModal').modal('hide');
-                        location.reload(); // Refresh the page to display updated customer details
+                        // Double-check route_id was included in the form data
+                        console.log('Form data route_id:', formData.get('route_id'));
+                        
+                        Swal.fire('Success', 'Customer updated successfully', 'success')
+                            .then(() => {
+                                $('#updateCustomerModal').modal('hide');
+                                location.reload(); // Refresh the page to display updated customer details
+                            });
                     } else {
-                        alert(response.message);
+                        Swal.fire('Error', response.message || 'Failed to update customer', 'error');
                     }
                 },
-                error: function () {
-                    alert('Error updating customer.');
+                error: function (xhr, status, error) {
+                    console.error('Ajax error:', xhr, status, error);
+                    Swal.fire('Error', 'Error updating customer: ' + (xhr.responseText || error), 'error');
                 }
             });
         });

@@ -1,6 +1,73 @@
 <?php
 require_once '../models/Customer.php'; // Include the Customer class
 require_once '../../config/databade.php';
+
+// Set headers for JSON responses and suppress warnings
+header('Content-Type: application/json');
+ini_set('display_errors', 0);
+error_reporting(E_ERROR);
+
+// Start output buffering to prevent any unwanted output
+ob_start();
+
+// Create logs directory if it doesn't exist
+$log_dir = '../../logs';
+if (!is_dir($log_dir)) {
+    mkdir($log_dir, 0777, true);
+}
+
+// Debug logging function
+function debug_log($message, $data = null) {
+    $log_file = '../../logs/customer_debug.log';
+    $log_entry = date('Y-m-d H:i:s') . ' - ' . $message;
+    if ($data !== null) {
+        $log_entry .= ' - ' . json_encode($data);
+    }
+    try {
+        file_put_contents($log_file, $log_entry . "\n", FILE_APPEND);
+    } catch (Exception $e) {
+        // Silently fail if logging isn't possible
+    }
+}
+
+// Ensure clean output before sending JSON
+function send_json_response($data) {
+    // Clear any output buffered so far
+    ob_clean();
+    
+    // Output JSON
+    echo json_encode($data);
+    
+    // End the script
+    exit;
+}
+
+// Check if there's JSON input
+$request_body = file_get_contents('php://input');
+$data = json_decode($request_body, true);
+
+// Ensure the database has the route_id column
+function ensureRouteIdColumn($conn) {
+    // Check if route_id column exists in customers table
+    $result = mysqli_query($conn, "SHOW COLUMNS FROM customers LIKE 'route_id'");
+    
+    if (!$result || mysqli_num_rows($result) === 0) {
+        // If column doesn't exist, add it
+        $alterQuery = "ALTER TABLE customers ADD COLUMN route_id INT(11) NULL DEFAULT NULL AFTER last_purchase_date";
+        mysqli_query($conn, $alterQuery);
+        
+        // Add foreign key constraint if possible
+        $checkRoutesTable = mysqli_query($conn, "SHOW TABLES LIKE 'routes'");
+        if (mysqli_num_rows($checkRoutesTable) > 0) {
+            $addFKQuery = "ALTER TABLE customers ADD CONSTRAINT fk_customer_route FOREIGN KEY (route_id) REFERENCES routes(id) ON DELETE SET NULL";
+            mysqli_query($conn, $addFKQuery);
+        }
+    }
+}
+
+// Call this function at the start of the script
+ensureRouteIdColumn($conn);
+
 class CustomerController
 {
     private $customer;
@@ -28,7 +95,8 @@ class CustomerController
                 $data['birthday'],
                 $data['credit_limit'],
                 $data['discount'],
-                $data['price_type']
+                $data['price_type'],
+                $data['route_id'] // Include route_id
             );
 
             return [
@@ -79,7 +147,8 @@ class CustomerController
                 $data['birthday'],
                 $data['credit_limit'],
                 $data['discount'],
-                $data['price_type']
+                $data['price_type'],
+                $data['route_id'] // Include route_id
             );
 
             return ['status' => 'success', 'message' => 'Customer updated successfully.'];
@@ -163,14 +232,109 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     switch ($action) {
         case 'add':
-            $response = $controller->addCustomer($data);
-            break;
+            // Sanitize inputs
+            $name = mysqli_real_escape_string($conn, $_POST['name'] ?? '');
+            $telephone = mysqli_real_escape_string($conn, $_POST['telephone'] ?? '');
+            $nic = mysqli_real_escape_string($conn, $_POST['nic'] ?? '');
+            $address = mysqli_real_escape_string($conn, $_POST['address'] ?? '');
+            $whatsapp = mysqli_real_escape_string($conn, $_POST['whatsapp'] ?? '');
+            $email = mysqli_real_escape_string($conn, $_POST['email'] ?? '');
+            $birthday = mysqli_real_escape_string($conn, $_POST['birthday'] ?? '');
+            $credit_limit = mysqli_real_escape_string($conn, $_POST['credit_limit'] ?? '');
+            $discount = mysqli_real_escape_string($conn, $_POST['discount'] ?? '');
+            $price_type = mysqli_real_escape_string($conn, $_POST['price_type'] ?? '');
+            $route_id = isset($_POST['route_id']) && $_POST['route_id'] !== '' ? $_POST['route_id'] : null;
+
+            // Debug log
+            debug_log("Adding customer with route_id", [
+                'route_id_raw' => $_POST['route_id'] ?? 'not set',
+                'route_id_processed' => $route_id
+            ]);
+
+            $sql = "INSERT INTO customers (
+                name, telephone, nic, address, whatsapp, email, birthday, 
+                credit_limit, discount, price_type, route_id
+            ) VALUES (
+                '$name', '$telephone', '$nic', '$address', '$whatsapp', 
+                '$email', '$birthday', '$credit_limit', '$discount', '$price_type', " . 
+                ($route_id === null ? "NULL" : "'$route_id'") . "
+            )";
+
+            debug_log("SQL Insert Query", $sql);
+
+            if (mysqli_query($conn, $sql)) {
+                send_json_response([
+                    'status' => 'success',
+                    'message' => 'Customer added successfully.'
+                ]);
+            } else {
+                debug_log("Add customer - Error: " . mysqli_error($conn));
+                send_json_response([
+                    'status' => 'error',
+                    'message' => 'Failed to add customer: ' . mysqli_error($conn)
+                ]);
+            }
+            exit;
 
         case 'update':
             if (!$id) {
                 $response = ['status' => 'error', 'message' => 'Customer ID is required for update.'];
             } else {
-                $response = $controller->updateCustomer($id, $data);
+                // Sanitize all inputs
+                $name = mysqli_real_escape_string($conn, $_POST['name'] ?? '');
+                $telephone = mysqli_real_escape_string($conn, $_POST['telephone'] ?? '');
+                $nic = mysqli_real_escape_string($conn, $_POST['nic'] ?? '');
+                $address = mysqli_real_escape_string($conn, $_POST['address'] ?? '');
+                $whatsapp = mysqli_real_escape_string($conn, $_POST['whatsapp'] ?? '');
+                $email = mysqli_real_escape_string($conn, $_POST['email'] ?? '');
+                $birthday = mysqli_real_escape_string($conn, $_POST['birthday'] ?? '');
+                $credit_limit = mysqli_real_escape_string($conn, $_POST['credit_limit'] ?? '');
+                $discount = mysqli_real_escape_string($conn, $_POST['discount'] ?? '');
+                $price_type = mysqli_real_escape_string($conn, $_POST['price_type'] ?? '');
+                $route_id = isset($_POST['route_id']) && $_POST['route_id'] !== '' ? $_POST['route_id'] : null;
+
+                // Debug log
+                debug_log("Updating customer with route_id", [
+                    'id' => $id,
+                    'route_id_raw' => $_POST['route_id'] ?? 'not set',
+                    'route_id_processed' => $route_id
+                ]);
+
+                $sql = "UPDATE customers SET 
+                    name = '$name', 
+                    telephone = '$telephone', 
+                    nic = '$nic', 
+                    address = '$address', 
+                    whatsapp = '$whatsapp', 
+                    email = '$email', 
+                    birthday = '$birthday', 
+                    credit_limit = '$credit_limit', 
+                    discount = '$discount', 
+                    price_type = '$price_type',
+                    route_id = " . ($route_id === null ? "NULL" : "'$route_id'") . "
+                    WHERE id = '$id'";
+
+                debug_log("SQL Update Query", $sql);
+
+                if (mysqli_query($conn, $sql)) {
+                    // After update, fetch the customer again to verify route_id was saved
+                    $verify_sql = "SELECT route_id FROM customers WHERE id = '$id'";
+                    $verify_result = mysqli_query($conn, $verify_sql);
+                    $verify_row = mysqli_fetch_assoc($verify_result);
+                    debug_log("Update customer - Verification - Saved route_id: " . var_export($verify_row['route_id'], true));
+                    
+                    send_json_response([
+                        'status' => 'success',
+                        'message' => 'Customer updated successfully.'
+                    ]);
+                } else {
+                    debug_log("Update customer - Error: " . mysqli_error($conn));
+                    send_json_response([
+                        'status' => 'error',
+                        'message' => 'Failed to update customer: ' . mysqli_error($conn)
+                    ]);
+                }
+                exit;
             }
             break;
 
@@ -178,7 +342,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$id) {
                 $response = ['status' => 'error', 'message' => 'Customer ID is required for deletion.'];
             } else {
-                $response = $controller->deleteCustomer($id);
+                $sql = "DELETE FROM customers WHERE id = '$id'";
+                if (mysqli_query($conn, $sql)) {
+                    send_json_response([
+                        'status' => 'success',
+                        'message' => 'Customer deleted successfully.'
+                    ]);
+                } else {
+                    send_json_response([
+                        'status' => 'error',
+                        'message' => 'Failed to delete customer: ' . mysqli_error($conn)
+                    ]);
+                }
             }
             break;
 
@@ -186,7 +361,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$id) {
                 $response = ['status' => 'error', 'message' => 'Customer ID is required for fetching data.'];
             } else {
-                $response = $controller->getCustomer($id);
+                $id = mysqli_real_escape_string($conn, $data['id'] ?? '');
+                
+                $sql = "SELECT id, name, telephone, nic, address, whatsapp, email, 
+                       birthday, credit_limit, discount, price_type, route_id 
+                       FROM customers 
+                       WHERE id = '$id'";
+                
+                $result = mysqli_query($conn, $sql);
+                
+                if ($result && mysqli_num_rows($result) > 0) {
+                    $customer = mysqli_fetch_assoc($result);
+                    debug_log("Get customer - route_id: " . var_export($customer['route_id'], true));
+                    
+                    send_json_response([
+                        'status' => 'success',
+                        'data' => $customer
+                    ]);
+                } else {
+                    send_json_response([
+                        'status' => 'error',
+                        'message' => 'Customer not found or error fetching data: ' . mysqli_error($conn)
+                    ]);
+                }
+                exit; // Stop execution after sending JSON response
             }
             break;
 
@@ -221,7 +419,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Return JSON response
-    header('Content-Type: application/json');
-    echo json_encode($response);
-    exit;
+    send_json_response($response);
 }
+?>
