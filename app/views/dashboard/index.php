@@ -44,7 +44,7 @@ if ($user_role === 'admin') {
     }, $permissions);
 }
 ?>
-?>
+
 
 <!DOCTYPE html>
 <html>
@@ -137,9 +137,9 @@ if ($user_role === 'admin') {
         <?php endif; ?>
 
         <?php if ($permissions['can_view_quotation']): ?>
-            <button onclick="location.href='../production';">
-                <img src="../../assets/images/production.png" alt="Setting">
-                <span>Production</span>
+            <button onclick="location.href='quotations.php';">
+                <img src="../../assets/images/Quatation.png" alt="Quotation">
+                <span>Quotation</span>
             </button>
         <?php endif; ?>
 
@@ -165,11 +165,10 @@ if ($user_role === 'admin') {
         <?php endif; ?>
 
         <?php if ($permissions['can_view_bank']): ?>
-            <button onclick="location.href='../raw_stocks/manage_raw_stock.php';">
-                <img src="../../assets/images/customer.png" alt="Raw Stock">
-                <span>Raw Stock</span>
+            <button onclick="location.href='../bank/Bank_Account.php';">
+                <img src="../../assets/images/bank.png" alt="Bank">
+                <span>Bank</span>
             </button>
-
         <?php endif; ?>
 
         <?php if ($permissions['can_view_employees']): ?>
@@ -222,9 +221,9 @@ if ($user_role === 'admin') {
         <?php endif; ?>
 
         <?php if ($permissions['can_view_settings']): ?>
-            <button onclick="location.href='branch_sales.php';">
-                <img src="../../assets/images/order.png" alt="Sales Order">
-                <span>branch Sales </span>
+            <button onclick="loadSection('setting', '#dynamic-section')">
+                <img src="../../assets/images/settings.png" alt="Setting">
+                <span>Setting</span>
             </button>
         <?php endif; ?>
 

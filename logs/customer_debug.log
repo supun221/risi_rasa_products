@@ -8,3 +8,28 @@
 2025-05-13 07:35:44 - Update customer - Verification - Saved route_id: '1'
 2025-05-13 07:36:06 - Adding customer with route_id - {"route_id_raw":"1","route_id_processed":"1"}
 2025-05-13 07:36:06 - SQL Insert Query - "INSERT INTO customers (\r\n                name, telephone, nic, address, whatsapp, email, birthday, \r\n                credit_limit, discount, price_type, route_id\r\n            ) VALUES (\r\n                'mithun mh', '0252257481', '', 'Matara', '', \r\n                '', '', '', '', '', '1'\r\n            )"
+2025-05-13 19:45:19 - Get customer - route_id: NULL
+2025-05-13 19:45:26 - Updating customer with route_id - {"id":"1","route_id_raw":"3","route_id_processed":"3"}
+2025-05-13 19:45:26 - SQL Update Query - "UPDATE customers SET \r\n                    name = 'Hasindu Nira', \r\n                    telephone = '712356456', \r\n                    nic = '200109201401', \r\n                    address = '5', \r\n                    whatsapp = '0', \r\n                    email = 'hasindu612@gmail.com', \r\n                    birthday = '2025-01-07', \r\n                    credit_limit = '25', \r\n                    discount = '', \r\n                    price_type = '',\r\n                    route_id = '3'\r\n                    WHERE id = '1'"
+2025-05-13 19:45:26 - Update customer - Verification - Saved route_id: '3'
+2025-05-13 19:45:31 - Get customer - route_id: NULL
+2025-05-13 19:45:39 - Updating customer with route_id - {"id":"2","route_id_raw":"4","route_id_processed":"4"}
+2025-05-13 19:45:39 - SQL Update Query - "UPDATE customers SET \r\n                    name = 'pasan', \r\n                    telephone = '712356456', \r\n                    nic = '200109201402', \r\n                    address = 'l', \r\n                    whatsapp = '0', \r\n                    email = '', \r\n                    birthday = '', \r\n                    credit_limit = '', \r\n                    discount = '', \r\n                    price_type = '',\r\n                    route_id = '4'\r\n                    WHERE id = '2'"
+2025-05-13 19:45:39 - Update customer - Verification - Saved route_id: '4'
+2025-05-13 19:45:44 - Get customer - route_id: NULL
+2025-05-13 19:45:51 - Updating customer with route_id - {"id":"3","route_id_raw":"3","route_id_processed":"3"}
+2025-05-13 19:45:51 - SQL Update Query - "UPDATE customers SET \r\n                    name = 'Hasindu Niran f', \r\n                    telephone = '712356456', \r\n                    nic = '200109201403', \r\n                    address = 'l', \r\n                    whatsapp = '0', \r\n                    email = '', \r\n                    birthday = '', \r\n                    credit_limit = '', \r\n                    discount = '', \r\n                    price_type = '',\r\n                    route_id = '3'\r\n                    WHERE id = '3'"
+2025-05-13 19:45:51 - Update customer - Verification - Saved route_id: '3'
+2025-05-13 19:45:58 - Get customer - route_id: NULL
+2025-05-13 19:46:12 - Updating customer with route_id - {"id":"6","route_id_raw":"2","route_id_processed":"2"}
+2025-05-13 19:46:12 - SQL Update Query - "UPDATE customers SET \r\n                    name = 'shan putha', \r\n                    telephone = '716520685', \r\n                    nic = '20001456543', \r\n                    address = 'rr', \r\n                    whatsapp = '0', \r\n                    email = '', \r\n                    birthday = '', \r\n                    credit_limit = '', \r\n                    discount = '', \r\n                    price_type = '',\r\n                    route_id = '2'\r\n                    WHERE id = '6'"
+2025-05-13 19:46:12 - Update customer - Verification - Saved route_id: '2'
+2025-05-13 19:46:20 - Get customer - route_id: '2'
+2025-05-13 19:46:31 - Get customer - route_id: '3'
+2025-05-13 19:46:40 - Updating customer with route_id - {"id":"1","route_id_raw":"3","route_id_processed":"3"}
+2025-05-13 19:46:40 - SQL Update Query - "UPDATE customers SET \r\n                    name = 'Hasindu Nira', \r\n                    telephone = '712356456', \r\n                    nic = '200109201401', \r\n                    address = '5', \r\n                    whatsapp = '0', \r\n                    email = 'hasindu612@gmail.com', \r\n                    birthday = '2025-01-07', \r\n                    credit_limit = '25000', \r\n                    discount = '', \r\n                    price_type = '',\r\n                    route_id = '3'\r\n                    WHERE id = '1'"
+2025-05-13 19:46:40 - Update customer - Verification - Saved route_id: '3'
+2025-05-13 19:46:56 - Get customer - route_id: NULL
+2025-05-13 19:47:02 - Updating customer with route_id - {"id":"9","route_id_raw":"2","route_id_processed":"2"}
+2025-05-13 19:47:02 - SQL Update Query - "UPDATE customers SET \r\n                    name = 'test', \r\n                    telephone = '776789765', \r\n                    nic = '20001689765', \r\n                    address = 'rt', \r\n                    whatsapp = '776789765', \r\n                    email = '', \r\n                    birthday = '', \r\n                    credit_limit = '5000', \r\n                    discount = '', \r\n                    price_type = '',\r\n                    route_id = '2'\r\n                    WHERE id = '9'"
+2025-05-13 19:47:02 - Update customer - Verification - Saved route_id: '2'
