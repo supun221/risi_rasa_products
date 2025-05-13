@@ -1,0 +1,10 @@
+2025-05-13 07:30:30 - Get customer - route_id: NULL
+2025-05-13 07:30:36 - Updating customer with route_id - {"id":"12","route_id_raw":"1","route_id_processed":"1"}
+2025-05-13 07:30:36 - SQL Update Query - "UPDATE customers SET \r\n                    name = 'sankalpa 23 Niran kjj', \r\n                    telephone = '712356456', \r\n                    nic = '200109201407', \r\n                    address = 'b', \r\n                    whatsapp = '0', \r\n                    email = '', \r\n                    birthday = '', \r\n                    credit_limit = '', \r\n                    discount = '', \r\n                    price_type = '',\r\n                    route_id = '1'\r\n                    WHERE id = '12'"
+2025-05-13 07:30:36 - Update customer - Verification - Saved route_id: '1'
+2025-05-13 07:35:38 - Get customer - route_id: NULL
+2025-05-13 07:35:44 - Updating customer with route_id - {"id":"11","route_id_raw":"1","route_id_processed":"1"}
+2025-05-13 07:35:44 - SQL Update Query - "UPDATE customers SET \r\n                    name = 'sankalpa 23 Niran', \r\n                    telephone = '712356456', \r\n                    nic = '200109201405', \r\n                    address = 'lnj', \r\n                    whatsapp = '0', \r\n                    email = '', \r\n                    birthday = '', \r\n                    credit_limit = '', \r\n                    discount = '', \r\n                    price_type = '',\r\n                    route_id = '1'\r\n                    WHERE id = '11'"
+2025-05-13 07:35:44 - Update customer - Verification - Saved route_id: '1'
+2025-05-13 07:36:06 - Adding customer with route_id - {"route_id_raw":"1","route_id_processed":"1"}
+2025-05-13 07:36:06 - SQL Insert Query - "INSERT INTO customers (\r\n                name, telephone, nic, address, whatsapp, email, birthday, \r\n                credit_limit, discount, price_type, route_id\r\n            ) VALUES (\r\n                'mithun mh', '0252257481', '', 'Matara', '', \r\n                '', '', '', '', '', '1'\r\n            )"

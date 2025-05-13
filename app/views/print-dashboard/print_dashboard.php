@@ -631,6 +631,10 @@ require_once '../header1.php';
                 <select id="rep-sales-username">
                     <option value="">All Reps</option>
                 </select>
+                <label for="rep-sales-route">Select Route:</label>
+                <select id="rep-sales-route">
+                    <option value="">All Routes</option>
+                </select>
                 <label for="rep-sales-start-date">Start Date:</label>
                 <input type="date" id="rep-sales-start-date">
                 <label for="rep-sales-end-date">End Date:</label>
@@ -695,24 +699,6 @@ require_once '../header1.php';
         </div>
     </div>
 </body>
-<!-- <script>
-    function fetchCategories() {
-        fetch("../dashboard/get_categories.php")
-            .then(response => response.json())
-            .then(data => {
-                let categorySelect = document.getElementById("category");
-                let lowCategorySelect = document.getElementById("low-category");
-                categorySelect.innerHTML = '<option value="">Select Category</option>';
-                lowCategorySelect.innerHTML = '<option value="">All Category</option>';
-                data.forEach(category => {
-                    let option = `<option value="${category}">${category}</option>`;
-                    categorySelect.innerHTML += option;
-                    lowCategorySelect.innerHTML += option;
-                });
-            })
-            .catch(error => console.error("Error fetching categories:", error));
-    }
-</script> -->
 <script>
     document.addEventListener("keydown", function(event) {
         if (event.code === "Home") {
@@ -725,6 +711,7 @@ require_once '../header1.php';
         fetchCategoriesForSalesReport();
         loadUsers();
         loadRepUsernames();
+        loadRoutes(); // Add this line to load routes when page loads
     });
     
     // Function to load rep usernames for the dropdown lists
@@ -741,15 +728,42 @@ require_once '../header1.php';
                 repSalesSelect.innerHTML = '<option value="">All Reps</option>';
                 repStockSelect.innerHTML = '<option value="">All Reps</option>';
                 
-                // Populate dropdowns with user data
-                users.forEach(user => {
-                    let option = `<option value="${user.id}">${user.username}</option>`;
-                    repPaymentsSelect.innerHTML += option;
-                    repSalesSelect.innerHTML += option;
-                    repStockSelect.innerHTML += option;
+                // Check if users is an array (might be an empty array)
+                if (Array.isArray(users)) {
+                    // Populate dropdowns with user data
+                    users.forEach(user => {
+                        let option = `<option value="${user.id}">${user.username}</option>`;
+                        repPaymentsSelect.innerHTML += option;
+                        repSalesSelect.innerHTML += option;
+                        repStockSelect.innerHTML += option;
+                    });
+                } else {
+                    console.log("No rep users found or invalid response format");
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching rep usernames:", error);
+                // The dropdowns will just have "All Reps" option
+            });
+    }
+    
+    // Function to load routes for dropdown
+    function loadRoutes() {
+        fetch("fetch_routes.php")
+            .then(response => response.json())
+            .then(routes => {
+                let repSalesRouteSelect = document.getElementById("rep-sales-route");
+                
+                // Reset dropdown with default option
+                repSalesRouteSelect.innerHTML = '<option value="">All Routes</option>';
+                
+                // Populate dropdown with route data
+                routes.forEach(route => {
+                    let option = `<option value="${route.id}">${route.name}</option>`;
+                    repSalesRouteSelect.innerHTML += option;
                 });
             })
-            .catch(error => console.error("Error fetching rep usernames:", error));
+            .catch(error => console.error("Error fetching routes:", error));
     }
     
     // Rep Payments Report Functions
@@ -847,15 +861,17 @@ require_once '../header1.php';
         }
     }
     
-    // Rep Sales Report Functions
+    // Rep Sales Report Functions - Updated to include route filtering
     function fetchRepSalesReport() {
         let repId = document.getElementById("rep-sales-username").value;
+        let routeId = document.getElementById("rep-sales-route").value;
         let startDate = document.getElementById("rep-sales-start-date").value;
         let endDate = document.getElementById("rep-sales-end-date").value;
         let barcode = document.getElementById("rep-sales-barcode").value;
         
         let queryParams = new URLSearchParams({
             rep_id: repId,
+            route_id: routeId,
             start_date: startDate,
             end_date: endDate,
             barcode: barcode
@@ -878,6 +894,8 @@ require_once '../header1.php';
                     <th>Unit Price</th>
                     <th>Discount</th>
                     <th>Subtotal</th>
+                    <th>Customer</th>
+                    <th>Route</th>
                     <th>Rep</th>
                     <th>Date</th>
                 `;
@@ -887,7 +905,7 @@ require_once '../header1.php';
                 let totalAmount = 0;
                 
                 if (!data.success || data.data.length === 0) {
-                    tableBody = "<tr><td colspan='10'>No sales records found.</td></tr>";
+                    tableBody = "<tr><td colspan='12'>No sales records found.</td></tr>";
                 } else {
                     data.data.forEach(item => {
                         totalQuantity += parseInt(item.quantity) || 0;
@@ -903,6 +921,8 @@ require_once '../header1.php';
                                 <td>${parseFloat(item.unit_price).toFixed(2)}</td>
                                 <td>${parseFloat(item.discount_percent).toFixed(2)}%</td>
                                 <td>${parseFloat(item.subtotal).toFixed(2)}</td>
+                                <td>${item.customer_name || "Walk-in"}</td>
+                                <td>${item.route_name || "N/A"}</td>
                                 <td>${item.rep_name}</td>
                                 <td>${item.sale_date}</td>
                             </tr>
@@ -916,7 +936,7 @@ require_once '../header1.php';
                             <td>${totalQuantity}</td>
                             <td colspan="3"></td>
                             <td>${totalAmount.toFixed(2)}</td>
-                            <td colspan="2"></td>
+                            <td colspan="4"></td>
                         </tr>
                     `;
                 }
@@ -930,11 +950,12 @@ require_once '../header1.php';
     
     function printRepSalesReport() {
         let repId = document.getElementById("rep-sales-username").value;
+        let routeId = document.getElementById("rep-sales-route").value;
         let startDate = document.getElementById("rep-sales-start-date").value;
         let endDate = document.getElementById("rep-sales-end-date").value;
         let barcode = document.getElementById("rep-sales-barcode").value;
         
-        let url = `print_rep_sales_report.php?rep_id=${encodeURIComponent(repId)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}&barcode=${encodeURIComponent(barcode)}`;
+        let url = `print_rep_sales_report.php?rep_id=${encodeURIComponent(repId)}&route_id=${encodeURIComponent(routeId)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}&barcode=${encodeURIComponent(barcode)}`;
         
         let printWindow = window.open(url, '_blank');
         

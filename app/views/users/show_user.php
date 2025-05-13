@@ -205,15 +205,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <tr><td>Create Invoice</td><td><input type="checkbox" name="can_create_invoice" value="1" <?php echo $permissions['can_create_invoice'] ? 'checked' : ''; ?>></td></tr>
                 <tr><td>View Sales Order</td><td><input type="checkbox" name="can_view_sales_order" value="1" <?php echo $permissions['can_view_sales_order'] ? 'checked' : ''; ?>></td></tr>
-                <tr><td>View Quotation</td><td><input type="checkbox" name="can_view_quotation" value="1" <?php echo $permissions['can_view_quotation'] ? 'checked' : ''; ?>></td></tr>
+                <tr><td>View Production</td><td><input type="checkbox" name="can_view_quotation" value="1" <?php echo $permissions['can_view_quotation'] ? 'checked' : ''; ?>></td></tr>
                 <tr><td>View Customer</td><td><input type="checkbox" name="can_view_customer" value="1" <?php echo $permissions['can_view_customer'] ? 'checked' : ''; ?>></td></tr>
                 <tr><td>View GRN/Purchasing</td><td><input type="checkbox" name="can_view_grn_purchasing" value="1" <?php echo $permissions['can_view_grn_purchasing'] ? 'checked' : ''; ?>></td></tr>
-                <tr><td>View Bank</td><td><input type="checkbox" name="can_view_bank" value="1" <?php echo $permissions['can_view_bank'] ? 'checked' : ''; ?>></td></tr>
+                <tr><td>View Raw stocks</td><td><input type="checkbox" name="can_view_bank" value="1" <?php echo $permissions['can_view_bank'] ? 'checked' : ''; ?>></td></tr>
                 <tr><td>View Cash Book</td><td><input type="checkbox" name="can_view_cash_book" value="1" <?php echo $permissions['can_view_cash_book'] ? 'checked' : ''; ?>></td></tr>
                 <tr><td>View Expenses</td><td><input type="checkbox" name="can_view_expenses" value="1" <?php echo $permissions['can_view_expenses'] ? 'checked' : ''; ?>></td></tr>
                 <tr><td>View Suppliers</td><td><input type="checkbox" name="can_view_suppliers" value="1" <?php echo $permissions['can_view_suppliers'] ? 'checked' : ''; ?>></td></tr>
                 <tr><td>View Damage & Lost</td><td><input type="checkbox" name="can_view_damage_lost" value="1" <?php echo $permissions['can_view_damage_lost'] ? 'checked' : ''; ?>></td></tr>
-                <tr><td>View Settings</td><td><input type="checkbox" name="can_view_settings" value="1" <?php echo $permissions['can_view_settings'] ? 'checked' : ''; ?>></td></tr>
+                <tr><td>View branch Sales</td><td><input type="checkbox" name="can_view_settings" value="1" <?php echo $permissions['can_view_settings'] ? 'checked' : ''; ?>></td></tr>
             </tbody>
         </table>
         <button type="submit">Save Permissions</button>

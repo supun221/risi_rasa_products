@@ -21,12 +21,22 @@
 </head>
 
 <body>
-    <div class="">
-        <!-- Button to trigger modal -->
-        <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addCustomerModal">
-            Add Customer
-        </button> -->
+    <?php
+    // Fetch routes for dropdown
+    require_once '../../../config/databade.php'; // Database connection
+    
+    $routes = [];
+    $routeQuery = "SELECT id, name FROM routes ORDER BY name ASC";
+    $routeResult = mysqli_query($conn, $routeQuery);
+    
+    if ($routeResult) {
+        while ($row = mysqli_fetch_assoc($routeResult)) {
+            $routes[] = $row;
+        }
+    }
+    ?>
 
+    <div class="">
         <!-- Modal -->
         <div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -49,7 +59,6 @@
                             <div class="form-group">
                                 <label for="telephone">Telephone</label>
                                 <input type="number" class="form-control" id="telephone" name="telephone" maxlength="10" pattern="\d{10}" required>
-
                             </div>
                             <div class="form-group">
                                 <label for="nic">NIC</label>
@@ -58,6 +67,15 @@
                             <div class="form-group">
                                 <label for="address">Address</label>
                                 <textarea class="form-control" id="address" name="address" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="route_id">Route</label>
+                                <select class="form-control" id="route_id" name="route_id">
+                                    <option value="">-- Select Route --</option>
+                                    <?php foreach($routes as $route): ?>
+                                        <option value="<?php echo $route['id']; ?>"><?php echo htmlspecialchars($route['name']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label for="whatsapp">WhatsApp</label>
@@ -156,22 +174,37 @@
             $('#customerForm').on('submit', function(event) {
                 event.preventDefault(); // Prevent default form submission
 
+                // Debug the form data before submission
+                console.log('Form data:', $(this).serialize());
+                
+                // Explicitly check route_id value
+                const routeId = $('#route_id').val();
+                console.log('Selected route ID:', routeId);
+
                 const formData = $(this).serialize();
                 $.ajax({
                     url: '../../controllers/customer_controller.php',
                     type: 'POST',
                     data: formData,
+                    dataType: 'json',  // Expect JSON response
                     success: function(response) {
+                        console.log('Response:', response);
                         if (response.status === 'success') {
-                            alert('Customer added successfully.');
-                            $('#addCustomerModal').modal('hide');
-                            location.reload(); // Reload the page after successful addition
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Customer added successfully.',
+                                icon: 'success'
+                            }).then(() => {
+                                $('#addCustomerModal').modal('hide');
+                                location.reload(); // Reload the page after successful addition
+                            });
                         } else {
-                            alert(response.message || 'Error adding customer.');
+                            Swal.fire('Error!', response.message || 'Error adding customer.', 'error');
                         }
                     },
                     error: function(xhr, status, error) {
-                        alert('An error occurred: ' + (xhr.responseText || error));
+                        console.error('Ajax error:', xhr, status, error);
+                        Swal.fire('Error!', 'An error occurred: ' + (xhr.responseText || error), 'error');
                     }
                 });
             });
