@@ -1,23 +1,33 @@
 <?php
+// Connect to database
 require_once '../../../config/databade.php';
 
-// Query to fetch all users with job_role='rep'
-$query = "SELECT id, username FROM signup WHERE job_role = 'rep' ORDER BY username";
-$result = $conn->query($query);
+// Initialize response array
+$response = [];
 
-$users = [];
-if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $users[] = [
-            'id' => $row['id'],
-            'username' => $row['username']
-        ];
+try {
+    // Query the signup table (not users table) for reps
+    $query = "SELECT id, username FROM signup WHERE job_role = 'rep' ORDER BY username";
+    $result = mysqli_query($conn, $query);
+    
+    if ($result) {
+        // Fetch rep users
+        while ($row = mysqli_fetch_assoc($result)) {
+            $response[] = [
+                'id' => $row['id'],
+                'username' => $row['username']
+            ];
+        }
+    } else {
+        // Log error but don't expose in response
+        error_log("Error querying signup table: " . mysqli_error($conn));
     }
+} catch (Exception $e) {
+    // Log any exception
+    error_log("Exception in fetch_rep_users.php: " . $e->getMessage());
 }
 
-// Return as JSON
+// Return response as JSON
 header('Content-Type: application/json');
-echo json_encode($users);
-
-$conn->close();
+echo json_encode($response);
 ?>

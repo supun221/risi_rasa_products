@@ -271,6 +271,10 @@ $invoiceNumber = generateInvoiceNumber($conn);
                             <span>Credit Amount:</span>
                             <span>Rs. <span id="credit-amount">0.00</span></span>
                         </div>
+                        <div class="row mb-2" id="summary-used-advance-row" style="display: none;">
+                            <div class="col-6 font-weight-bold text-info">Advance Used:</div>
+                            <div class="col-6 text-info">Rs. <span id="summary-used-advance">0.00</span></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -547,6 +551,27 @@ $invoiceNumber = generateInvoiceNumber($conn);
     font-size: 0.9rem;
     padding: 0.5rem 0.75rem;
 }
+
+/* Toast notification style */
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
 </style>
 
 <script>
@@ -669,6 +694,906 @@ $(document).ready(function() {
             error: function() {
                 // Reset button state
                 $('#save-pos-customer-btn').prop('disabled', false).html('Save Customer');
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: 'Could not connect to the server. Please try again.'
+                });
+            }
+        });
+    });
+    
+    // Fix the toggle-customer-search button functionality
+    $('#toggle-customer-search').click(function() {
+        $('#customer-search-card').toggle();
+        if ($('#customer-search-card').is(':visible')) {
+            $('#customer-phone-search').focus();
+        }
+    });
+    
+    // Customer phone search functionality
+    $('#customer-phone-search').on('input', function() {
+        const searchTerm = $(this).val().trim();
+        
+        if (searchTerm.length >= 2) {
+            // Perform AJAX search
+            $.ajax({
+                url: 'process/search_customers.php',
+                type: 'GET',
+                data: { term: searchTerm },
+                dataType: 'json',
+                success: function(response) {
+                    let suggestionsHtml = '';
+                    
+                    if (response.success && response.customers.length > 0) {
+                        response.customers.forEach(function(customer) {
+                            suggestionsHtml += `
+                                <div class="phone-suggestion-item" 
+                                    data-id="${customer.id}" 
+                                    data-name="${customer.name}" 
+                                    data-telephone="${customer.telephone}"
+                                    data-nic="${customer.nic || ''}"
+                                    data-credit-balance="${customer.credit_balance || 0}"
+                                    data-advance="${customer.advance_amount || 0}"
+                                    data-route="${customer.route_name || ''}">
+                                    <span class="customer-name">${customer.name}</span>
+                                    <span class="customer-phone">${customer.telephone}</span>
+                                </div>`;
+                        });
+                        
+                        $('#customer-phone-suggestions').html(suggestionsHtml).show();
+                        
+                        // Attach click event to suggestions
+                        $('.phone-suggestion-item').click(function() {
+                            selectCustomer($(this));
+                        });
+                    } else {
+                        $('#customer-phone-suggestions').hide();
+                        $('#pos-customer-search-results').hide();
+                        $('#pos-no-customer-found').show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error searching for customers:", error);
+                    $('#customer-phone-suggestions').hide();
+                }
+            });
+        } else {
+            $('#customer-phone-suggestions').hide();
+            $('#pos-customer-search-results').hide();
+            $('#pos-no-customer-found').hide();
+        }
+    });
+    
+    // Function to select a customer
+    function selectCustomer(customerElement) {
+        // Get customer details from data attributes
+        const customerId = customerElement.data('id');
+        const customerName = customerElement.data('name');
+        const customerPhone = customerElement.data('telephone');
+        const customerNIC = customerElement.data('nic');
+        const creditBalance = parseFloat(customerElement.data('credit-balance')) || 0;
+        const advanceAmount = parseFloat(customerElement.data('advance')) || 0;
+        
+        // Update selected customer display
+        $('#pos-customer-name-display').text(customerName);
+        $('#selected-pos-customer-info').show();
+        
+        // Store customer data for use at checkout
+        window.selectedCustomer = {
+            id: customerId,
+            name: customerName,
+            telephone: customerPhone,
+            nic: customerNIC,
+            creditBalance: creditBalance,
+            advanceAmount: advanceAmount
+        };
+        
+        // Log selected customer for debugging
+        console.log("Selected customer:", window.selectedCustomer);
+        
+        // Hide search components
+        $('#customer-search-card').hide();
+        $('#customer-phone-suggestions').hide();
+        $('#pos-customer-search-results').hide();
+        $('#pos-no-customer-found').hide();
+        
+        // Clear search input
+        $('#customer-phone-search').val('');
+        
+        // Update payment UI based on customer selection
+        updatePaymentOptionsForCustomer();
+    }
+    
+    // Clear selected customer
+    $('#clear-customer').click(function() {
+        $('#selected-pos-customer-info').hide();
+        $('#pos-customer-name-display').text('');
+        window.selectedCustomer = null;
+        
+        // Reset payment UI
+        updatePaymentOptionsForCustomer();
+    });
+    
+    // Update payment options based on customer
+    function updatePaymentOptionsForCustomer() {
+        if (window.selectedCustomer) {
+            // Enable credit option and show advance if available
+            $("#payment-method option[value='credit']").prop('disabled', false);
+            
+            // Check if customer has advance payment
+            if (window.selectedCustomer.advanceAmount > 0) {
+                $('#summary-advance-row').show();
+                $('#summary-advance-amount').text(window.selectedCustomer.advanceAmount.toFixed(2));
+                $('#use-advance-check-container').show();
+                $('#available-advance-amount').text(window.selectedCustomer.advanceAmount.toFixed(2));
+            } else {
+                $('#summary-advance-row').hide();
+                $('#use-advance-check-container').hide();
+            }
+        } else {
+            // Disable credit option if no customer selected
+            $("#payment-method option[value='credit']").prop('disabled', true);
+            
+            // If credit is selected but no customer, switch to cash
+            if ($("#payment-method").val() === 'credit') {
+                $("#payment-method").val('cash');
+            }
+            
+            // Hide advance payment options
+            $('#summary-advance-row').hide();
+            $('#use-advance-check-container').hide();
+        }
+    }
+    
+    // Handle barcode input - search when Enter key is pressed
+    $('#barcode-input').keypress(function(e) {
+        if (e.which === 13) { // Enter key
+            e.preventDefault();
+            const barcode = $(this).val().trim();
+            if (barcode) {
+                searchProductByBarcode(barcode);
+            }
+        }
+    });
+    
+    // The search barcode button should also trigger the same function
+    $('#search-barcode').click(function() {
+        const barcode = $('#barcode-input').val().trim();
+        if (barcode) {
+            searchProductByBarcode(barcode);
+        }
+    });
+    
+    // Function to search for product by barcode
+    function searchProductByBarcode(barcode) {
+        // Show loading indicator inside the input
+        $('#barcode-input').prop('disabled', true);
+        $('#search-barcode').html('<i class="fas fa-spinner fa-spin"></i>');
+        
+        // Make API request to search for product
+        $.ajax({
+            url: 'process/search_product_barcode.php',
+            type: 'GET',
+            data: { barcode: barcode },
+            dataType: 'json',
+            success: function(response) {
+                // Reset loading indicators
+                $('#barcode-input').prop('disabled', false);
+                $('#search-barcode').html('<i class="fas fa-barcode"></i>');
+                
+                if (response.success) {
+                    if (response.products.length > 1) {
+                        // Multiple products found with the same barcode
+                        showDuplicateProductsModal(response.products);
+                    } else if (response.products.length === 1) {
+                        // Single product found - select it
+                        selectProduct(response.products[0]);
+                    } else {
+                        // No products found
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Product Not Found',
+                            text: 'No product found with barcode: ' + barcode
+                        });
+                    }
+                } else {
+                    // Error occurred
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Failed to search for product'
+                    });
+                }
+                
+                // Clear barcode input and focus it again for next scan
+                $('#barcode-input').val('').focus();
+            },
+            error: function(xhr, status, error) {
+                // Reset loading indicators
+                $('#barcode-input').prop('disabled', false);
+                $('#search-barcode').html('<i class="fas fa-barcode"></i>');
+                
+                console.error('Error searching for product:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: 'Failed to connect to server. Please try again.'
+                });
+                
+                // Clear barcode input and focus it again
+                $('#barcode-input').val('').focus();
+            }
+        });
+    }
+    
+    // Function to show modal with duplicate products
+    function showDuplicateProductsModal(products) {
+        // Clear previous product list
+        $('#duplicate-products-list').empty();
+        
+        // Add each product to the list
+        products.forEach(function(product) {
+            const listItem = `
+                <a href="#" class="list-group-item list-group-item-action duplicate-product" 
+                   data-product='${JSON.stringify(product).replace(/'/g, "&#39;")}'>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${product.product_name}</h6>
+                            <small>Barcode: ${product.barcode || product.itemcode || 'N/A'}</small>
+                        </div>
+                        <div class="text-right">
+                            <span class="badge badge-primary">Rs. ${parseFloat(product.price).toFixed(2)}</span><br>
+                            <small>Stock: ${product.quantity}</small>
+                        </div>
+                    </div>
+                </a>
+            `;
+            $('#duplicate-products-list').append(listItem);
+        });
+        
+        // Show the modal
+        $('#duplicate-barcode-modal').modal('show');
+        
+        // Handle product selection from modal
+        $('.duplicate-product').off('click').on('click', function(e) {
+            e.preventDefault();
+            const product = $(this).data('product');
+            $('#duplicate-barcode-modal').modal('hide');
+            selectProduct(product);
+        });
+    }
+    
+    // Function to select a product and populate the form fields
+    function selectProduct(product) {
+        console.log('Selected product:', product);
+        
+        // Populate product fields
+        $('#selected-product').val(product.product_name);
+        $('#lorry-stock-id').val(product.id || product.lorry_stock_id || '');
+        $('#available-qty').val(product.quantity || '0');
+        $('#unit-price').val(parseFloat(product.price).toFixed(2));
+        
+        // Store the selected product for later use
+        window.selectedProduct = product;
+        
+        // Update line total calculation
+        updateLineTotal();
+        
+        // Focus on quantity input for quicker entry
+        $('#quantity').focus().select();
+    }
+    
+    // Function to update line total when quantity or discount changes
+    function updateLineTotal() {
+        const quantity = parseInt($('#quantity').val()) || 0;
+        const unitPrice = parseFloat($('#unit-price').val()) || 0;
+        const discountPercent = parseFloat($('#discount-percent').val()) || 0;
+        const discountAmount = parseFloat($('#discount-amount').val()) || 0;
+        
+        let total = quantity * unitPrice;
+        
+        // Apply percentage discount
+        if (discountPercent > 0) {
+            total = total - (total * (discountPercent / 100));
+        }
+        
+        // Apply fixed discount
+        if (discountAmount > 0) {
+            total = total - discountAmount;
+        }
+        
+        // Ensure total is not negative
+        total = Math.max(total, 0);
+        
+        $('#line-total').val(total.toFixed(2));
+    }
+    
+    // Update line total when quantity, price, or discount changes
+    $('#quantity, #discount-percent, #discount-amount').on('input', function() {
+        updateLineTotal();
+    });
+    
+    // Handle add product form submission (both button click and Enter key)
+    $('#add-product-form').on('submit', function(e) {
+        e.preventDefault();
+        addProductToCart();
+    });
+    
+    // Handle Enter key on quantity field
+    $('#quantity').keypress(function(e) {
+        if (e.which === 13) { // Enter key
+            e.preventDefault();
+            addProductToCart();
+        }
+    });
+    
+    // Function to add product to cart
+    function addProductToCart() {
+        // Get form values
+        const productName = $('#selected-product').val().trim();
+        const lorryStockId = $('#lorry-stock-id').val();
+        const quantity = parseInt($('#quantity').val()) || 0;
+        const freeQuantity = parseInt($('#free-qty').val()) || 0;
+        const unitPrice = parseFloat($('#unit-price').val()) || 0;
+        const discountPercent = parseFloat($('#discount-percent').val()) || 0;
+        const discountAmount = parseFloat($('#discount-amount').val()) || 0;
+        const lineTotal = parseFloat($('#line-total').val()) || 0;
+        
+        // Validate input
+        if (!productName) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Product Required',
+                text: 'Please select a product first.'
+            });
+            return;
+        }
+        
+        if (quantity <= 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Quantity',
+                text: 'Please enter a quantity greater than zero.'
+            });
+            return;
+        }
+        
+        // Check available quantity
+        const availableQty = parseInt($('#available-qty').val()) || 0;
+        if (quantity > availableQty) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Not Enough Stock',
+                text: `Only ${availableQty} items available in stock.`
+            });
+            return;
+        }
+        
+        // Get selected product data from stored object
+        const product = window.selectedProduct || {};
+        
+        // Create item object for cart
+        const item = {
+            lorry_stock_id: lorryStockId,
+            product_name: productName,
+            barcode: product.barcode || product.itemcode || '',
+            quantity: quantity,
+            free_quantity: freeQuantity,
+            unit_price: unitPrice,
+            discount_percent: discountPercent,
+            discount_amount: discountAmount,
+            subtotal: lineTotal
+        };
+        
+        // Send item to server to add to cart
+        $.ajax({
+            url: 'process/add_to_cart.php',
+            type: 'POST',
+            data: item,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    // Item added to cart successfully
+                    updateCartDisplay();
+                    
+                    // Clear the product selection form
+                    clearProductForm();
+                    
+                    // Focus back on barcode input for next scan
+                    $('#barcode-input').focus();
+                    
+                    // Show brief success message
+                    showToast('Product added to cart!');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Failed to add product to cart.'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error adding to cart:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: 'Could not add product to cart. Please try again.'
+                });
+            }
+        });
+    }
+    
+    // Clear product selection form
+    function clearProductForm() {
+        $('#selected-product').val('');
+        $('#lorry-stock-id').val('');
+        $('#available-qty').val('');
+        $('#unit-price').val('');
+        $('#quantity').val(1);
+        $('#free-qty').val(0);
+        $('#discount-percent').val(0);
+        $('#discount-amount').val(0);
+        $('#line-total').val('');
+        window.selectedProduct = null;
+    }
+    
+    // Update cart display with latest items
+    function updateCartDisplay() {
+        $.ajax({
+            url: 'process/get_cart.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    renderCartItems(response.cart);
+                    updateOrderSummary(response.totals);
+                } else {
+                    console.error('Error loading cart:', response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching cart:', error);
+            }
+        });
+    }
+    
+    // Render cart items in the table
+    function renderCartItems(items) {
+        const tableBody = $('#pos-items-body');
+        
+        // Clear current items
+        tableBody.empty();
+        
+        if (items.length === 0) {
+            tableBody.html('<tr id="empty-cart"><td colspan="7" class="text-center">No items added yet</td></tr>');
+            return;
+        }
+        
+        // Add each item to the table
+        items.forEach(function(item, index) {
+            const row = `
+                <tr data-index="${index}">
+                    <td>${item.product_name}</td>
+                    <td>${parseFloat(item.unit_price).toFixed(2)}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.free_quantity}</td>
+                    <td>${item.discount_percent}% / ${parseFloat(item.discount_amount).toFixed(2)}</td>
+                    <td>${parseFloat(item.subtotal).toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger remove-item" data-index="${index}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            
+            tableBody.append(row);
+        });
+        
+        // Attach remove item event handlers
+        $('.remove-item').click(function() {
+            const indexToRemove = $(this).data('index');
+            removeCartItem(indexToRemove);
+        });
+    }
+    
+    // Update order summary values
+    function updateOrderSummary(totals) {
+        $('#subtotal-amount').text(parseFloat(totals.subtotal).toFixed(2));
+        $('#total-discount').text(parseFloat(totals.totalDiscount).toFixed(2));
+        $('#grand-total').text(parseFloat(totals.grandTotal).toFixed(2));
+    }
+    
+    // Remove item from cart
+    function removeCartItem(index) {
+        $.ajax({
+            url: 'process/remove_from_cart.php',
+            type: 'POST',
+            data: { index: index },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    updateCartDisplay();
+                    showToast('Item removed from cart');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Failed to remove item from cart.'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error removing from cart:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: 'Could not remove item from cart. Please try again.'
+                });
+            }
+        });
+    }
+    
+    // Small toast notification
+    function showToast(message) {
+        const toast = $('<div class="toast-notification"></div>').text(message);
+        $('body').append(toast);
+        
+        setTimeout(function() {
+            toast.addClass('show');
+        }, 100);
+        
+        setTimeout(function() {
+            toast.removeClass('show');
+            
+            setTimeout(function() {
+                toast.remove();
+            }, 500);
+        }, 3000);
+    }
+    
+    // Load cart on page load
+    updateCartDisplay();
+    
+    // Handle Complete Sale button click
+    $('#complete-sale').click(function() {
+        // Validate that there are items in the cart
+        $.ajax({
+            url: 'process/get_cart.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success && response.cart && response.cart.length > 0) {
+                    // We have items, show payment confirmation modal
+                    prepareCheckoutModal(response.cart, response.totals);
+                } else {
+                    // No items in cart
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Empty Cart',
+                        text: 'Please add items to your cart before completing the sale.'
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to check cart items. Please try again.'
+                });
+            }
+        });
+    });
+    
+    // Function to prepare checkout modal before showing it
+    function prepareCheckoutModal(items, totals) {
+        // Update summary information
+        $('#summary-total-items').text(items.length);
+        $('#summary-subtotal').text(parseFloat(totals.subtotal).toFixed(2));
+        $('#summary-discount').text(parseFloat(totals.totalDiscount).toFixed(2));
+        $('#summary-grand-total').text(parseFloat(totals.grandTotal).toFixed(2));
+        
+        // Update customer name in summary
+        if (window.selectedCustomer) {
+            $('#summary-customer-name').text(window.selectedCustomer.name);
+        } else {
+            $('#summary-customer-name').text('Walk-in Customer');
+        }
+        
+        // Set default payment method to match the main form
+        const paymentMethod = $('#payment-method').val();
+        $('#modal-payment-method').val(paymentMethod);
+        
+        // Initialize paid amount to match grand total for convenience
+        const grandTotal = parseFloat(totals.grandTotal);
+        $('#modal-paid-amount').val(grandTotal.toFixed(2));
+        
+        // Reset change amount
+        $('#modal-change-amount').text('0.00');
+        
+        // Show/hide credit amount field based on payment method
+        updatePaymentFields();
+        
+        // Show the modal
+        $('#payment-confirmation-modal').modal('show');
+    }
+    
+    // Update payment fields when payment method changes
+    $('#modal-payment-method').on('change', updatePaymentFields);
+    
+    function updatePaymentFields() {
+        const paymentMethod = $('#modal-payment-method').val();
+        
+        // Show/hide cheque number field
+        if (paymentMethod === 'cheque') {
+            $('#cheque-number-group').show();
+        } else {
+            $('#cheque-number-group').hide();
+        }
+        
+        // Show/hide credit amount group
+        if (paymentMethod === 'credit') {
+            $('#modal-credit-amount-group').show();
+            $('#modal-change-amount-group').hide();
+            
+            // Ensure a customer is selected for credit
+            if (!window.selectedCustomer) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Customer Required',
+                    text: 'Please select a customer before using credit payment.'
+                });
+                $('#modal-payment-method').val('cash');
+                $('#modal-credit-amount-group').hide();
+                $('#modal-change-amount-group').show();
+                return;
+            }
+        } else {
+            $('#modal-credit-amount-group').hide();
+            $('#modal-change-amount-group').show();
+        }
+        
+        // Calculate change/credit amount
+        calculateChange();
+    }
+    
+    // Calculate change when amount paid changes
+    $('#modal-paid-amount').on('input', calculateChange);
+    
+    // Calculate change/credit amount
+    function calculateChange() {
+        const grandTotal = parseFloat($('#summary-grand-total').text()) || 0;
+        const paidAmount = parseFloat($('#modal-paid-amount').val()) || 0;
+        const paymentMethod = $('#modal-payment-method').val();
+        
+        if (paymentMethod === 'credit') {
+            // For credit, calculate remaining credit amount
+            const creditAmount = Math.max(0, grandTotal - paidAmount).toFixed(2);
+            $('#modal-credit-amount').text(creditAmount);
+        } else {
+            // For other payment types, calculate change
+            const changeAmount = Math.max(0, paidAmount - grandTotal).toFixed(2);
+            $('#modal-change-amount').text(changeAmount);
+        }
+    }
+    
+    // Handle confirm payment button click
+    $('#confirm-payment').click(function() {
+        // Disable button to prevent double submission
+        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+        
+        // Get payment details
+        const paymentMethod = $('#modal-payment-method').val();
+        const paidAmount = parseFloat($('#modal-paid-amount').val()) || 0;
+        const printInvoice = $('#print-invoice').is(':checked');
+        const chequeNumber = (paymentMethod === 'cheque') ? $('#cheque-number').val() : '';
+        const returnBillNumber = $('#return-bill-number').val();
+        
+        // Validate required fields
+        if (paymentMethod === 'cheque' && !chequeNumber) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Missing Information',
+                text: 'Please enter the cheque number.'
+            });
+            $(this).prop('disabled', false).html('Confirm & Complete');
+            return;
+        }
+        
+        // Prepare data for submission
+        const saleData = {
+            payment_method: paymentMethod,
+            paid_amount: paidAmount,
+            invoice_number: '<?php echo $invoiceNumber; ?>', // From PHP variable
+            cheque_number: chequeNumber,
+            return_bill_number: returnBillNumber,
+            customer_id: window.selectedCustomer ? window.selectedCustomer.id : null,
+            customer_name: window.selectedCustomer ? window.selectedCustomer.name : 'Walk-in Customer',
+            print_invoice: printInvoice
+        };
+        
+        // Check if advance payment checkbox is checked and customer has advance
+        const useAdvanceChecked = $('#use-advance-payment').is(':checked');
+        console.log("Checking advance payment:", useAdvanceChecked);
+        
+        if (window.selectedCustomer && window.selectedCustomer.advanceAmount > 0 && useAdvanceChecked) {
+            console.log("Adding advance payment data:", window.selectedCustomer.advanceAmount);
+            saleData.use_advance = true;
+            saleData.advance_amount = window.selectedCustomer.advanceAmount;
+            
+            // Update the display to show advance being used
+            const advanceUsed = Math.min(window.selectedCustomer.advanceAmount, parseFloat($('#summary-grand-total').text()) || 0);
+            $('#summary-used-advance').text(advanceUsed.toFixed(2));
+        }
+        
+        console.log("Sale data:", saleData);
+        
+        // Submit sale data to server
+        $.ajax({
+            url: 'process/complete_sale.php',
+            type: 'POST',
+            data: saleData,
+            dataType: 'json',
+            success: function(response) {
+                $('#confirm-payment').prop('disabled', false).html('Confirm & Complete');
+                
+                console.log("Server response:", response);
+                
+                if (response.success) {
+                    // Close the modal
+                    $('#payment-confirmation-modal').modal('hide');
+                    
+                    // Store the invoice number from response or use the one we sent
+                    const generatedInvoiceNumber = response.invoice_number || saleData.invoice_number;
+                    
+                    // If print invoice is checked, open print window immediately
+                    if (printInvoice) {
+                        // Use the invoice number to open the correct invoice in a new tab
+                        const printWindow = window.open('../invoice/pos_rep_invoice.php?invoice=' + encodeURIComponent(generatedInvoiceNumber), '_blank');
+                        
+                        // Show success message after a short delay
+                        setTimeout(() => {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sale Completed',
+                                text: 'The sale has been successfully completed.',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                // Reset POS after confirmation
+                                resetPOS();
+                            });
+                        }, 500);
+                    } else {
+                        // Show success message immediately if not printing
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sale Completed',
+                            text: 'The sale has been successfully completed.',
+                            confirmButtonText: 'OK',
+                            showCancelButton: true,
+                            cancelButtonText: 'Print Invoice',
+                            cancelButtonColor: '#3085d6'
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.cancel) {
+                                // User clicked "Print Invoice" button
+                                window.open('../invoice/pos_rep_invoice.php?invoice=' + encodeURIComponent(generatedInvoiceNumber), '_blank');
+                            }
+                            // Reset POS
+                            resetPOS();
+                        });
+                    }
+                } else {
+                    // Show error message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Failed to complete the sale. Please try again.'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#confirm-payment').prop('disabled', false).html('Confirm & Complete');
+                
+                console.error('Error completing sale:', error);
+                console.error('Server response:', xhr.responseText);
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: 'Could not connect to the server. Please try again.'
+                });
+            }
+        });
+    });
+    
+    // Use advance payment checkbox event handler
+    $('#use-advance-payment').on('change', function() {
+        if ($(this).is(':checked') && window.selectedCustomer && window.selectedCustomer.advanceAmount > 0) {
+            const grandTotal = parseFloat($('#summary-grand-total').text()) || 0;
+            const advanceUsed = Math.min(window.selectedCustomer.advanceAmount, grandTotal);
+            
+            console.log("Advance checked. Available: " + window.selectedCustomer.advanceAmount + 
+                        ", Using: " + advanceUsed + 
+                        ", Grand total: " + grandTotal);
+            
+            // Display the advance amount that will be used
+            $('#summary-used-advance-row').show();
+            $('#summary-used-advance').text(advanceUsed.toFixed(2));
+            
+            // Adjust the amount that needs to be paid if advance doesn't cover the full amount
+            const remainingToPay = Math.max(0, grandTotal - advanceUsed);
+            $('#modal-paid-amount').val(remainingToPay.toFixed(2));
+            
+            // Recalculate change/credit
+            calculateChange();
+        } else {
+            $('#summary-used-advance-row').hide();
+            
+            // Reset to full amount
+            const grandTotal = parseFloat($('#summary-grand-total').text()) || 0;
+            $('#modal-paid-amount').val(grandTotal.toFixed(2));
+            
+            // Recalculate change/credit
+            calculateChange();
+        }
+    });
+
+    // Verify return bill button click
+    $('#verify-return-bill').click(function() {
+        const returnBillNumber = $('#return-bill-number').val().trim();
+        
+        if (!returnBillNumber) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Information',
+                text: 'Please enter a return bill number to verify.'
+            });
+            return;
+        }
+        
+        // Show loading state
+        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+        
+        // Verify return bill with server
+        $.ajax({
+            url: 'process/verify_return_bill.php',
+            type: 'GET',
+            data: { return_bill_number: returnBillNumber },
+            dataType: 'json',
+            success: function(response) {
+                // Reset button state
+                $('#verify-return-bill').prop('disabled', false).html('<i class="fas fa-check"></i> Verify');
+                
+                if (response.success) {
+                    // Show return bill amount
+                    $('#return-bill-amount').text(parseFloat(response.amount).toFixed(2));
+                    $('#return-bill-info').show();
+                    
+                    // Update payment fields with the return amount
+                    const returnAmount = parseFloat(response.amount) || 0;
+                    const grandTotal = parseFloat($('#summary-grand-total').text()) || 0;
+                    const currentPaid = parseFloat($('#modal-paid-amount').val()) || 0;
+                    
+                    // Add return amount to paid amount
+                    $('#modal-paid-amount').val((currentPaid + returnAmount).toFixed(2));
+                    
+                    // Recalculate change
+                    calculateChange();
+                } else {
+                    $('#return-bill-info').hide();
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Return Bill',
+                        text: response.message || 'Could not verify the return bill.'
+                    });
+                }
+            },
+            error: function() {
+                // Reset button state
+                $('#verify-return-bill').prop('disabled', false).html('<i class="fas fa-check"></i> Verify');
                 
                 Swal.fire({
                     icon: 'error',
