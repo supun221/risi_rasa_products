@@ -363,6 +363,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $id = mysqli_real_escape_string($conn, $data['id'] ?? '');
                 
+                // Include route_id in the select
                 $sql = "SELECT id, name, telephone, nic, address, whatsapp, email, 
                        birthday, credit_limit, discount, price_type, route_id 
                        FROM customers 

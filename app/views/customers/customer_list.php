@@ -524,6 +524,8 @@
                     
                     if (data.status === 'success') {
                         const customer = data.data;
+                        console.log('Customer data:', customer); // Debug log
+                        
                         // Populate the modal fields
                         document.getElementById('update-customer-id').value = customer.id;
                         document.getElementById('update-name').value = customer.name;
@@ -537,9 +539,19 @@
                         document.getElementById('update-discount').value = customer.discount;
                         document.getElementById('update-price-type').value = customer.price_type;
                         
-                        // Set route_id in the dropdown
+                        // Set route_id in the dropdown with proper handling
                         if (document.getElementById('update-route-id')) {
-                            document.getElementById('update-route-id').value = customer.route_id || '';
+                            // Use a timeout to ensure the dropdown is populated
+                            setTimeout(() => {
+                                const routeDropdown = document.getElementById('update-route-id');
+                                if (customer.route_id) {
+                                    routeDropdown.value = customer.route_id;
+                                    console.log('Set route_id to:', customer.route_id);
+                                } else {
+                                    routeDropdown.value = '';
+                                    console.log('No route_id found, set to empty');
+                                }
+                            }, 300);
                         }
                         
                         // Show the modal

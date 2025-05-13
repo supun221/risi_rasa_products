@@ -118,6 +118,7 @@ if ($routeResult) {
                 success: function (response) {
                     if (response.status === 'success') {
                         const customer = response.data;
+                        console.log("Customer data received:", customer); // Debug log
 
                         // Populate the modal fields
                         $('#update-customer-id').val(customer.id);
@@ -131,6 +132,9 @@ if ($routeResult) {
                         $('#update-credit-limit').val(customer.credit_limit);
                         $('#update-discount').val(customer.discount);
                         $('#update-price-type').val(customer.price_type);
+                        
+                        // Set route_id - log value first for debugging
+                        console.log("Setting route_id to:", customer.route_id);
                         $('#update-route-id').val(customer.route_id);
 
                         // Show the modal
@@ -139,8 +143,9 @@ if ($routeResult) {
                         alert(response.message);
                     }
                 },
-                error: function () {
-                    alert('Error fetching customer details.');
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", xhr.responseText);
+                    alert('Error fetching customer details: ' + error);
                 }
             });
         }
@@ -162,22 +167,18 @@ if ($routeResult) {
             const routeId = $('#update-route-id').val();
             console.log('Selected route ID for update:', routeId);
 
-            // Gather form data and ensure route_id is properly included
-            const formData = new FormData(this);
+            // Gather form data
+            const formData = $(this).serialize();
             
             // Perform AJAX to update customer
             $.ajax({
                 url: '../../controllers/customer_controller.php',
                 method: 'POST',
                 data: formData,
-                processData: false,
-                contentType: false,
+                dataType: 'json',
                 success: function (response) {
                     console.log('Update response:', response);
                     if (response.status === 'success') {
-                        // Double-check route_id was included in the form data
-                        console.log('Form data route_id:', formData.get('route_id'));
-                        
                         Swal.fire('Success', 'Customer updated successfully', 'success')
                             .then(() => {
                                 $('#updateCustomerModal').modal('hide');
@@ -189,6 +190,7 @@ if ($routeResult) {
                 },
                 error: function (xhr, status, error) {
                     console.error('Ajax error:', xhr, status, error);
+                    console.error('Response text:', xhr.responseText);
                     Swal.fire('Error', 'Error updating customer: ' + (xhr.responseText || error), 'error');
                 }
             });
