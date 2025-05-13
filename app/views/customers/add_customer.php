@@ -17,6 +17,25 @@
         .step.active {
             display: block;
         }
+        
+        /* Fix for modal footer buttons */
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+        }
+        
+        /* Make sure buttons are visible with proper spacing */
+        .modal-footer button {
+            margin: 0 5px;
+            min-width: 80px;
+        }
+        
+        /* Add some max height to modal body with scrolling */
+        .modal-body {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
     </style>
 </head>
 
@@ -108,9 +127,14 @@
                         </div>
 
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">Back</button>
-                            <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
-                            <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Save Customer</button>
+                            <div class="d-flex w-100 justify-content-between">
+                                <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">Back</button>
+                                <div>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+                                    <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">Save Customer</button>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
