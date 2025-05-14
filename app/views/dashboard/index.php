@@ -44,7 +44,7 @@ if ($user_role === 'admin') {
     }, $permissions);
 }
 ?>
-?>
+
 
 <!DOCTYPE html>
 <html>
