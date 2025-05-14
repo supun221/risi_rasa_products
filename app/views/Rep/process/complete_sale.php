@@ -81,27 +81,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $return_bill_amount = 0;
         if ($return_bill_number) {
             // Verify return bill exists and is valid
-            $stmt = $conn->prepare("SELECT id, net_amount, status FROM pos_returns WHERE return_bill_number = ?");
-            $stmt->bind_param("s", $return_bill_number);
+            // Modified to include both 'approved' and 'pending' statuses
+            $stmt = $conn->prepare("
+                SELECT id, total_amount, approval_status 
+                FROM return_collections 
+                WHERE return_bill_number = ? AND rep_id = ? 
+                AND approval_status IN ('approved', 'pending') 
+                AND used_in_invoice IS NULL
+            ");
+            $stmt->bind_param("si", $return_bill_number, $rep_id);
             $stmt->execute();
             $result = $stmt->get_result();
             
             if ($result->num_rows === 0) {
-                throw new Exception("Invalid return bill number.");
+                throw new Exception("Invalid return bill number or already used.");
             }
             
             $return_bill = $result->fetch_assoc();
+            $return_bill_amount = (float)$return_bill['total_amount'];
             
-            if ($return_bill['status'] !== 'active') {
-                throw new Exception("This return bill has already been used.");
+            // Update return_collections to mark as used
+            $stmt = $conn->prepare("
+                UPDATE return_collections 
+                SET used_in_invoice = ?, used_date = NOW() 
+                WHERE id = ?
+            ");
+            $stmt->bind_param("si", $invoice_number, $return_bill['id']);
+            if (!$stmt->execute()) {
+                throw new Exception("Failed to update return bill status: " . $stmt->error);
             }
-            
-            $return_bill_amount = $return_bill['net_amount'];
-            
-            // Update return bill status to used
-            $stmt = $conn->prepare("UPDATE pos_returns SET status = 'used' WHERE id = ?");
-            $stmt->bind_param("i", $return_bill['id']);
-            $stmt->execute();
         }
         
         // Use customer advance amount (if applicable)

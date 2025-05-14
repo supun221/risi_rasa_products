@@ -874,7 +874,7 @@ $(document).ready(function() {
         
         // Make API request to search for product
         $.ajax({
-            url: 'process/search_product_barcode.php',
+            url: 'process/search_lorry_stock_by_barcode.php',
             type: 'GET',
             data: { barcode: barcode },
             dataType: 'json',
@@ -937,14 +937,17 @@ $(document).ready(function() {
         products.forEach(function(product) {
             const listItem = `
                 <a href="#" class="list-group-item list-group-item-action duplicate-product" 
-                   data-product='${JSON.stringify(product).replace(/'/g, "&#39;")}'>
+                   data-product='${JSON.stringify({
+                       ...product,
+                       price: product.unit_price // Ensure price property is set correctly
+                   }).replace(/'/g, "&#39;")}'>
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="mb-1">${product.product_name}</h6>
                             <small>Barcode: ${product.barcode || product.itemcode || 'N/A'}</small>
                         </div>
                         <div class="text-right">
-                            <span class="badge badge-primary">Rs. ${parseFloat(product.price).toFixed(2)}</span><br>
+                            <span class="badge badge-primary">Rs. ${parseFloat(product.unit_price).toFixed(2)}</span><br>
                             <small>Stock: ${product.quantity}</small>
                         </div>
                     </div>
@@ -965,6 +968,68 @@ $(document).ready(function() {
         });
     }
     
+    // Product search by name functionality
+    $('#product-search').on('input', function() {
+        const searchTerm = $(this).val().trim();
+        
+        if (searchTerm.length >= 2) {
+            // Perform AJAX search
+            $.ajax({
+                url: 'process/search_lorry_stock.php',
+                type: 'GET',
+                data: { term: searchTerm },
+                dataType: 'json',
+                success: function(response) {
+                    let suggestionsHtml = '';
+                    
+                    if (response.success && response.products.length > 0) {
+                        response.products.forEach(function(product) {
+                            suggestionsHtml += `
+                                <div class="product-suggestion-item" 
+                                    data-id="${product.id}" 
+                                    data-name="${product.product_name}" 
+                                    data-quantity="${product.quantity}"
+                                    data-price="${product.unit_price}">
+                                    <span class="product-name">${product.product_name}</span>
+                                    <span class="product-details">Rs. ${parseFloat(product.unit_price).toFixed(2)} | Stock: ${product.quantity}</span>
+                                </div>`;
+                        });
+                        
+                        $('#product-suggestions').html(suggestionsHtml).show();
+                        
+                        // Attach click event to suggestions
+                        $('.product-suggestion-item').click(function() {
+                            const product = {
+                                id: $(this).data('id'),
+                                product_name: $(this).data('name'),
+                                price: $(this).data('price'),
+                                quantity: $(this).data('quantity')
+                            };
+                            selectProduct(product);
+                            $('#product-suggestions').hide();
+                            $('#product-search').val('');
+                        });
+                    } else {
+                        $('#product-suggestions').hide();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error searching for products:", error);
+                    $('#product-suggestions').hide();
+                }
+            });
+        } else {
+            $('#product-suggestions').hide();
+        }
+    });
+    
+    // Hide suggestions when clicking outside
+    $(document).on('click', function(event) {
+        if (!$(event.target).closest('#product-search, #product-suggestions').length) {
+            $('#product-suggestions').hide();
+        }
+    });
+    
     // Function to select a product and populate the form fields
     function selectProduct(product) {
         console.log('Selected product:', product);
@@ -973,10 +1038,16 @@ $(document).ready(function() {
         $('#selected-product').val(product.product_name);
         $('#lorry-stock-id').val(product.id || product.lorry_stock_id || '');
         $('#available-qty').val(product.quantity || '0');
-        $('#unit-price').val(parseFloat(product.price).toFixed(2));
         
-        // Store the selected product for later use
-        window.selectedProduct = product;
+        // Fix: Use unit_price if available, otherwise fall back to price
+        const productPrice = product.unit_price || product.price || 0;
+        $('#unit-price').val(parseFloat(productPrice).toFixed(2));
+        
+        // Update the stored product to ensure price is correctly set
+        window.selectedProduct = {
+            ...product,
+            price: productPrice
+        };
         
         // Update line total calculation
         updateLineTotal();
@@ -1603,5 +1674,31 @@ $(document).ready(function() {
             }
         });
     });
+    
+    // Reset POS function
+    function resetPOS() {
+        // Clear cart
+        $.ajax({
+            url: 'process/reset_cart.php',
+            type: 'POST',
+            dataType: 'json',
+            success: function() {
+                // Clear all selected products and customer
+                clearProductForm();
+                $('#selected-pos-customer-info').hide();
+                $('#pos-customer-name-display').text('');
+                window.selectedCustomer = null;
+                
+                // Reset all totals and displays
+                updateCartDisplay();
+                
+                // Focus back on barcode input
+                $('#barcode-input').focus();
+                
+                // Generate a new invoice number (refresh page)
+                location.reload();
+            }
+        });
+    }
 });
 </script>
