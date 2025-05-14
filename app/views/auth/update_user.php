@@ -96,7 +96,8 @@ $user = $result->fetch_assoc();
             <select name="job_role" required>
                 <option value="" disabled>Select Job Role</option>
                 <option value="staff" <?php echo ($user['job_role'] == 'staff') ? 'selected' : ''; ?>>Staff</option>
-                <option value="admin" <?php echo ($user['job_role'] == 'admin') ? 'selected' : ''; ?>>Admin</option>    
+                <option value="admin" <?php echo ($user['job_role'] == 'admin') ? 'selected' : ''; ?>>Admin</option>
+                <option value="rep" <?php echo ($user['job_role'] == 'rep') ? 'selected' : ''; ?>>Rep</option>    
             </select>
             
             <input type="email" name="email" placeholder="Email" value="<?php echo htmlspecialchars($user['Email']); ?>" required><br>
