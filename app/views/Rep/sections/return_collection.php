@@ -280,7 +280,12 @@ $(document).ready(function() {
                                    data-price="${item.unit_price}">
                         </td>`);
                         
-                        row.append(`<td class="return-amount">Rs. 0.00</td>`);
+                        // Return amount input field (editable)
+                        row.append(`<td>
+                            <input type="number" class="form-control return-amount-input" 
+                                   name="return_amount[${index}]" value="0" 
+                                   min="0" step="0.01">
+                        </td>`);
                         
                         $('#return-items-body').append(row);
                     });
@@ -305,15 +310,21 @@ $(document).ready(function() {
     
     // Initialize return quantity events
     function initReturnQtyEvents() {
+        // When quantity changes, update the return amount automatically
         $('.return-qty').on('input', function() {
             const qty = parseInt($(this).val()) || 0;
             const unitPrice = parseFloat($(this).data('price'));
             const returnAmount = qty * unitPrice;
             
-            // Format and update the amount cell
-            $(this).closest('tr').find('.return-amount').text('Rs. ' + returnAmount.toFixed(2));
+            // Update the amount input field with calculated value
+            $(this).closest('tr').find('.return-amount-input').val(returnAmount.toFixed(2));
             
             // Update total
+            calculateTotal();
+        });
+        
+        // When return amount is manually changed, update the total
+        $('.return-amount-input').on('input', function() {
             calculateTotal();
         });
     }
@@ -321,10 +332,9 @@ $(document).ready(function() {
     // Calculate total return amount
     function calculateTotal() {
         let total = 0;
-        $('.return-qty').each(function() {
-            const qty = parseInt($(this).val()) || 0;
-            const unitPrice = parseFloat($(this).data('price'));
-            total += qty * unitPrice;
+        $('.return-amount-input').each(function() {
+            const amount = parseFloat($(this).val()) || 0;
+            total += amount;
         });
         
         $('#total-return-amount').text('Rs. ' + total.toFixed(2));

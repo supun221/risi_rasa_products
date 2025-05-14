@@ -105,7 +105,9 @@ try {
         if ($return_qty > 0) {
             $product_name = $conn->real_escape_string($_POST['product_name'][$key]);
             $unit_price = (float)$_POST['unit_price'][$key];
-            $return_amount = $unit_price * $return_qty;
+            
+            // Use the manually entered return amount instead of calculating it
+            $return_amount = (float)$_POST['return_amount'][$key];
             
             // Insert return item
             $item_query = "INSERT INTO return_collection_items 
@@ -179,7 +181,10 @@ try {
                     throw new Exception('Failed to prepare insert stock query: ' . $conn->error);
                 }
                 
-                $stmt->bind_param("isids", $rep_id, $product_name, $return_qty, $unit_price, $return_amount);
+                // Here we use the manually entered return_amount divided by return_qty to get the effective unit price
+                $effective_unit_price = $return_qty > 0 ? ($return_amount / $return_qty) : $unit_price;
+                
+                $stmt->bind_param("isids", $rep_id, $product_name, $return_qty, $effective_unit_price, $return_amount);
                 $stmt->execute();
             }
         }
