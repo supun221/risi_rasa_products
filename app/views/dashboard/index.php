@@ -224,7 +224,7 @@ if ($user_role === 'admin') {
         <?php if ($permissions['can_view_settings']): ?>
             <button onclick="location.href='branch_sales.php';">
                 <img src="../../assets/images/order.png" alt="Sales Order">
-                <span>branch Sales </span>
+                <span>Rep Sales </span>
             </button>
         <?php endif; ?>
 

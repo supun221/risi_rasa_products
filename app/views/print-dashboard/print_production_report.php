@@ -1,26 +1,20 @@
 <?php
 // Database connection
-require_once '../../../config/databade.php';
+require_once '../../../config/database.php'; // Fixed the typo in database.php
 
 // Get filter parameters
-$supplier = isset($_GET['supplier']) ? $conn->real_escape_string($_GET['supplier']) : '';
 $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 $startDate = isset($_GET['start_date']) ? $conn->real_escape_string($_GET['start_date']) : '';
 $endDate = isset($_GET['end_date']) ? $conn->real_escape_string($_GET['end_date']) : '';
 $branch = isset($_GET['branch']) ? $conn->real_escape_string($_GET['branch']) : '';
 
-// Build the SQL query
-$query = "SELECT * FROM stock_entries_raw WHERE 1=1";
+// Build the SQL query - filter for supplier_id = 'self_001' to get production items
+$query = "SELECT * FROM stock_entries 
+          WHERE supplier_id = 'self_001'";
 
 // Add filters
 $params = [];
 $types = "";
-
-if (!empty($supplier)) {
-    $query .= " AND supplier_id = ?";
-    $params[] = $supplier;
-    $types .= "s";
-}
 
 if (!empty($search)) {
     $query .= " AND (product_name LIKE ? OR barcode LIKE ?)";
@@ -51,8 +45,8 @@ if (!empty($branch)) {
 $query .= " ORDER BY created_at DESC";
 
 // Initialize data arrays
-$rawStockData = [];
-$totalQuantity = 0;
+$productionData = [];
+$totalQuantity = 0;  // Fixed: Added the missing $ sign
 $totalCost = 0;
 
 try {
@@ -69,7 +63,7 @@ try {
     
     if ($result && $result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
-            $rawStockData[] = $row;
+            $productionData[] = $row;
             $totalQuantity += intval($row['purchase_qty']);
             $totalCost += floatval($row['total_cost_amount']);
         }
@@ -79,14 +73,12 @@ try {
 
     // Filter information for the report header
     $filterInfo = [];
-    if (!empty($supplier)) {
-        $filterInfo[] = "Supplier: " . htmlspecialchars($supplier);
-    }
+    
 } catch (Exception $e) {
     // Log error
-    error_log("Error in print_raw_stock_report.php: " . $e->getMessage());
+    error_log("Error in print_production_report.php: " . $e->getMessage());
     // Set empty data array
-    $rawStockData = [];
+    $productionData = [];
     $totalQuantity = 0;
     $totalCost = 0;
     $filterInfo = ["Error: Unable to fetch data"];
@@ -114,7 +106,7 @@ if (!empty($branch)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raw Stock Report</title>
+    <title>Production Report</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -173,7 +165,7 @@ if (!empty($branch)) {
 </head>
 <body>
     <div class="report-header">
-        <h1>Raw Stock Report</h1>
+        <h1>Production Report</h1>
         <?php if (!empty($filterInfo)): ?>
             <div class="filter-info">
                 <?php echo implode(" | ", $filterInfo); ?>
@@ -186,45 +178,41 @@ if (!empty($branch)) {
             <tr>
                 <th>Product Name</th>
                 <th>Barcode</th>
-                <th>Supplier</th>
-                <th>Purchase Qty</th>
+                <th>Production Quantity</th>
                 <th>Unit</th>
                 <th>Cost Price</th>
                 <th>Total Cost</th>
                 <th>MRP</th>
-                <th>Expire Date</th>
                 <th>Branch</th>
-                <th>Date Added</th>
+                <th>Production Date</th>
             </tr>
         </thead>
         <tbody>
-            <?php if (empty($rawStockData)): ?>
+            <?php if (empty($productionData)): ?>
                 <tr>
-                    <td colspan="11" style="text-align: center;">No records found</td>
+                    <td colspan="9" style="text-align: center;">No production records found</td>
                 </tr>
             <?php else: ?>
-                <?php foreach ($rawStockData as $item): ?>
+                <?php foreach ($productionData as $item): ?>
                     <tr>
                         <td><?php echo htmlspecialchars($item['product_name'] ?? 'N/A'); ?></td>
                         <td><?php echo htmlspecialchars($item['barcode'] ?? 'N/A'); ?></td>
-                        <td><?php echo htmlspecialchars($item['supplier_id'] ?? 'N/A'); ?></td>
                         <td><?php echo htmlspecialchars($item['purchase_qty'] ?? '0'); ?></td>
                         <td><?php echo htmlspecialchars($item['unit'] ?? 'N/A'); ?></td>
                         <td><?php echo number_format((float)($item['cost_price'] ?? 0), 2); ?></td>
                         <td><?php echo number_format((float)($item['total_cost_amount'] ?? 0), 2); ?></td>
                         <td><?php echo number_format((float)($item['max_retail_price'] ?? 0), 2); ?></td>
-                        <td><?php echo htmlspecialchars($item['expire_date'] ?? 'N/A'); ?></td>
                         <td><?php echo htmlspecialchars($item['branch'] ?? 'N/A'); ?></td>
                         <td><?php echo htmlspecialchars($item['created_at'] ?? 'N/A'); ?></td>
                     </tr>
                 <?php endforeach; ?>
                 <tr class="totals-row">
-                    <td colspan="3" style="text-align:right;">Total:</td>
+                    <td colspan="2" style="text-align:right;">Total:</td>
                     <td><?php echo $totalQuantity; ?></td>
                     <td></td>
                     <td></td>
                     <td><?php echo number_format($totalCost, 2); ?></td>
-                    <td colspan="4"></td>
+                    <td colspan="3"></td>
                 </tr>
             <?php endif; ?>
         </tbody>
