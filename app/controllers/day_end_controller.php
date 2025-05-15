@@ -15,8 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['getUsername'])) {
         echo json_encode(['username' => $_SESSION['username'] ?? 'Guest']);
         exit;
-    }
-    elseif (isset($_POST['getOpeningBalance'])) {
+    } elseif (isset($_POST['getOpeningBalance'])) {
         // Get yesterday's date
         $today = date('Y-m-d');
 
@@ -30,7 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 date = ? AND username = ?";
         $stmt = $conn->prepare($query);
         $stmt->bind_param("ss", $today, $username);
-
     } elseif (isset($_POST['getDayEndData'])) {
         // Query to fetch data for the day
         $query = "
@@ -46,9 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             SUM(CASE WHEN payment_type = 'voucher_payment' THEN net_amount ELSE 0 END) AS total_voucher_payment,
             SUM(CASE WHEN payment_type = 'free_payment' THEN net_amount ELSE 0 END) AS total_free_payment
         FROM bill_records
-        WHERE bill_date = ? AND issuer = ?";
+WHERE DATE(bill_date) = DATE(?) AND issuer = ?";
         $stmt = $conn->prepare($query);
         $stmt->bind_param("ss", $today, $username);
+        
     } elseif (isset($_POST['getTodayCashDrawerPayment'])) {
         // Query to fetch today's cash drawer payments from the payments table
         $query = "
@@ -58,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             WHERE date = ? AND payment_method = 'cash' AND paid_by = ?";
         $stmt = $conn->prepare($query);
         $stmt->bind_param("ss", $today, $username);
+         $data['petty_cash'] = $pettyCashResult['petty_cash'] ?? '0.00';
     } elseif (isset($_POST['getDayEndHandBalance'])) {
         // Query to fetch the day end hand balance from the day_end_balance table
         $query = "
@@ -67,6 +67,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 day_end_balance
             WHERE 
                 date = ? AND username = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("ss", $today, $username);
+    } elseif (isset($_POST['getPettyCashExpenses'])) {
+        // Query to fetch today's petty cash expenses from cash_book
+        $query = "
+            SELECT 
+                SUM(amount) AS petty_cash
+            FROM cash_book
+            WHERE DATE(created_timestamp) = ? AND user_name = ?";
         $stmt = $conn->prepare($query);
         $stmt->bind_param("ss", $today, $username);
     } else {
@@ -101,4 +110,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     echo json_encode($data);
     exit;
 }
-?>

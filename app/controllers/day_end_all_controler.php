@@ -1,6 +1,11 @@
 <?php
 include('../../config/databade.php'); // Ensure this file exists and is correctly configured
 
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Ensure database connection
 if ($conn->connect_error) {
     die(json_encode(["error" => "Database connection failed: " . $conn->connect_error]));
@@ -16,10 +21,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 
 function saveDayEndReport($conn, $data) {
-    // Prepare the SQL query with 17 placeholders (`?`) for 17 VARCHAR columns
+    // Prepare the SQL query with 18 placeholders (`?`) - adding `branch` as a VARCHAR column
     $stmt = $conn->prepare("INSERT INTO day_end_reports 
-        (username, opening_balance, total_gross, total_net, total_discount, total_bills, total_cash, total_credit, bill_payment, cash_drawer, voucher_payment, free_payment, total_balance, day_end_hand_balance, cash_balance, today_balance, difference_hand) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        (username, opening_balance, total_gross, total_net, total_discount, total_bills, total_cash, total_credit, bill_payment, cash_drawer, voucher_payment, free_payment, total_balance, petty_cash, day_end_hand_balance, cash_balance, today_balance, difference_hand, branch) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     if (!$stmt) {
         die(json_encode(["error" => "Prepare failed: " . $conn->error]));
@@ -39,14 +44,23 @@ function saveDayEndReport($conn, $data) {
     $voucher_payment = isset($data['voucher_payment']) ? (string) $data['voucher_payment'] : "0.00";
     $free_payment = isset($data['free_payment']) ? (string) $data['free_payment'] : "0.00";
     $total_balance = isset($data['total_balance']) ? (string) $data['total_balance'] : "0.00";
+    $petty_cash = isset($data['petty_cash']) ? (string) $data['petty_cash'] : "0.00";
     $day_end_hand_balance = isset($data['day_end_hand_balance']) ? (string) $data['day_end_hand_balance'] : "0.00";
     $cash_balance = isset($data['cash_balance']) ? (string) $data['cash_balance'] : "0.00";
     $today_balance = isset($data['today_balance']) ? (string) $data['today_balance'] : "0.00";
     $difference_hand = isset($data['difference_hand']) ? (string) $data['difference_hand'] : "0.00";
+    // Fetch branch from session
+    $branch = isset($_SESSION['store']) ? $_SESSION['store'] : "";
 
-    // ✅ Bind parameters with the CORRECT type string ("sssssssssssssssss" for all VARCHAR)
+    // Validate branch (optional but recommended)
+    if (empty($branch)) {
+        echo json_encode(["error" => "Branch not identified. Please log in again."]);
+        return;
+    }
+
+    // Bind parameters with the CORRECT type string ("ssssssssssssssssss" + "s" for branch = "sssssssssssssssssss")
     $stmt->bind_param(
-        "sssssssssssssssss",
+        "sssssssssssssssssss",
         $username,
         $opening_balance,
         $total_gross,
@@ -60,10 +74,12 @@ function saveDayEndReport($conn, $data) {
         $voucher_payment,
         $free_payment,
         $total_balance,
+        $petty_cash,
         $day_end_hand_balance,
         $cash_balance,
         $today_balance,
-        $difference_hand
+        $difference_hand,
+        $branch
     );
 
     // Execute the statement
