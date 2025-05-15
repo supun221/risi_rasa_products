@@ -1,5 +1,5 @@
 <?php
-require_once '../../../config/databade.php';
+require_once '../../../config/database.php';
 
 // Get filter parameters
 $repId = isset($_GET['rep_id']) ? $conn->real_escape_string($_GET['rep_id']) : '';

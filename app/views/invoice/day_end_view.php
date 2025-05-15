@@ -65,7 +65,7 @@
                 id="total_bills">-</span></div>
         <div class="data-row"><span><i class="fas fa-cash-register"></i> Total Cash Payments:</span> <span
                 id="total_cash">-</span></div>
-        <div class="data-row"><span><i class="fas fa-credit-card"></i> Total Card Payments:</span> <span
+        <div class="data-row"><span><i class="fas fa-credit-card"></i> Total Credit Payments:</span> <span
                 id="total_credit">-</span></div>
         <div class="data-row"><span><i class="fas fa-file-invoice"></i> Total Bill Payments:</span> <span
                 id="bill_payment">-</span></div>
@@ -75,8 +75,12 @@
                 id="voucher_payment">-</span></div>
         <div class="data-row"><span><i class="fas fa-donate"></i> Total Free Payments:</span> <span
                 id="free_payment">-</span></div>
+
         <div class="data-row"><span><i class="fas fa-balance-scale"></i> Total Balance:</span> <span
                 id="total_balance">-</span></div>
+
+        <div class="data-row"><span><i class="fas fa-money-bill-trend-up"></i> Petty cash(expenses)</span> <span
+                id="petty_cash">-</span></div>
         <div class="data-row"><span><i class="fas fa-balance-scale"></i> Day End Hand Balance:</span> <span id="day_end_hand_balance">-</span></div>
         <div class="data-row">
 
@@ -91,7 +95,38 @@
                 id="differencehand">-</span></div>
         <div class="data-row">
 
+<style>
+    #backBtn {
+    background-color:rgb(119, 77, 255); /* Red */
+    color: white;
+}
 
+#printBtn {
+    background-color:rgb(13, 92, 171); /* Blue */
+    color: white;
+}
+
+#saveBtn {
+    background-color:rgb(18, 139, 58); /* Green */
+    color: white;
+}
+
+/* Add spacing */
+.btn-container {
+    display: flex;
+    gap: 10px;
+}
+
+/* Optional: Styling for buttons */
+.action-btn {
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+</style>
 
 
             <div class="btn-container">
@@ -123,6 +158,7 @@
                     voucher_payment: parseFloat(document.getElementById('voucher_payment').textContent) || 0.00,
                     free_payment: parseFloat(document.getElementById('free_payment').textContent) || 0.00,
                     total_balance: parseFloat(document.getElementById('total_balance').textContent) || 0.00,
+                    petty_cash: parseFloat(document.getElementById('petty_cash').textContent) || 0.00,
                     day_end_hand_balance: parseFloat(document.getElementById('day_end_hand_balance').textContent) || 0.00,
                     cash_balance: parseFloat(document.getElementById('cash_balance').textContent) || 0.00,
                     today_balance: parseFloat(document.getElementById('difference').textContent) || 0.00,
@@ -158,6 +194,7 @@
                 fetchDayEndData();
                 fetchTodayCashDrawerPayment();
                 fetchDayEndHandBalance();
+                fetchPettyCash();
             });
 
             function fetchUsername() {
@@ -172,6 +209,24 @@
                     .then(data => {
                         document.getElementById('username').textContent = data.username || 'N/A';
                         window.username = data.username; // Store username globally
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            function fetchPettyCash() {
+                fetch('../../controllers/day_end_controller.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'getPettyCashExpenses=true',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const pettyCash = parseFloat(data.petty_cash || '0.00');
+                        document.getElementById('petty_cash').textContent = pettyCash.toFixed(2);
+                        window.pettyCash = pettyCash; // Store for calculations
+                        calculateCashBalanceAndDifference();
                     })
                     .catch(error => console.error('Error:', error));
             }
@@ -207,6 +262,7 @@
                     })
                     .then(response => response.json())
                     .then(data => {
+                        console.log("Fetched Data:", data);
                         const totalNet = parseFloat(data.total_net || '0.00');
                         document.getElementById('total_gross').textContent = data.total_gross || '0.00';
                         document.getElementById('total_net').textContent = totalNet.toFixed(2);
@@ -272,14 +328,15 @@
                     window.openingBalance !== undefined &&
                     window.totalNet !== undefined &&
                     window.cashDrawer !== undefined &&
-                    window.dayEndHandBalance !== undefined
+                    window.dayEndHandBalance !== undefined &&
+                    window.pettyCash !== undefined
                 ) {
                     // Calculate Cash Balance
                     const cashBalance = window.openingBalance + window.totalNet;
                     document.getElementById('cash_balance').textContent = cashBalance.toFixed(2);
 
                     // Calculate Difference (Cash Balance - Cash Drawer)
-                    const difference = cashBalance - window.cashDrawer;
+                    const difference = cashBalance - window.cashDrawer - window.pettyCash;
                     document.getElementById('difference').textContent = difference.toFixed(2);
 
                     // Calculate Difference Hand (Day End Hand Balance - Cash Balance)
@@ -318,6 +375,11 @@
                     year: 'numeric'
                 });
             }
+            document.addEventListener("keydown", function(event) {
+        if (event.code === "Home") {
+            window.location.href = "../dashboard/index.php";
+        }
+    });
         </script>
 
 

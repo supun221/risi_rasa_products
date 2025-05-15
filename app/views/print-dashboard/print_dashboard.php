@@ -244,6 +244,28 @@ require_once '../header1.php';
                 <button class="rep_generate_btn" onclick="fetchSalesReport()">Run Report</button>
                 <button class="rep_generate_btn" onclick="printSalesReport()">Print Report</button>
             </div>
+            
+            <!-- Raw Stock Report -->
+            <div class="report-btn-container">
+                <div class="report-heading-cont">
+                    <span class="report-name">Raw Stock Report</span>
+                </div>
+                <div class="total-stock-inputs">
+                    <select id="raw-stock-supplier">
+                        <option value="">All Suppliers</option>
+                    </select>
+                    <input type="text" id="raw-stock-search" placeholder="Search by Product Name or Barcode">
+                    <input type="date" id="raw-stock-start-date">
+                    <input type="date" id="raw-stock-end-date">
+                    <select id="raw-stock-branch">
+                        <option value="">All Branches</option>
+                    </select>
+                </div>
+                <p class="report-content">Generate a report of raw stock entries.</p>
+                <button class="rep_generate_btn" onclick="fetchRawStockReport()">Run Report</button>
+                <button class="rep_generate_btn" onclick="printRawStockReport()">Print Report</button>
+            </div>
+
             <!-- Sales Report (Product Wise) -->
             <div class="report-btn-container">
                 <div class="report-heading-cont">
@@ -711,7 +733,8 @@ require_once '../header1.php';
         fetchCategoriesForSalesReport();
         loadUsers();
         loadRepUsernames();
-        loadRoutes(); // Add this line to load routes when page loads
+        loadRoutes();
+        loadSuppliers();
     });
     
     // Function to load rep usernames for the dropdown lists
@@ -766,297 +789,141 @@ require_once '../header1.php';
             .catch(error => console.error("Error fetching routes:", error));
     }
     
-    // Rep Payments Report Functions
-    function fetchRepPaymentsReport() {
-        let repId = document.getElementById("rep-payments-username").value;
-        let startDate = document.getElementById("rep-payments-start-date").value;
-        let endDate = document.getElementById("rep-payments-end-date").value;
+    // Function to load suppliers
+    function loadSuppliers() {
+        fetch("fetch_suppliers.php")
+            .then(response => response.json())
+            .then(suppliers => {
+                let supplierSelect = document.getElementById("raw-stock-supplier");
+                
+                // Reset dropdown with default option
+                supplierSelect.innerHTML = '<option value="">All Suppliers</option>';
+                
+                // Populate dropdown with supplier data
+                suppliers.forEach(supplier => {
+                    let option = `<option value="${supplier.id}">${supplier.name}</option>`;
+                    supplierSelect.innerHTML += option;
+                });
+                
+                // Also update branch dropdown
+                loadBranchesForRawStock();
+            })
+            .catch(error => console.error("Error fetching suppliers:", error));
+    }
+    
+    // Function to load branches for raw stock
+    function loadBranchesForRawStock() {
+        fetch("fetch_branch.php")
+            .then(response => response.json())
+            .then(branches => {
+                let branchSelect = document.getElementById("raw-stock-branch");
+                
+                // Reset dropdown with default option
+                branchSelect.innerHTML = '<option value="">All Branches</option>';
+                
+                // Populate dropdown with branch data
+                branches.forEach(branch => {
+                    let option = `<option value="${branch}">${branch}</option>`;
+                    branchSelect.innerHTML += option;
+                });
+            })
+            .catch(error => console.error("Error fetching branches for raw stock:", error));
+    }
+    
+    // Raw Stock Report Functions
+    function fetchRawStockReport() {
+        let supplier = document.getElementById("raw-stock-supplier").value;
+        let search = document.getElementById("raw-stock-search").value;
+        let startDate = document.getElementById("raw-stock-start-date").value;
+        let endDate = document.getElementById("raw-stock-end-date").value;
+        let branch = document.getElementById("raw-stock-branch").value;
         
         let queryParams = new URLSearchParams({
-            rep_id: repId,
+            supplier: supplier,
+            search: search,
             start_date: startDate,
-            end_date: endDate
+            end_date: endDate,
+            branch: branch
         });
         
-        let url = `fetch_rep_payments_report.php?${queryParams.toString()}`;
+        let url = `fetch_raw_stock_report.php?${queryParams.toString()}`;
         
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                $("#reportTitle").text("Rep Payments Report");
-                $("#reportModalLabel").text("Rep Payments Report");
+                $("#reportTitle").text("Raw Stock Report");
+                $("#reportModalLabel").text("Raw Stock Report");
                 
                 let tableHeaders = `
-                    <th>Invoice Number</th>
-                    <th>Customer Name</th>
-                    <th>Amount</th>
-                    <th>Payment Method</th>
-                    <th>Cheque Number</th>
-                    <th>Rep</th>
+                    <th>Product Name</th>
+                    <th>Barcode</th>
+                    <th>Supplier</th>
+                    <th>Purchase Qty</th>
+                    <th>Unit</th>
+                    <th>Cost Price</th>
+                    <th>Total Cost</th>
+                    <th>MRP</th>
+                    <th>Expire Date</th>
                     <th>Branch</th>
-                    <th>Date</th>
-                    <th>Notes</th>
-                `;
-                
-                let tableBody = "";
-                let totalAmount = 0;
-                
-                if (!data.success || data.data.length === 0) {
-                    tableBody = "<tr><td colspan='9'>No payment records found.</td></tr>";
-                } else {
-                    data.data.forEach(item => {
-                        totalAmount += parseFloat(item.amount) || 0;
-                        
-                        tableBody += `
-                            <tr>
-                                <td>${item.invoice_number}</td>
-                                <td>${item.customer_name}</td>
-                                <td>${parseFloat(item.amount).toFixed(2)}</td>
-                                <td>${item.payment_method}</td>
-                                <td>${item.cheque_num || "N/A"}</td>
-                                <td>${item.rep_name}</td>
-                                <td>${item.branch}</td>
-                                <td>${item.payment_date}</td>
-                                <td>${item.notes || ""}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    // Append total row
-                    tableBody += `
-                        <tr style="font-weight: bold;">
-                            <td colspan="2" style="text-align:right;">Total:</td>
-                            <td>${totalAmount.toFixed(2)}</td>
-                            <td colspan="6"></td>
-                        </tr>
-                    `;
-                }
-                
-                $("#reportTableHead").html(tableHeaders);
-                $("#reportTableBody").html(tableBody);
-                $("#reportModal").modal("show");
-            })
-            .catch(error => console.error("Error fetching rep payments report:", error));
-    }
-    
-    function printRepPaymentsReport() {
-        let repId = document.getElementById("rep-payments-username").value;
-        let startDate = document.getElementById("rep-payments-start-date").value;
-        let endDate = document.getElementById("rep-payments-end-date").value;
-        
-        let url = `print_rep_payments_report.php?rep_id=${encodeURIComponent(repId)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
-        
-        let printWindow = window.open(url, '_blank');
-        
-        if (printWindow) {
-            setTimeout(() => {
-                printWindow.focus();
-                printWindow.print();
-                printWindow.onafterprint = function() {
-                    printWindow.close();
-                };
-            }, 1000);
-        } else {
-            alert("Popup blocked! Allow popups for this site.");
-        }
-    }
-    
-    // Rep Sales Report Functions - Updated to include route filtering
-    function fetchRepSalesReport() {
-        let repId = document.getElementById("rep-sales-username").value;
-        let routeId = document.getElementById("rep-sales-route").value;
-        let startDate = document.getElementById("rep-sales-start-date").value;
-        let endDate = document.getElementById("rep-sales-end-date").value;
-        let barcode = document.getElementById("rep-sales-barcode").value;
-        
-        let queryParams = new URLSearchParams({
-            rep_id: repId,
-            route_id: routeId,
-            start_date: startDate,
-            end_date: endDate,
-            barcode: barcode
-        });
-        
-        let url = `fetch_rep_sales_report.php?${queryParams.toString()}`;
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                $("#reportTitle").text("Rep Sales Items Report");
-                $("#reportModalLabel").text("Rep Sales Items Report");
-                
-                let tableHeaders = `
-                    <th>Invoice Number</th>
-                    <th>Product Name</th>
-                    <th>Barcode</th>
-                    <th>Quantity</th>
-                    <th>Free Quantity</th>
-                    <th>Unit Price</th>
-                    <th>Discount</th>
-                    <th>Subtotal</th>
-                    <th>Customer</th>
-                    <th>Route</th>
-                    <th>Rep</th>
-                    <th>Date</th>
+                    <th>Date Added</th>
                 `;
                 
                 let tableBody = "";
                 let totalQuantity = 0;
-                let totalAmount = 0;
+                let totalCost = 0;
                 
                 if (!data.success || data.data.length === 0) {
-                    tableBody = "<tr><td colspan='12'>No sales records found.</td></tr>";
+                    tableBody = "<tr><td colspan='11'>No stock records found.</td></tr>";
                 } else {
                     data.data.forEach(item => {
-                        totalQuantity += parseInt(item.quantity) || 0;
-                        totalAmount += parseFloat(item.subtotal) || 0;
+                        totalQuantity += parseInt(item.purchase_qty) || 0;
+                        totalCost += parseFloat(item.total_cost_amount) || 0;
                         
                         tableBody += `
-                            <tr>
-                                <td>${item.invoice_number}</td>
-                                <td>${item.product_name}</td>
-                                <td>${item.barcode || "N/A"}</td>
-                                <td>${item.quantity}</td>
-                                <td>${item.free_quantity}</td>
-                                <td>${parseFloat(item.unit_price).toFixed(2)}</td>
-                                <td>${parseFloat(item.discount_percent).toFixed(2)}%</td>
-                                <td>${parseFloat(item.subtotal).toFixed(2)}</td>
-                                <td>${item.customer_name || "Walk-in"}</td>
-                                <td>${item.route_name || "N/A"}</td>
-                                <td>${item.rep_name}</td>
-                                <td>${item.sale_date}</td>
-                            </tr>
-                        `;
+                        <tr>
+                            <td>${item.product_name}</td>
+                            <td>${item.barcode || "N/A"}</td>
+                            <td>${item.supplier_name || "N/A"}</td>
+                            <td>${item.purchase_qty}</td>
+                            <td>${item.unit || "N/A"}</td>
+                            <td>${parseFloat(item.cost_price).toFixed(2)}</td>
+                            <td>${parseFloat(item.total_cost_amount).toFixed(2)}</td>
+                            <td>${parseFloat(item.max_retail_price).toFixed(2)}</td>
+                            <td>${item.expire_date || "N/A"}</td>
+                            <td>${item.branch}</td>
+                            <td>${item.created_at}</td>
+                        </tr>
+                    `;
                     });
                     
                     // Append total row
                     tableBody += `
-                        <tr style="font-weight: bold;">
-                            <td colspan="3" style="text-align:right;">Total:</td>
-                            <td>${totalQuantity}</td>
-                            <td colspan="3"></td>
-                            <td>${totalAmount.toFixed(2)}</td>
-                            <td colspan="4"></td>
-                        </tr>
-                    `;
-                }
-                
-                $("#reportTableHead").html(tableHeaders);
-                $("#reportTableBody").html(tableBody);
-                $("#reportModal").modal("show");
-            })
-            .catch(error => console.error("Error fetching rep sales report:", error));
-    }
-    
-    function printRepSalesReport() {
-        let repId = document.getElementById("rep-sales-username").value;
-        let routeId = document.getElementById("rep-sales-route").value;
-        let startDate = document.getElementById("rep-sales-start-date").value;
-        let endDate = document.getElementById("rep-sales-end-date").value;
-        let barcode = document.getElementById("rep-sales-barcode").value;
-        
-        let url = `print_rep_sales_report.php?rep_id=${encodeURIComponent(repId)}&route_id=${encodeURIComponent(routeId)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}&barcode=${encodeURIComponent(barcode)}`;
-        
-        let printWindow = window.open(url, '_blank');
-        
-        if (printWindow) {
-            setTimeout(() => {
-                printWindow.focus();
-                printWindow.print();
-                printWindow.onafterprint = function() {
-                    printWindow.close();
-                };
-            }, 1000);
-        } else {
-            alert("Popup blocked! Allow popups for this site.");
-        }
-    }
-    
-    // Rep Lorry Stock Report Functions
-    function fetchRepLorryStockReport() {
-        let repId = document.getElementById("rep-stock-username").value;
-        let startDate = document.getElementById("rep-stock-start-date").value;
-        let endDate = document.getElementById("rep-stock-end-date").value;
-        let barcode = document.getElementById("rep-stock-barcode").value;
-        
-        let queryParams = new URLSearchParams({
-            rep_id: repId,
-            start_date: startDate,
-            end_date: endDate,
-            barcode: barcode
-        });
-        
-        let url = `fetch_rep_lorry_stock_report.php?${queryParams.toString()}`;
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                $("#reportTitle").text("Rep Lorry Stock Report");
-                $("#reportModalLabel").text("Rep Lorry Stock Report");
-                
-                let tableHeaders = `
-                    <th>Product Name</th>
-                    <th>Barcode</th>
-                    <th>Quantity</th>
-                    <th>Unit Price</th>
-                    <th>Total Value</th>
-                    <th>Rep</th>
-                    <th>Status</th>
-                    <th>Last Updated</th>
+                    <tr style="font-weight: bold;">
+                        <td colspan="3" style="text-align:right;">Total:</td>
+                        <td>${totalQuantity}</td>
+                        <td></td>
+                        <td></td>
+                        <td>${totalCost.toFixed(2)}</td>
+                        <td colspan="4"></td>
+                    </tr>
                 `;
-                
-                let tableBody = "";
-                let totalQuantity = 0;
-                let totalValue = 0;
-                
-                if (!data.success || data.data.length === 0) {
-                    tableBody = "<tr><td colspan='8'>No lorry stock records found.</td></tr>";
-                } else {
-                    data.data.forEach(item => {
-                        let itemValue = parseFloat(item.quantity) * parseFloat(item.unit_price);
-                        totalQuantity += parseInt(item.quantity) || 0;
-                        totalValue += itemValue;
-                        
-                        tableBody += `
-                            <tr>
-                                <td>${item.product_name}</td>
-                                <td>${item.barcode || "N/A"}</td>
-                                <td>${item.quantity}</td>
-                                <td>${parseFloat(item.unit_price).toFixed(2)}</td>
-                                <td>${itemValue.toFixed(2)}</td>
-                                <td>${item.rep_name}</td>
-                                <td>${item.status}</td>
-                                <td>${item.date_added}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    // Append total row
-                    tableBody += `
-                        <tr style="font-weight: bold;">
-                            <td colspan="2" style="text-align:right;">Total:</td>
-                            <td>${totalQuantity}</td>
-                            <td></td>
-                            <td>${totalValue.toFixed(2)}</td>
-                            <td colspan="3"></td>
-                        </tr>
-                    `;
                 }
                 
                 $("#reportTableHead").html(tableHeaders);
                 $("#reportTableBody").html(tableBody);
                 $("#reportModal").modal("show");
             })
-            .catch(error => console.error("Error fetching rep lorry stock report:", error));
+            .catch(error => console.error("Error fetching raw stock report:", error));
     }
     
-    function printRepLorryStockReport() {
-        let repId = document.getElementById("rep-stock-username").value;
-        let startDate = document.getElementById("rep-stock-start-date").value;
-        let endDate = document.getElementById("rep-stock-end-date").value;
-        let barcode = document.getElementById("rep-stock-barcode").value;
+    function printRawStockReport() {
+        let supplier = document.getElementById("raw-stock-supplier").value;
+        let search = document.getElementById("raw-stock-search").value;
+        let startDate = document.getElementById("raw-stock-start-date").value;
+        let endDate = document.getElementById("raw-stock-end-date").value;
+        let branch = document.getElementById("raw-stock-branch").value;
         
-        let url = `print_rep_lorry_stock_report.php?rep_id=${encodeURIComponent(repId)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}&barcode=${encodeURIComponent(barcode)}`;
+        let url = `print_raw_stock_report.php?supplier=${encodeURIComponent(supplier)}&search=${encodeURIComponent(search)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}&branch=${encodeURIComponent(branch)}`;
         
         let printWindow = window.open(url, '_blank');
         
