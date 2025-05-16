@@ -1,6 +1,6 @@
 <?php 
     include '../../../models/Database.php';
-    $sql = "SELECT id, product_name, available_stock, created_at FROM stock_entries_raw";
+    $sql = "SELECT id, product_name, available_stock, created_at FROM stock_entries_raw WHERE available_stock > 0";
     $result = $db_conn->query($sql);
     $stock_entries = [];
     if ($result->num_rows > 0) {
