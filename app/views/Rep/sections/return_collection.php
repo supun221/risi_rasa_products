@@ -276,7 +276,7 @@ $(document).ready(function() {
                         row.append(`<td>
                             <input type="number" class="form-control return-qty" 
                                    name="return_qty[${index}]" value="0" 
-                                   min="0" max="${item.quantity}"
+                                   min="0" max="${item.quantity}" step="0.01"
                                    data-price="${item.unit_price}">
                         </td>`);
                         
@@ -312,7 +312,7 @@ $(document).ready(function() {
     function initReturnQtyEvents() {
         // When quantity changes, update the return amount automatically
         $('.return-qty').on('input', function() {
-            const qty = parseInt($(this).val()) || 0;
+            const qty = parseFloat($(this).val()) || 0;
             const unitPrice = parseFloat($(this).data('price'));
             const returnAmount = qty * unitPrice;
             
@@ -356,7 +356,7 @@ $(document).ready(function() {
     $('#return-form').submit(function(e) {
         let hasReturnItems = false;
         $('.return-qty').each(function() {
-            if (parseInt($(this).val()) > 0) {
+            if (parseFloat($(this).val()) > 0) {
                 hasReturnItems = true;
                 return false; // break the loop
             }

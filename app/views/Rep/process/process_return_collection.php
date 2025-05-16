@@ -58,7 +58,7 @@ try {
     
     // Check if at least one item has quantity > 0
     foreach ($_POST['return_qty'] as $qty) {
-        if ((int)$qty > 0) {
+        if ((float)$qty > 0) {
             $has_items_to_return = true;
             break;
         }
@@ -99,8 +99,8 @@ try {
     
     // Process return items
     foreach ($_POST['item_id'] as $key => $sale_item_id) {
-        $return_qty = (int)$_POST['return_qty'][$key];
-        $original_qty = (int)$_POST['original_qty'][$key];
+        $return_qty = (float)$_POST['return_qty'][$key];
+        $original_qty = (float)$_POST['original_qty'][$key];
         
         if ($return_qty > 0) {
             $product_name = $conn->real_escape_string($_POST['product_name'][$key]);
@@ -143,7 +143,7 @@ try {
                 throw new Exception('Failed to prepare update item query: ' . $conn->error);
             }
             
-            $stmt->bind_param("idi", $new_qty, $new_subtotal, $sale_item_id);
+            $stmt->bind_param("ddi", $new_qty, $new_subtotal, $sale_item_id);
             $stmt->execute();
             
             // Add products back to lorry stock
