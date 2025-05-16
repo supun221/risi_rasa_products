@@ -354,20 +354,6 @@ $(document).ready(function() {
     
     // Form validation before submit
     $('#return-form').submit(function(e) {
-        let hasReturnItems = false;
-        $('.return-qty').each(function() {
-            if (parseFloat($(this).val()) > 0) {
-                hasReturnItems = true;
-                return false; // break the loop
-            }
-        });
-        
-        if (!hasReturnItems) {
-            e.preventDefault();
-            alert('Please enter at least one item to return');
-            return false;
-        }
-        
         if (!$('#return_reason').val()) {
             e.preventDefault();
             alert('Please select a return reason');

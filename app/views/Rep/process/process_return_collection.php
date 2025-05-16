@@ -54,19 +54,6 @@ try {
     }
     
     $total_amount = 0;
-    $has_items_to_return = false;
-    
-    // Check if at least one item has quantity > 0
-    foreach ($_POST['return_qty'] as $qty) {
-        if ((float)$qty > 0) {
-            $has_items_to_return = true;
-            break;
-        }
-    }
-    
-    if (!$has_items_to_return) {
-        throw new Exception('Please enter return quantity for at least one item');
-    }
     
     // Generate return bill number
     $date_prefix = date('Ymd');
@@ -102,35 +89,37 @@ try {
         $return_qty = (float)$_POST['return_qty'][$key];
         $original_qty = (float)$_POST['original_qty'][$key];
         
+        // Process all items regardless of quantity
+        $product_name = $conn->real_escape_string($_POST['product_name'][$key]);
+        $unit_price = (float)$_POST['unit_price'][$key];
+        
+        // Use the manually entered return amount instead of calculating it
+        $return_amount = (float)$_POST['return_amount'][$key];
+        
+        // Insert return item
+        $item_query = "INSERT INTO return_collection_items 
+                      (return_id, sale_item_id, product_name, unit_price, 
+                       return_qty, return_amount, reason) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?)";
+                       
+        $stmt = $conn->prepare($item_query);
+        if (!$stmt) {
+            throw new Exception('Failed to prepare return item query: ' . $conn->error);
+        }
+        
+        $stmt->bind_param("iisdids", $return_id, $sale_item_id, $product_name, 
+                        $unit_price, $return_qty, $return_amount, $reason);
+        $stmt->execute();
+        
+        if ($stmt->affected_rows <= 0) {
+            throw new Exception('Failed to insert return item: ' . $product_name);
+        }
+        
+        // Add to total regardless of quantity - this ensures all return amounts are included
+        $total_amount += $return_amount;
+        
+        // Only update inventory and original sale if there's a positive quantity
         if ($return_qty > 0) {
-            $product_name = $conn->real_escape_string($_POST['product_name'][$key]);
-            $unit_price = (float)$_POST['unit_price'][$key];
-            
-            // Use the manually entered return amount instead of calculating it
-            $return_amount = (float)$_POST['return_amount'][$key];
-            
-            // Insert return item
-            $item_query = "INSERT INTO return_collection_items 
-                          (return_id, sale_item_id, product_name, unit_price, 
-                           return_qty, return_amount, reason) 
-                          VALUES (?, ?, ?, ?, ?, ?, ?)";
-                           
-            $stmt = $conn->prepare($item_query);
-            if (!$stmt) {
-                throw new Exception('Failed to prepare return item query: ' . $conn->error);
-            }
-            
-            $stmt->bind_param("iisdids", $return_id, $sale_item_id, $product_name, 
-                            $unit_price, $return_qty, $return_amount, $reason);
-            $stmt->execute();
-            
-            if ($stmt->affected_rows <= 0) {
-                throw new Exception('Failed to insert return item: ' . $product_name);
-            }
-            
-            // Add to total
-            $total_amount += $return_amount;
-            
             // Update pos_sale_items table - reduce quantity and subtotal
             $new_qty = $original_qty - $return_qty;
             $new_subtotal = $unit_price * $new_qty;
