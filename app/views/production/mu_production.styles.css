@@ -371,11 +371,17 @@ body {
 
 .item-name-suggester {
   position: absolute;
-  left: 0;
-  bottom: -180%;
+  left: 5px;
+  top: 90%; /* Position it directly below the input field */
   width: 100%;
-  background-color: white;
-  z-index: 1;
+  background-color: rgb(244, 208, 208);
+  z-index: 10; /* Higher z-index to ensure visibility */
+  border: 1px solid #ccc;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-height: 150px;
+  overflow-y: auto;
+  display: none;
 }
 
 #produced-items-tb > tbody > tr > td:nth-child(2) > input {
@@ -401,6 +407,17 @@ body {
 }
 #produced-items-tb > tbody > tr > td:nth-child(9) > input {
   width: 130px;
+}
+
+.suggestion-item {
+  padding: 5px 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.suggestion-item:hover {
+  background-color: #f37ca9;
 }
 
 .add-item-btn {
@@ -432,16 +449,6 @@ body {
   width: 100%;
   max-width: 300px;
   margin: 0 auto;
-}
-
-.suggestion-item {
-  padding: 5px;
-  cursor: pointer;
-  border-bottom: 1px solid #ccc;
-}
-
-.suggestion-item:hover {
-  background-color: #f0f0f0;
 }
 
 .raw-mat-selection {
