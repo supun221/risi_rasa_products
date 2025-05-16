@@ -526,7 +526,7 @@
                         <tr>
                             <th>Item Code</th>
                             <th>Product Name</th>
-                            <th>Available Stock (kg)</th>
+                          
                             <th>Actions</th>
                         </tr>
                     </thead>

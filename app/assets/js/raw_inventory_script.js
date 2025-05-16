@@ -297,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     row.innerHTML = `
                         <td>${product.item_code}</td>
                         <td>${product.product_name}</td>
-                        <td>${product.available_stock}</td>
+                       
                     
                         <td>
                             <button class="delete-product" data-id="${product.item_code}">
