@@ -265,17 +265,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Insert sale item
             $stmt = $conn->prepare("
                 INSERT INTO pos_sale_items (
-                    sale_id, product_name, quantity, free_quantity, unit_price, 
+                    sale_id, lorry_stock_id, product_name, quantity, free_quantity, unit_price, 
                     discount_percent, discount_amount, subtotal
                 ) VALUES (
-                    ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?,
                     ?, ?, ?
                 )
             ");
             
+            $lorry_stock_id_to_insert = isset($item['lorry_stock_id']) && $item['lorry_stock_id'] ? (int)$item['lorry_stock_id'] : null;
+
             $stmt->bind_param(
-                "isiiiddd",
+                "iisiidddd", // Corrected type string
                 $sale_id,
+                $lorry_stock_id_to_insert,
                 $item['product_name'],
                 $item['quantity'],
                 $item['free_quantity'],
