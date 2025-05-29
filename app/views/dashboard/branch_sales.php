@@ -316,11 +316,12 @@
     $sql = "SELECT r.id as rep_id, r.username as rep_name, r.telephone as contact_number, r.Email as email, 
             COUNT(DISTINCT ls.product_name) AS total_products,
             SUM(ls.quantity) AS total_quantity,
-            SUM(ls.total_amount) AS total_amount
+            SUM(ls.quantity * ls.unit_price) AS total_amount
             FROM signup r
-            LEFT JOIN lorry_stock ls ON r.id = ls.rep_id
-            WHERE ls.status = 'active' AND r.job_role = 'rep'
-            GROUP BY r.id, r.username, r.telephone, r.Email";
+            LEFT JOIN lorry_stock ls ON r.id = ls.rep_id AND ls.status = 'active' /* Ensure join condition includes active stock */
+            WHERE r.job_role = 'rep'
+            GROUP BY r.id, r.username, r.telephone, r.Email
+            HAVING SUM(ls.quantity) IS NOT NULL"; /* Ensure reps with no active stock are not shown or handle NULLs */
 
     $result = mysqli_query($conn, $sql);
 
@@ -364,7 +365,7 @@
                         <p class="copy">Email: <?php echo htmlspecialchars($rep['email']); ?></p>
                         <p class="sales">Total Products: <?php echo number_format($rep['total_products']); ?></p>
                         <p class="sales">Total Quantity: <?php echo number_format($rep['total_quantity']); ?> units</p>
-                        <p class="sales">Total Amount: Rs.<?php echo number_format($rep['total_amount'], 2); ?></p>
+                        <p class="sales">Total Amount: Rs.<?php echo number_format($rep['total_amount'] ?? 0, 2); ?></p>
                         <button class="btn" onclick="showStockDetails(<?php echo $rep['id']; ?>)">View Stock Details</button>
                     </div>
                 </div>
@@ -441,6 +442,7 @@
                         `;
                         
                         data.items.forEach(item => {
+                            // item.total_amount is now pre-calculated as quantity * unit_price from get_rep_stock.php
                             tableHTML += `
                                 <tr>
                                     <td>${item.product_name}</td>
@@ -448,7 +450,7 @@
                                     <td>${item.barcode || 'N/A'}</td>
                                     <td>${item.quantity}</td>
                                     <td>${parseFloat(item.unit_price).toFixed(2)}</td>
-                                    <td>${parseFloat(item.total_amount).toFixed(2)}</td>
+                                    <td>${parseFloat(item.total_amount).toFixed(2)}</td> 
                                     <td>${item.status}</td>
                                 </tr>
                             `;
@@ -461,7 +463,7 @@
                                         <th colspan="3">Total</th>
                                         <th>${data.summary.total_quantity}</th>
                                         <th></th>
-                                        <th>${parseFloat(data.summary.total_amount).toFixed(2)}</th>
+                                        <th>${parseFloat(data.summary.total_amount).toFixed(2)}</th> 
                                         <th></th>
                                     </tr>
                                 </tfoot>

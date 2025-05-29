@@ -15,7 +15,7 @@ try {
     }
     
     $stmt = $conn->prepare("
-        SELECT product_name, SUM(quantity) as total_qty, SUM(total_amount) as total_value
+        SELECT product_name, SUM(quantity) as total_qty, SUM(total_amount) as total_value ,unit_price
         FROM lorry_stock 
         WHERE rep_id = ? AND status = 'active'
         GROUP BY product_name
@@ -36,7 +36,10 @@ try {
     
     while ($row = $lorry_stock->fetch_assoc()) {
         $temp_results[] = $row;
-        $grand_total += $row['total_value'];
+        // Ensure unit_price is available and numeric before calculation
+        if (isset($row['total_qty'], $row['unit_price']) && is_numeric($row['total_qty']) && is_numeric($row['unit_price'])) {
+            $grand_total += ($row['total_qty'] * $row['unit_price']);
+        }
     }
     
 } catch (Exception $e) {
@@ -133,7 +136,14 @@ try {
                                     <tr>
                                         <td><?php echo htmlspecialchars($item['product_name']); ?></td>
                                         <td><?php echo htmlspecialchars($item['total_qty']); ?></td>
-                                        <td>Rs. <?php echo number_format($item['total_value'], 2); ?></td>
+                                        <td>Rs. <?php 
+                                            // Ensure unit_price is available and numeric for display
+                                            if (isset($item['unit_price']) && is_numeric($item['unit_price'])) {
+                                                echo number_format($item['total_qty'] * $item['unit_price'], 2);
+                                            } else {
+                                                echo 'N/A'; // Or some other placeholder if unit_price is missing
+                                            }
+                                        ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>

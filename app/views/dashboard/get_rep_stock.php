@@ -53,12 +53,18 @@ try {
     // Fetch all items
     $items = [];
     $total_quantity = 0;
-    $total_amount = 0;
+    $calculated_grand_total_amount = 0; // Renamed for clarity during calculation
     
     while ($row = mysqli_fetch_assoc($stock_result)) {
+        $item_calculated_total = 0;
+        if (isset($row['quantity'], $row['unit_price']) && is_numeric($row['quantity']) && is_numeric($row['unit_price'])) {
+            $item_calculated_total = $row['quantity'] * $row['unit_price'];
+        }
+        $row['total_amount'] = $item_calculated_total; // Overwrite total_amount with calculated value
+
         $items[] = $row;
-        $total_quantity += $row['quantity'];
-        $total_amount += $row['total_amount'];
+        $total_quantity += (is_numeric($row['quantity']) ? $row['quantity'] : 0);
+        $calculated_grand_total_amount += $row['total_amount'];
     }
     
     // Return the data as JSON
@@ -68,7 +74,7 @@ try {
         'items' => $items,
         'summary' => [
             'total_quantity' => $total_quantity,
-            'total_amount' => $total_amount
+            'total_amount' => $calculated_grand_total_amount // Use the sum of calculated item totals
         ]
     ]);
     
