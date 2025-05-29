@@ -279,6 +279,93 @@
         #routesTable th {
             background-color: #f8f9fa;
         }
+
+        /* Search Form Styles */
+        .search-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-group label {
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #516173;
+        }
+
+        .search-input, 
+        .search-select {
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus,
+        .search-select:focus {
+            border-color: #4361ee;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-btn {
+            background-color: #4361ee;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            align-self: flex-end;
+        }
+
+        .search-btn:hover {
+            background-color: #3249c2;
+        }
+
+        .reset-btn {
+            background-color: #6c757d;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            align-self: flex-end;
+        }
+
+        .reset-btn:hover {
+            background-color: #5a6268;
+        }
+
+        .search-actions {
+            display: flex;
+            gap: 10px;
+        }
     </style>
 </head>
 
@@ -287,9 +374,19 @@
     require_once '../header1.php';
     require_once '../../../config/databade.php'; // Database connection
 
+    // Fetch all routes for the dropdown
+    $routes = [];
+    $routeQuery = "SELECT id, name FROM routes ORDER BY name";
+    $routeResult = mysqli_query($conn, $routeQuery);
+    if ($routeResult) {
+        while ($row = mysqli_fetch_assoc($routeResult)) {
+            $routes[] = $row;
+        }
+    }
+
     // Fetch customers from the database with credit_balance and route name included
     $customers = [];
-    $query = "SELECT c.id, c.name, c.telephone, c.nic, c.credit_limit, c.credit_balance, c.address, r.name as route_name 
+    $query = "SELECT c.id, c.name, c.telephone, c.nic, c.credit_limit, c.credit_balance, c.address, r.name as route_name, c.route_id 
               FROM customers c
               LEFT JOIN routes r ON c.route_id = r.id";
     $result = mysqli_query($conn, $query);
@@ -322,6 +419,31 @@
         </div>
         
         <?php require_once 'add_customer.php'; // Include add customer modal ?>
+
+        <!-- Search Form -->
+        <div class="search-container">
+            <div class="search-group">
+                <label for="routeFilter">Filter by Route</label>
+                <select id="routeFilter" class="search-select">
+                    <option value="">All Routes</option>
+                    <?php foreach ($routes as $route): ?>
+                        <option value="<?php echo htmlspecialchars($route['id']); ?>"><?php echo htmlspecialchars($route['name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="search-group">
+                <label for="customerSearch">Search by Name, Phone, or ID</label>
+                <input type="text" id="customerSearch" class="search-input" placeholder="Enter customer name, phone, or ID...">
+            </div>
+            <div class="search-actions">
+                <button type="button" id="resetSearch" class="reset-btn">
+                    <i class="fas fa-undo"></i> Reset
+                </button>
+                <button type="button" id="applySearch" class="search-btn">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </div>
 
         <!-- Route Management Modal -->
         <div class="modal fade" id="routeModal" tabindex="-1" role="dialog" aria-labelledby="routeModalLabel" aria-hidden="true">
@@ -379,7 +501,7 @@
                         <th width="18%">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="customerTableBody">
                     <?php
                     if (!empty($customers)) {
                         foreach ($customers as $index => $customer) {
@@ -394,7 +516,7 @@
                             // Get route name
                             $routeName = isset($customer['route_name']) ? htmlspecialchars($customer['route_name']) : '-';
 
-                            echo '<tr id="customer-row-' . htmlspecialchars($customerId) . '">';
+                            echo '<tr id="customer-row-' . htmlspecialchars($customerId) . '" data-route-id="' . htmlspecialchars($customer['route_id']) . '" data-customer-name="' . htmlspecialchars($customer['name']) . '" data-customer-phone="' . htmlspecialchars($customer['telephone']) . '" data-customer-id="' . htmlspecialchars($customerId) . '">';
                             echo '<td>' . ($index + 1) . '</td>';
                             echo '<td><strong>' . htmlspecialchars($customer['name']) . '</strong></td>';
                             echo '<td>' . htmlspecialchars($customer['telephone']) . '</td>';
@@ -577,6 +699,95 @@
         document.addEventListener('DOMContentLoaded', function() {
             const addRouteBtn = document.getElementById('addRouteBtn');
             const viewRoutesBtn = document.getElementById('viewRoutesBtn');
+            const routeFilter = document.getElementById('routeFilter');
+            const customerSearch = document.getElementById('customerSearch');
+            const applySearch = document.getElementById('applySearch');
+            const resetSearch = document.getElementById('resetSearch');
+            const customerRows = document.querySelectorAll('#customerTableBody tr');
+            
+            // Store original rows for reset functionality
+            const originalRows = Array.from(customerRows);
+            
+            // Handle search functionality
+            applySearch.addEventListener('click', function() {
+                filterCustomers();
+            });
+            
+            // Allow filtering by pressing Enter in the search field
+            customerSearch.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    filterCustomers();
+                }
+            });
+            
+            // Reset search fields and display all customers
+            resetSearch.addEventListener('click', function() {
+                routeFilter.value = '';
+                customerSearch.value = '';
+                
+                // Show all rows
+                const tableBody = document.getElementById('customerTableBody');
+                tableBody.innerHTML = '';
+                
+                originalRows.forEach((row, index) => {
+                    const clonedRow = row.cloneNode(true);
+                    const firstCell = clonedRow.querySelector('td:first-child');
+                    if (firstCell) {
+                        firstCell.textContent = index + 1;
+                    }
+                    tableBody.appendChild(clonedRow);
+                });
+            });
+            
+            function filterCustomers() {
+                const routeId = routeFilter.value.trim();
+                const searchTerm = customerSearch.value.trim().toLowerCase();
+                let visibleCount = 0;
+                
+                // Create a new table body to rebuild
+                const tableBody = document.getElementById('customerTableBody');
+                tableBody.innerHTML = '';
+                
+                originalRows.forEach(row => {
+                    const rowRouteId = row.dataset.routeId || '';
+                    const customerName = (row.dataset.customerName || '').toLowerCase();
+                    const customerPhone = (row.dataset.customerPhone || '').toLowerCase();
+                    const customerId = (row.dataset.customerId || '').toLowerCase();
+                    
+                    // Check if row matches both filters
+                    const matchesRoute = !routeId || rowRouteId === routeId;
+                    const matchesSearch = !searchTerm || 
+                                         customerName.includes(searchTerm) || 
+                                         customerPhone.includes(searchTerm) || 
+                                         customerId.includes(searchTerm);
+                    
+                    if (matchesRoute && matchesSearch) {
+                        // Clone the row to avoid modifying the original
+                        const clonedRow = row.cloneNode(true);
+                        
+                        // Update row number
+                        const firstCell = clonedRow.querySelector('td:first-child');
+                        if (firstCell) {
+                            visibleCount++;
+                            firstCell.textContent = visibleCount;
+                        }
+                        
+                        tableBody.appendChild(clonedRow);
+                    }
+                });
+                
+                // Show a message if no results found
+                if (visibleCount === 0) {
+                    const noResultsRow = document.createElement('tr');
+                    const noResultsCell = document.createElement('td');
+                    noResultsCell.setAttribute('colspan', '9');
+                    noResultsCell.style.textAlign = 'center';
+                    noResultsCell.style.padding = '20px';
+                    noResultsCell.textContent = 'No customers found matching your search criteria.';
+                    noResultsRow.appendChild(noResultsCell);
+                    tableBody.appendChild(noResultsRow);
+                }
+            }
             
             // Handle Add Route button click
             addRouteBtn.addEventListener('click', function() {

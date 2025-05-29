@@ -19,6 +19,25 @@ require_once '../../../../config/databade.php';
             <form id="customer-search-form" class="form-inline flex-grow-1 mr-2">
                 <div class="input-group w-100">
                     <input type="text" class="form-control" id="customer-search" name="search" placeholder="Search by name, phone or NIC">
+                    <select class="form-control ml-2" id="route-filter" name="route">
+                        <option value="">All Routes</option>
+                        <?php
+                        // Fetch routes for the dropdown
+                        try {
+                            $route_stmt = $conn->prepare("SELECT id, name FROM routes ORDER BY name");
+                            $route_stmt->execute();
+                            $route_result = $route_stmt->get_result();
+                            
+                            while ($route = $route_result->fetch_assoc()) {
+                                $selected = (isset($_GET['route']) && $_GET['route'] == $route['id']) ? 'selected' : '';
+                                echo "<option value='{$route['id']}' $selected>{$route['name']}</option>";
+                            }
+                            $route_stmt->close();
+                        } catch (Exception $e) {
+                            echo "<option value=''>Error loading routes</option>";
+                        }
+                        ?>
+                    </select>
                     <div class="input-group-append">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-search"></i> Search
@@ -53,9 +72,11 @@ require_once '../../../../config/databade.php';
                     <?php
                     // Fetch customers from database
                     $search_term = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : '%';
+                    $route_filter = isset($_GET['route']) && !empty($_GET['route']) ? $_GET['route'] : null;
                     
                     try {
-                        $stmt = $conn->prepare("
+                        // Modify the query to include route filtering
+                        $query = "
                             SELECT c.id, c.name, c.telephone, c.nic, c.address, c.whatsapp, c.credit_limit, c.credit_balance,
                                    COALESCE(ap.net_amount, 0) as advance_amount
                             FROM customers c
@@ -68,11 +89,24 @@ require_once '../../../../config/databade.php';
                                     GROUP BY customer_id
                                 )
                             ) ap ON c.id = ap.customer_id
-                            WHERE c.name LIKE ? OR c.telephone LIKE ? OR c.nic LIKE ?
-                            ORDER BY c.name
-                            LIMIT 50
-                        ");
-                        $stmt->bind_param("sss", $search_term, $search_term, $search_term);
+                            WHERE (c.name LIKE ? OR c.telephone LIKE ? OR c.nic LIKE ?)
+                        ";
+                        
+                        // Add route filter condition if selected
+                        if ($route_filter !== null) {
+                            $query .= " AND c.route_id = ?";
+                        }
+                        
+                        $query .= " ORDER BY c.name LIMIT 50";
+                        
+                        $stmt = $conn->prepare($query);
+                        
+                        if ($route_filter !== null) {
+                            $stmt->bind_param("sssi", $search_term, $search_term, $search_term, $route_filter);
+                        } else {
+                            $stmt->bind_param("sss", $search_term, $search_term, $search_term);
+                        }
+                        
                         $stmt->execute();
                         $result = $stmt->get_result();
                         
@@ -397,12 +431,17 @@ require_once '../../../../config/databade.php';
                         `<span class='${advanceClass}'>Rs. ${parseFloat(customer.advance_amount).toFixed(2)}</span>` : 
                         'Rs. 0.00';
                     
+                    // Format credit balance with color styling
+                    const creditBalanceVal = parseFloat(customer.credit_balance.replace(/,/g, ''));
+                    const creditBalanceClass = creditBalanceVal > 0 ? 'text-danger font-weight-bold' : '';
+                    const creditBalanceFormatted = `<span class='${creditBalanceClass}'>Rs. ${customer.credit_balance}</span>`;
+                    
                     html += `<tr>
                         <td>${customer.name}</td>
                         <td>${customer.telephone}</td>
                         <td>${customer.nic}</td>
                         <td>Rs. ${customer.credit_limit}</td>
-                        <td>Rs. ${customer.credit_balance}</td>
+                        <td>${creditBalanceFormatted}</td>
                         <td>${advanceAmount}</td>
                         <td>
                             <button class='btn btn-sm btn-info view-customer' data-id='${customer.id}' title='View Details'>
@@ -411,7 +450,7 @@ require_once '../../../../config/databade.php';
                             <button class='btn btn-sm btn-primary edit-customer' data-id='${customer.id}' title='Edit'>
                                 <i class='fas fa-edit'></i>
                             </button>
-                            <a href='{$base_url}/app/views/customers/payment.php?id=${customer.id}' class='btn btn-sm btn-success' title='Make Payment'>
+                            <a href='../customers/payment.php?id=${customer.id}' class='btn btn-sm btn-success' title='Make Payment'>
                                 <i class='fas fa-money-bill-wave'></i>
                             </a>
                         </td>
@@ -504,22 +543,27 @@ require_once '../../../../config/databade.php';
             e.preventDefault();
             
             const searchTerm = $('#customer-search').val();
+            const routeId = $('#route-filter').val();
+            
+            // Show loading indicator in table
+            $('#customers-table tbody').html('<tr><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></td></tr>');
             
             // Send AJAX request
             $.ajax({
                 url: 'process/search_customers.php',
                 type: 'GET',
-                data: { term: searchTerm },
+                data: { term: searchTerm, route: routeId },
                 dataType: 'json',
                 success: function(response) {
                     if (response.success) {
                         updateCustomerTable(response.customers);
                     } else {
-                        alert('Error: ' + response.message);
+                        $('#customers-table tbody').html('<tr><td colspan="7" class="text-center text-danger">' + response.message + '</td></tr>');
                     }
                 },
-                error: function() {
-                    alert('Error searching customers. Please try again.');
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error:", xhr.responseText);
+                    $('#customers-table tbody').html('<tr><td colspan="7" class="text-center text-danger">Error searching customers. Please try again.</td></tr>');
                 }
             });
         });
