@@ -206,6 +206,17 @@ try {
                 <i class="fas fa-history"></i>
                 <div class="tile-title">Return History</div>
             </div>
+            
+            <!-- Report Tile - New Addition -->
+            <div class="tile" id="report-tile" data-target="report-section" data-file="tile_report">
+                <i class="fas fa-file-alt"></i>
+                <div class="tile-title">Day end</div>
+            </div>
+               <!-- Report Tile - New Addition -->
+            <div class="tile" id="repreport-tile" data-target="rep-report-section" data-file="rep_sales_report">
+                <i class="fas fa-file-alt"></i>
+                <div class="tile-title"> rep Reports </div>
+            </div>
         </div>
         
         <!-- Dynamic Content Container -->
