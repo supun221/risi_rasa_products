@@ -77,15 +77,19 @@ try {
                 <form id="rep-sales-report-form">
                     <div class="row">
                         <div class="col-md-3 form-group">
-                            <label for="rep-sales-username">Select Rep:</label>
-                            <select id="rep-sales-username" class="form-control">
-                                <option value="">All Reps</option>
-                                <?php foreach($all_reps as $rep): ?>
-                                <option value="<?php echo $rep['id']; ?>" <?php echo $rep['id'] == $rep_id ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($rep['username']); ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <label for="rep-sales-username">Rep:</label>
+                            <?php 
+                            // Find the current rep's username
+                            $rep_username = '';
+                            foreach($all_reps as $rep) {
+                                if($rep['id'] == $rep_id) {
+                                    $rep_username = $rep['username'];
+                                    break;
+                                }
+                            }
+                            ?>
+                            <input type="text" class="form-control" value="<?php echo htmlspecialchars($rep_username); ?>" readonly>
+                            <input type="hidden" id="rep-sales-username" value="<?php echo $rep_id; ?>">
                         </div>
                         
                         <div class="col-md-3 form-group">

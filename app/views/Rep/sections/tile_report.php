@@ -409,7 +409,7 @@ try {
             </div>
 
             <!-- Today's Profit -->
-            <div class="col-md-4 mb-4">
+            <!-- <div class="col-md-4 mb-4">
                 <div class="card dashboard-tile h-100">
                     <div class="card-body">
                         <h5 class="card-title text-purple">Today's Profit</h5>
@@ -425,7 +425,7 @@ try {
                         <i class="fas fa-chart-pie fa-2x text-purple"></i>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Monthly Sales -->
             <div class="col-md-4 mb-4">
@@ -442,7 +442,7 @@ try {
             </div>
 
             <!-- Monthly Profit -->
-            <div class="col-md-4 mb-4">
+            <!-- <div class="col-md-4 mb-4">
                 <div class="card dashboard-tile h-100">
                     <div class="card-body">
                         <h5 class="card-title text-info">Monthly Profit</h5>
@@ -458,7 +458,7 @@ try {
                         <i class="fas fa-percentage fa-2x text-info"></i>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <!-- Payment Methods Section - Today -->
