@@ -15,11 +15,10 @@ try {
     }
     
     $stmt = $conn->prepare("
-        SELECT product_name, SUM(quantity) as total_qty, SUM(total_amount) as total_value ,unit_price
+        SELECT product_name, itemcode, quantity as total_qty, unit_price, (quantity * unit_price) as total_value
         FROM lorry_stock 
-        WHERE rep_id = ? AND status = 'active'
-        GROUP BY product_name
-        ORDER BY product_name
+        WHERE rep_id = ? AND status = 'active' AND quantity > 0
+        ORDER BY product_name, itemcode, unit_price
     ");
     
     if (!$stmt) {
@@ -125,6 +124,7 @@ try {
                     <table class="table table-striped">
                         <thead>
                             <tr>
+                                <th>Code</th>
                                 <th>Product</th>
                                 <th>Quantity</th>
                                 <th>Value</th>
@@ -134,6 +134,7 @@ try {
                             <?php if (isset($temp_results) && !empty($temp_results)): ?>
                                 <?php foreach ($temp_results as $item): ?>
                                     <tr>
+                                        <td><?php echo htmlspecialchars($item['itemcode'] ?? 'N/A'); ?></td>
                                         <td><?php echo htmlspecialchars($item['product_name']); ?></td>
                                         <td><?php echo htmlspecialchars($item['total_qty']); ?></td>
                                         <td>Rs. <?php 
@@ -148,13 +149,13 @@ try {
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="3" class="text-center">No items in lorry stock</td>
+                                    <td colspan="4" class="text-center">No items in lorry stock</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="2">Total Value</th>
+                                <th colspan="3">Total Value</th>
                                 <th>Rs. <?php echo isset($grand_total) ? number_format($grand_total, 2) : '0.00'; ?></th>
                             </tr>
                         </tfoot>
