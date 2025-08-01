@@ -183,6 +183,9 @@ foreach ($stock_items as $item) {
                             <option value="return">Return to Warehouse</option>
                             <option value="other">Other</option>
                         </select>
+                        <small class="form-text text-muted" id="reason-help-text" style="display: none;">
+                            <strong>Note:</strong> Items marked as "Damaged Goods" will be automatically added to the damage list for record keeping.
+                        </small>
                     </div>
                     
                     <div class="form-group">
@@ -356,8 +359,23 @@ $(document).ready(function() {
         $('#quick-retrieve-qty').val(1);
         $('#quick-retrieve-qty').attr('max', availableQty);
         
+        // Reset form
+        $('#quick-retrieve-reason').val('');
+        $('#quick-retrieve-note').val('');
+        $('#reason-help-text').hide();
+        
         // Show modal
         $('#quick-retrieve-modal').modal('show');
+    });
+    
+    // Show/hide help text based on selected reason
+    $('#quick-retrieve-reason').change(function() {
+        const selectedReason = $(this).val();
+        if (selectedReason === 'damage') {
+            $('#reason-help-text').fadeIn();
+        } else {
+            $('#reason-help-text').fadeOut();
+        }
     });
     
     // Confirm Quick Retrieve button click
@@ -408,10 +426,22 @@ $(document).ready(function() {
                 $('#quick-retrieve-modal').modal('hide');
                 
                 if (response.success) {
+                    // Customize success message based on reason
+                    let successMessage = response.message || 'Stock retrieved successfully.';
+                    let successTitle = 'Success';
+                    
+                    if (response.details && response.details.reason === 'damage') {
+                        successTitle = 'Damage Recorded';
+                        successMessage = 'Stock retrieved and saved to damage list successfully.';
+                    } else if (response.details && response.details.reason === 'return') {
+                        successTitle = 'Stock Returned';
+                        successMessage = 'Stock returned to warehouse successfully.';
+                    }
+                    
                     Swal.fire({
                         icon: 'success',
-                        title: 'Success',
-                        text: 'Stock retrieved successfully.'
+                        title: successTitle,
+                        text: successMessage
                     }).then(() => {
                         // Reload the page to reflect changes
                         location.reload();

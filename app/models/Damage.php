@@ -17,8 +17,8 @@ class Damage
     
         try {
             // Insert into damages table
-            $query = "INSERT INTO damages (product_name, damage_description, damage_quantity, price, barcode, date) 
-                      VALUES (?, ?, ?, ?, ?, DEFAULT)";
+            $query = "INSERT INTO damages (product_name, damage_description, damage_quantity, price, barcode, branch, date) 
+                      VALUES (?, ?, ?, ?, ?, 'main store', DEFAULT)";
             $stmt = mysqli_prepare($this->conn, $query);
             if (!$stmt) {
                 throw new Exception("Failed to prepare statement: " . mysqli_error($this->conn));

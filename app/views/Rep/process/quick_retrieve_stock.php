@@ -80,6 +80,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Calculate total value of retrieved items
         $total_amount = $quantity * $stock_item['unit_price'];
         
+        // Initialize variables for different reasons
+        $damage_id = null;
+        $new_available_stock = null;
+        
         // Update lorry_stock quantity or status if empty
         $status = $new_quantity <= 0 ? 'retrieved' : 'active';
         
@@ -104,6 +108,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Store the new available stock for response
             $new_available_stock = $stock_item['available_stock'] + $quantity;
+        }
+        
+        // If reason is 'damage', save to damage list
+        if ($reason === 'damage') {
+            // Prepare damage description from note or default
+            $damage_description = !empty($note) ? $note : 'Damaged goods retrieved from lorry stock';
+            
+            // Insert into damages table
+            $stmt = $conn->prepare("
+                INSERT INTO damages (product_name, damage_description, damage_quantity, price, barcode, branch, date) 
+                VALUES (?, ?, ?, ?, ?, 'main store', NOW())
+            ");
+            $stmt->bind_param("ssids", 
+                $stock_item['product_name'],
+                $damage_description,
+                $quantity,
+                $stock_item['unit_price'],
+                $stock_item['barcode']
+            );
+            
+            if (!$stmt->execute()) {
+                throw new Exception('Failed to save damage record: ' . $stmt->error);
+            }
+            
+            // Get the damage record ID for response
+            $damage_id = $conn->insert_id;
+            
+            // Update stock_entries to reduce available_stock for damaged goods
+            $stmt = $conn->prepare("
+                UPDATE stock_entries 
+                SET available_stock = available_stock - ? 
+                WHERE id = ?
+            ");
+            $stmt->bind_param("ii", $quantity, $stock_entry_id);
+            
+            if (!$stmt->execute()) {
+                throw new Exception('Failed to update main stock for damaged goods: ' . $stmt->error);
+            }
         }
         
         // Log transaction in lorry_transactions table
@@ -149,6 +191,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response['details']['new_warehouse_stock'] = $new_available_stock;
         } else {
             $response['details']['returned_to_warehouse'] = false;
+        }
+        
+        // Add info about damage record if applicable
+        if ($reason === 'damage' && $damage_id) {
+            $response['details']['saved_to_damage_list'] = true;
+            $response['details']['damage_id'] = $damage_id;
+            $response['message'] = 'Stock retrieved and saved to damage list successfully';
         }
         
     } catch (Exception $e) {
