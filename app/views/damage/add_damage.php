@@ -7,8 +7,50 @@
     <title>Add damage</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        .modal-header {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 8px 25px rgba(229, 62, 62, 0.2);
+        }
+
+        .form-control {
+            border: 2px solid #fed7d7;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #e53e3e;
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            border: none;
+            border-radius: 10px;
+        }
+
+        .btn-secondary {
+            background: #9f7aea;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #742a2a;
+        }
+    </style>
 
 </head>
 
@@ -20,8 +62,10 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addDamageModalLabel">Add Damage</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title" id="addDamageModalLabel">
+                        <i class="fas fa-plus-circle"></i> Add Damage Record
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white;">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -55,8 +99,10 @@
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <button type="submit" name="add_damage" class="btn btn-primary">Add</button>
-                        <button type="button" class="btn btn-secondary" onclick="closeAddDamageModal()">Cancel</button>
+                        <button type="submit" name="add_damage" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Add Damage
+                        </button>
+                     
                     </div>
                 </form>
             </div>
