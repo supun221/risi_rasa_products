@@ -36,6 +36,15 @@
                     </button>
                 </div>
             </div>
+            <div class="prod-op-sel-tile">
+                <div class="tile-option-cont">
+                    <h5 class="tile-heading">Final Product Assembly</h5>
+                    <p class="tile-info">This feature will allow you to convert bulk stock into finished retail items.</p>
+                    <button class="tile-nav-btn" id="final-product">
+                        Visit
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </body>
@@ -43,13 +52,18 @@
 <script>
     const singleProductionBtn = document.getElementById('single-ing-product')
     const multiProductionBtn = document.getElementById('multi-ing-product')
+    const finalProductionBtn = document.getElementById('final-product')
     
     singleProductionBtn.addEventListener('click', ()=>{
-        window.location.href = "./si_production.php"
+        window.location.href = "./si_production_new.php"
     })
 
     multiProductionBtn.addEventListener('click', ()=>{
-        window.location.href = "./mu_production.php"
+        window.location.href = "./mu_production_new.php"
+    })
+
+    finalProductionBtn.addEventListener('click', ()=>{
+        window.location.href = "./final_production.php"
     })
 </script>
 </html>

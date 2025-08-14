@@ -14,27 +14,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 document.addEventListener("DOMContentLoaded", async function () {
   try {
-    const response = await fetch("./logic/fetch_stock_entries_new.php");
-    current_stock_new = await response.json();
-    
-    // Add event listeners for barcode lookup after data is loaded
-    setupBarcodeListeners();
-  } catch (error) {
-    notifier.alert("Error fetching stock entries:", error);
-  }
-});
-
-document.addEventListener("DOMContentLoaded", async function () {
-  try {
-    const response = await fetch("./logic/fetch_raw_materials.php");
+    const response = await fetch("./logic/fetch_bulks.php");
     raw_materials = await response.json();
     const dropdown = document.getElementById("raw-ingredient-selector");
     raw_materials.forEach((entry) => {
       let option = document.createElement("option");
       option.value = entry.id;
-      const createdDate = new Date(entry.created_at);
-      const formattedDate = createdDate.toLocaleDateString();
-      option.textContent = `${entry.product_name} (Added: ${formattedDate})`;
+
+      option.textContent = `${entry.product_name} (barcode: ${entry.itemcode})`;
 
       option.dataset.stock = entry.available_stock;
       dropdown.appendChild(option);
@@ -473,7 +460,7 @@ const getCurrentDate = () => {
 
 const updateRawMaterialStock = async (id, new_stock) => {
   try {
-    const response = await fetch("./logic/update_raw_material_stock.php", {
+    const response = await fetch("./logic/update_production_bulk.php", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ id, new_stock }),
@@ -490,174 +477,3 @@ const updateRawMaterialStock = async (id, new_stock) => {
 };
 
 
-
-//new production feature
-async function createStockNew(
-  barcode,
-  productName,
-  availableStock
-) {
-  try {
-    const response = await fetch("./logic/create_stock_entry_new.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: `barcode=${barcode}&stock_id=0&product_name=${productName}&available_stock=${availableStock}`,
-    });
-
-    const data = await response.json();
-    console.log(data.message);
-  } catch (error) {
-    console.error("Error creating stock:", error);
-  }
-}
-
-async function updateStockNew(barcode,newStock) {
-  try {
-    const response = await fetch("./logic/update_stock_entry_new.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: `barcode=${barcode}&new_stock=${newStock}`,
-    });
-
-    const data = await response.text();
-    console.log(data);
-  } catch (error) {
-    console.error("Error updating stock:", error);
-  }
-}
-
-const findExistingStockNew = (barcode) => {
-  let designatedItem = current_stock_new.find((item) => {
-    if (
-      item.itemcode == barcode
-    ) {
-      return item;
-    }
-  });
-
-  return designatedItem;
-};
-
-
-
-
-const executeProductionNew = () => {
-  const inputWeight = parseFloat(
-    document.getElementById("raw-material-inp-amount").value
-  );
-  
-  loader.classList.remove("hide-spinner");
-  const materialItem = parseInt(
-    document.getElementById("raw-ingredient-selector").value
-  );
-  const tableRows = document.querySelectorAll("#produced-items-tb tbody tr");
-  const remainder = parseFloat(
-    document.getElementById("raw-material-rem-stock").value
-  );
-  const productionData = [];
-
-  tableRows.forEach((row) => {
-    const rowId = row.id.split("_")[1];
-    const barcode = document.getElementById(`new_item_barcode_${rowId}`).value;
-    const productName = document.getElementById(`new_item_name_${rowId}`).value;
-    const weight = document.getElementById(`new_item_weight_${rowId}`).value;
-
-    productionData.push({
-      barcode,
-      productName,
-      weight
-    });
-  });
-
-  productionData.forEach((item) => {
-    let existingStock = findExistingStockNew(item.barcode);
-
-    if (existingStock) {
-      const newStock = parseFloat(existingStock.available_stock) + parseFloat(item.weight);
-      updateStockNew(item.barcode, newStock);
-    } else {
-      createStockNew(
-        item.barcode,
-        item.productName,
-        item.weight,
-      );
-    }
-  });
-
-  updateRawMaterialStock(materialItem, parseInt(remainder - inputWeight));
-
-  setTimeout(() => {
-    loader.classList.add("hide-spinner");
-  }, 2000);
-  notifier.success("stock entries updated!");
-  setTimeout(() => {
-    window.location.reload();
-  }, 1000);
-};
-
-
-function setupBarcodeListeners() {
-  const barcodeInput = document.getElementById('new_item_barcode_0');
-  const nameInput = document.getElementById('new_item_name_0');
-  
-  if (barcodeInput && nameInput) {
-    barcodeInput.addEventListener('keypress', function(event) {
-      if (event.key === 'Enter') {
-        lookupItemByBarcode(this.value, nameInput);
-      }
-    });
-    
-    // Add event listener for focus out (blur)
-    barcodeInput.addEventListener('blur', function() {
-      lookupItemByBarcode(this.value, nameInput);
-    });
-  }
-}
-
-function lookupItemByBarcode(barcode, nameInputField) {
-  nameInputField.value = '';
-  
-  if (!barcode.trim()) {
-    return;
-  }
-  
-  // Search for the item in the current_stock_new array
-  const foundItem = current_stock_new.find(item => 
-    item.itemcode === barcode.trim()
-  );
-  
-  if (foundItem) {
-    nameInputField.value = foundItem.product_name;
-    
-    console.log('Found item:', foundItem);;
-  } else {
-    nameInputField.value = '';
-    nameInputField.placeholder = 'Item not found';
-
-    setTimeout(() => {
-      nameInputField.placeholder = '';
-    }, 3000);
-  }
-}
-
-// If you plan to add more rows dynamically, you can use this function
-function addBarcodeListenerToRow(rowIndex) {
-  const barcodeInput = document.getElementById(`new_item_barcode_${rowIndex}`);
-  const nameInput = document.getElementById(`new_item_name_${rowIndex}`);
-  
-  if (barcodeInput && nameInput) {
-    barcodeInput.addEventListener('keypress', function(event) {
-      if (event.key === 'Enter') {
-        lookupItemByBarcode(this.value, nameInput);
-      }
-    });
-    
-    barcodeInput.addEventListener('blur', function() {
-      lookupItemByBarcode(this.value, nameInput);
-    });
-  }
-}

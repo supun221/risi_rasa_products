@@ -14,6 +14,18 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 document.addEventListener("DOMContentLoaded", async function () {
   try {
+    const response = await fetch("./logic/fetch_stock_entries_new.php");
+    current_stock_new = await response.json();
+    
+    // Add event listeners for barcode lookup after data is loaded
+    setupBarcodeListeners();
+  } catch (error) {
+    notifier.alert("Error fetching stock entries:", error);
+  }
+});
+
+document.addEventListener("DOMContentLoaded", async function () {
+  try {
     const response = await fetch("./logic/fetch_raw_materials.php");
     raw_materials = await response.json();
     populateInitialRawMaterialDropdown();
@@ -539,5 +551,204 @@ async function updateRawMaterialStock(id, new_stock) {
   } catch (error) {
     console.error("Error updating stock:", error);
     return false;
+  }
+}
+
+
+
+//new production feature
+async function createStockNew(
+  barcode,
+  productName,
+  availableStock,
+) {
+  try {
+    const response = await fetch("./logic/create_stock_entry_new.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `barcode=${barcode}&stock_id=0&product_name=${productName}&available_stock=${availableStock}`,
+    });
+
+    const data = await response.json();
+    console.log(data.message);
+  } catch (error) {
+    console.error("Error creating stock:", error);
+  }
+}
+
+async function updateStockNew(barcode, newStock) {
+  try {
+    const response = await fetch("./logic/update_stock_entry_new.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `barcode=${barcode}&new_stock=${newStock}`,
+    });
+
+    const data = await response.text();
+    console.log(data);
+  } catch (error) {
+    console.error("Error updating stock:", error);
+  }
+}
+
+const findExistingStockNew = (barcode) => {
+  let designatedItem = current_stock_new.find((item) => {
+    if (
+      item.itemcode == barcode
+    ) {
+      return item;
+    }
+  });
+
+  return designatedItem;
+};
+
+
+const executeProductionNew = () => {
+  loader.classList.remove("hide-spinner");
+  const productionData = [];
+  const rawMaterialData = [];
+
+  // Collect raw material inputs
+  for (let i = 0; i <= ingredientRowCount; i++) {
+    const materialSelector = document.getElementById(
+      `raw-ingredient-selector-${i}`
+    );
+    const materialInput = document.getElementById(
+      `raw-material-inp-amount-${i}`
+    );
+    const remainderStock = document.getElementById(
+      `raw-material-rem-stock-${i}`
+    );
+
+    if (materialSelector && materialInput && remainderStock) {
+      if (
+        materialSelector.value !== "null" &&
+        parseFloat(materialInput.value) > 0
+      ) {
+        rawMaterialData.push({
+          id: parseInt(materialSelector.value),
+          inputAmount: parseFloat(materialInput.value),
+          remainingStock: parseFloat(remainderStock.value),
+        });
+      }
+    }
+  }
+
+  const tableRows = document.querySelectorAll("#produced-items-tb tbody tr");
+
+  tableRows.forEach((row) => {
+    const rowId = row.id.split("_")[1];
+    const barcode = document.getElementById(`new_item_barcode_${rowId}`).value;
+    const productName = document.getElementById(`new_item_name_${rowId}`).value;
+    const weight = document.getElementById(`new_item_weight_${rowId}`).value;
+
+    productionData.push({
+      barcode,
+      productName,
+      weight,
+    });
+  });
+
+  productionData.forEach((item) => {
+    let existingStock = findExistingStockNew(item.barcode);
+
+    if (existingStock) {
+      const newStock =
+        parseFloat(existingStock.available_stock) + parseFloat(item.weight);
+      updateStockNew(item.barcode, newStock);
+    } else {
+      createStockNew(
+        item.barcode,
+        item.productName,
+        item.weight,
+      );
+    }
+  });
+
+  // Update raw material stocks
+  rawMaterialData.forEach((material) => {
+    updateRawMaterialStock(
+      material.id,
+      parseInt(material.remainingStock - material.inputAmount)
+    );
+  });
+
+  setTimeout(() => {
+    loader.classList.add("hide-spinner");
+  }, 2000);
+  notifier.success("Stock entries updated!");
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
+};
+
+function setupBarcodeListeners() {
+  const barcodeInput = document.getElementById('new_item_barcode_0');
+  const nameInput = document.getElementById('new_item_name_0');
+  
+  if (barcodeInput && nameInput) {
+    // Add event listener for Enter key press
+    barcodeInput.addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        lookupItemByBarcode(this.value, nameInput);
+      }
+    });
+    
+    // Add event listener for focus out (blur)
+    barcodeInput.addEventListener('blur', function() {
+      lookupItemByBarcode(this.value, nameInput);
+    });
+  }
+}
+
+function lookupItemByBarcode(barcode, nameInputField) {
+  // Clear the name field first
+  nameInputField.value = '';
+  
+  // If barcode is empty, return
+  if (!barcode.trim()) {
+    return;
+  }
+  
+  // Search for the item in the current_stock_new array
+  const foundItem = current_stock_new.find(item => 
+    item.itemcode === barcode.trim()
+  );
+  
+  if (foundItem) {
+    nameInputField.value = foundItem.product_name;
+    
+    console.log('Found item:', foundItem);
+  } else {
+    // Optional: Show message if item not found
+    nameInputField.value = '';
+    nameInputField.placeholder = 'Item not found';
+
+    setTimeout(() => {
+      nameInputField.placeholder = '';
+    }, 3000);
+  }
+}
+
+// If you plan to add more rows dynamically, you can use this function
+function addBarcodeListenerToRow(rowIndex) {
+  const barcodeInput = document.getElementById(`new_item_barcode_${rowIndex}`);
+  const nameInput = document.getElementById(`new_item_name_${rowIndex}`);
+  
+  if (barcodeInput && nameInput) {
+    barcodeInput.addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        lookupItemByBarcode(this.value, nameInput);
+      }
+    });
+    
+    barcodeInput.addEventListener('blur', function() {
+      lookupItemByBarcode(this.value, nameInput);
+    });
   }
 }

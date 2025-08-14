@@ -63,6 +63,10 @@
   background-image: url("choclate.jpg");
 }
 
+.prod-op-sel-tile:nth-child(3) {
+  background-image: url("finalp.avif");
+}
+
 .tile-option-cont {
   width: 100%;
   padding: 10px 5px;
