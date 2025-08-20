@@ -104,12 +104,12 @@ class Customer
     public function getCustomerByPhone($phone_number)
     {
         $query = "%" . $phone_number . "%";
-        $sql = "SELECT id, name FROM customers WHERE telephone LIKE ?";
+        $sql = "SELECT id, name FROM customers WHERE telephone LIKE ? OR name LIKE ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         if (!$stmt) {
             throw new Exception("Failed to prepare statement: " . mysqli_error($this->conn));
         }
-        mysqli_stmt_bind_param($stmt, "s", $query);
+        mysqli_stmt_bind_param($stmt, "ss", $query, $query);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
 
