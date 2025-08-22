@@ -318,6 +318,25 @@ require_once '../header1.php';
                 <button class="rep_generate_btn" onclick="fetchProfitProductReport()">Run Report</button>
                 <button class="rep_generate_btn" onclick="printProfitProductReport()">Print Report</button>
             </div>
+
+            <!-- Rep Sales Profit Report (Product Wise) -->
+            <div class="report-btn-container">
+                <div class="report-heading-cont">
+                    <span class="report-name">Rep Sales Profit Report (Product Wise)</span>
+                </div>
+                <div class="total-stock-inputs">
+                    <!-- <select id="profit-category">
+                        <option value="">Select Category</option>
+                    </select> -->
+                    <input type="text" id="rep-profit-product-barcode" placeholder="Search by Product Barcode">
+                    <input type="date" id="rep-profitproduct-start-date">
+                    <input type="date" id="rep-profitproduct-end-date">
+                </div>
+                <p class="report-content">Generate a report of product profits.</p>
+                <button class="rep_generate_btn" onclick="fetchRepSalesProfitProductReport()">Run Report</button>
+                <button class="rep_generate_btn" onclick="printRepSalesProfitProductReport()">Print Report</button>
+            </div>
+
             <!-- repair report -->
             <div class="report-btn-container">
                 <div class="report-heading-cont">
@@ -1497,6 +1516,125 @@ function printProfitProductReport() {
     let endDate = document.getElementById("profitproduct-end-date").value;
 
     let url = `print_profit_product_report.php?category=${encodeURIComponent(category)}&barcode=${encodeURIComponent(barcode)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
+
+    let printWindow = window.open(url, '_blank');
+
+    if (printWindow) {
+        setTimeout(() => {
+            printWindow.focus();
+            printWindow.print();
+            printWindow.onafterprint = function() {
+                printWindow.close();
+            };
+        }, 1000); // Delay to ensure full page load
+    } else {
+        alert("Popup blocked! Allow popups for this site.");
+    }
+}
+
+
+
+// Function to fetch rep sales profit product report
+function fetchRepSalesProfitProductReport() {
+    // let category = document.getElementById("profit-category").value;
+    let barcode = document.getElementById("rep-profit-product-barcode").value;
+    let startDate = document.getElementById("rep-profitproduct-start-date").value;
+    let endDate = document.getElementById("rep-profitproduct-end-date").value;
+
+    let queryParams = new URLSearchParams({
+        // category: category,
+        barcode: barcode,
+        start_date: startDate,
+        end_date: endDate
+    });
+
+    let url = `fetch_rep_sales_profit_product_report.php?${queryParams.toString()}`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            $("#reportTitle").text("Rep Sales Profit Report (Product Wise)");
+            $("#reportModalLabel").text("Rep Sales Profit Report (Product Wise)");
+
+            let tableHeaders = `
+                <th>Product Name</th>
+                <th>Barcode</th>
+                <th>Total Quantity Sold</th>
+                <th>Cost Price</th>
+                <th>Discount (%)</th>
+                <th>Total Revenue</th>
+                <th>Total Cost</th>
+                <th>Profit</th>
+                <th>Profit %</th>
+            `;
+            
+            let tableBody = "";
+            let totalQuantitySold = 0;
+            let totalRevenue = 0;
+            let totalCost = 0;
+            let totalProfit = 0;
+
+            if (!data.success || data.data.length === 0) {
+                tableBody = "<tr><td colspan='9'>No profit records found.</td></tr>";
+            } else {
+                data.data.forEach(item => {
+                    let profit = parseFloat(item.total_revenue) - parseFloat(item.total_cost);
+                    let profitPercentage = parseFloat(item.total_cost) > 0 ? 
+                        ((profit / parseFloat(item.total_cost)) * 100).toFixed(2) + '%' : 'N/A';
+                    
+                    totalQuantitySold += parseInt(item.total_qty) || 0;
+                    totalRevenue += parseFloat(item.total_revenue) || 0;
+                    totalCost += parseFloat(item.total_cost) || 0;
+                    totalProfit += profit;
+
+                    tableBody += `
+                        <tr>
+                            <td>${item.product_name}</td>
+                            <td>${item.barcode || "N/A"}</td>
+                            <td>${item.total_qty}</td>
+                            <td>${parseFloat(item.cost_price).toFixed(2)}</td>
+                            <td>${parseFloat(item.avg_discount).toFixed(2)}%</td>
+                            <td>${parseFloat(item.total_revenue).toFixed(2)}</td>
+                            <td>${parseFloat(item.total_cost).toFixed(2)}</td>
+                            <td>${profit.toFixed(2)}</td>
+                            <td>${profitPercentage}</td>
+                        </tr>
+                    `;
+                });
+
+                // Calculate total profit percentage
+                let totalProfitPercentage = totalCost > 0 ? ((totalProfit / totalCost) * 100).toFixed(2) + '%' : 'N/A';
+
+                // Append total row
+                tableBody += `
+                    <tr style="font-weight: bold;">
+                        <td colspan="2" style="text-align:right;">Total:</td>
+                        <td>${totalQuantitySold}</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>${totalRevenue.toFixed(2)}</td>
+                        <td>${totalCost.toFixed(2)}</td>
+                        <td>${totalProfit.toFixed(2)}</td>
+                        <td>${totalProfitPercentage}</td>
+                    </tr>
+                `;
+            }
+
+            $("#reportTableHead").html(tableHeaders);
+            $("#reportTableBody").html(tableBody);
+            $("#reportModal").modal("show");
+        })
+        .catch(error => console.error("Error fetching profit report:", error));
+}
+
+// Function to print rep sales profit product report
+function printRepSalesProfitProductReport() {
+    //let category = document.getElementById("profit-category").value;
+    let barcode = document.getElementById("rep-profit-product-barcode").value;
+    let startDate = document.getElementById("rep-profitproduct-start-date").value;
+    let endDate = document.getElementById("rep-profitproduct-end-date").value;
+
+    let url = `print_rep_sales_profit_product_report.php?barcode=${encodeURIComponent(barcode)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
 
     let printWindow = window.open(url, '_blank');
 
