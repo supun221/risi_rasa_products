@@ -19,10 +19,10 @@ $telephone = $data['telephone'];
 $company = $data['company'];
 
 // Get the max supplier_id from the database
-$result = $conn->query("SELECT MAX(supplier_id) AS max_id FROM suppliers");
+$result = $conn->query("SELECT MAX(supplier_id) AS max_id FROM suppliers WHERE supplier_id NOT LIKE 'self_%'");
 $row = $result->fetch_assoc();
 
-$next_id = $row['max_id'] ? $row['max_id'] + 1 : 1; // If no records, start with 1
+$next_id = $row['max_id'] ? (int)$row['max_id'] + 1 : 1; // If no records, start with 1
 
 $sql = "INSERT INTO suppliers (supplier_id, supplier_name, telephone_no, company, branch) VALUES ('$next_id', '$name', '$telephone', '$company', '$user_branch')";
 
