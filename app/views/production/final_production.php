@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Single Ingredient Production</title>
+    <title>Final Product Assembly</title>
     <link rel="stylesheet" href="./si_production.styles.css">
     <link rel="stylesheet" href="../../assets/notifier/style.css">
     <script src="../../assets/notifier/index.var.js"></script>
@@ -29,7 +29,7 @@
             </div>
         </div>
 
-        <span class="container-headline">Single Ingredient Production</span>
+        <span class="container-headline">Final Product Assembly</span>
 
         <div class="si-content-container">
             <div class="si-content-upper">

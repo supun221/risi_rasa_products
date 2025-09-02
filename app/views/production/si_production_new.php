@@ -29,7 +29,7 @@
             </div>
         </div>
 
-        <span class="container-headline">Final Product Assembly</span>
+        <span class="container-headline">Single Ingredient Production</span>
 
         <div class="si-content-container">
             <div class="si-content-upper">
