@@ -1,6 +1,6 @@
 <?php
 // Database connection
-require_once '../../../config/database.php'; // Fixed the typo in database.php
+require_once '../../../config/databade.php'; // Fixed the typo in database.php
 
 // Get filter parameters
 $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
