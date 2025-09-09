@@ -1739,13 +1739,14 @@ document.addEventListener("DOMContentLoaded", function () {
       frameDoc.close();
     };
 
-    // Load the receipt immediately
     loadReceipt();
 
-    // Clean up after printing
     setTimeout(() => {
       document.body.removeChild(printFrame);
     }, 2000);
+    setTimeout(() => {
+      window.location.reload()
+    }, 4000);
   }
 
   // Modify your existing submitRefund function to include receipt generation
@@ -1764,11 +1765,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const row = input.closest("tr");
         refundData.push({
           bill_id: billID,
-          stock_id: row.children[0].textContent,
-          product_barcode: row.children[1].textContent,
-          product_name: row.children[2].textContent,
+          stock_id: row.children[0].textContent.trim(),
+          product_barcode: row.children[1].textContent.trim(),
+          product_name: row.children[2].textContent.trim(),
           return_quantity: returnQty,
-          refund_amount: parseFloat(row.children[8].textContent),
+          refund_amount:parseFloat(row.children[8].textContent.replace(/[^\d.-]/g, '')),
         });
       }
     });
