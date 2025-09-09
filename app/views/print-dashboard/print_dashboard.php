@@ -1442,7 +1442,7 @@ function fetchProfitProductReport() {
                 <th>Barcode</th>
                 <th>Total Quantity Sold</th>
                 <th>Cost Price</th>
-                <th>Discount (%)</th>
+                 
                 <th>Total Revenue</th>
                 <th>Total Cost</th>
                 <th>Profit</th>
@@ -1474,7 +1474,7 @@ function fetchProfitProductReport() {
                             <td>${item.barcode || "N/A"}</td>
                             <td>${item.total_qty}</td>
                             <td>${parseFloat(item.cost_price).toFixed(2)}</td>
-                            <td>${parseFloat(item.avg_discount).toFixed(2)}%</td>
+                             
                             <td>${parseFloat(item.total_revenue).toFixed(2)}</td>
                             <td>${parseFloat(item.total_cost).toFixed(2)}</td>
                             <td>${profit.toFixed(2)}</td>
@@ -1492,7 +1492,7 @@ function fetchProfitProductReport() {
                         <td colspan="2" style="text-align:right;">Total:</td>
                         <td>${totalQuantitySold}</td>
                         <td>-</td>
-                        <td>-</td>
+                         
                         <td>${totalRevenue.toFixed(2)}</td>
                         <td>${totalCost.toFixed(2)}</td>
                         <td>${totalProfit.toFixed(2)}</td>
@@ -1561,7 +1561,7 @@ function fetchRepSalesProfitProductReport() {
                 <th>Barcode</th>
                 <th>Total Quantity Sold</th>
                 <th>Cost Price</th>
-                <th>Discount (%)</th>
+                
                 <th>Total Revenue</th>
                 <th>Total Cost</th>
                 <th>Profit</th>
@@ -1593,7 +1593,7 @@ function fetchRepSalesProfitProductReport() {
                             <td>${item.barcode || "N/A"}</td>
                             <td>${item.total_qty}</td>
                             <td>${parseFloat(item.cost_price).toFixed(2)}</td>
-                            <td>${parseFloat(item.avg_discount).toFixed(2)}%</td>
+                            
                             <td>${parseFloat(item.total_revenue).toFixed(2)}</td>
                             <td>${parseFloat(item.total_cost).toFixed(2)}</td>
                             <td>${profit.toFixed(2)}</td>
@@ -1611,7 +1611,7 @@ function fetchRepSalesProfitProductReport() {
                         <td colspan="2" style="text-align:right;">Total:</td>
                         <td>${totalQuantitySold}</td>
                         <td>-</td>
-                        <td>-</td>
+                        
                         <td>${totalRevenue.toFixed(2)}</td>
                         <td>${totalCost.toFixed(2)}</td>
                         <td>${totalProfit.toFixed(2)}</td>

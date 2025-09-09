@@ -44,12 +44,12 @@ if (!empty($barcode)) {
 }
 
 if (!empty($startDate)) {
-    $sql .= " AND DATE(ps.transaction_date) >= ?";
+    $sql .= " AND DATE(ps.sale_date) >= ?";
     $params[] = $startDate;
 }
 
 if (!empty($endDate)) {
-    $sql .= " AND DATE(ps.transaction_date) <= ?";
+    $sql .= " AND DATE(ps.sale_date) <= ?";
     $params[] = $endDate;
 }
 
@@ -201,8 +201,8 @@ $reportDate = date("Y-m-d H:i:s");
                 <th>Product Name</th>
                 <th>Barcode</th>
                 <th>Qty Sold</th>
-                <th>Cost Price</th>
-                <th>Selling Price</th>
+                <th>Avg Cost Price</th>
+                <th>Avg Selling Price</th>
                 <th>Revenue</th>
                 <th>Cost</th>
                 <th>Profit</th>

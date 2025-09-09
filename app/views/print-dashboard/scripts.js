@@ -24,12 +24,17 @@ function fetchCategories() {
         .then(data => {
             let categorySelect = document.getElementById("category");
             let lowCategorySelect = document.getElementById("low-category");
+            let salesCategory = document.getElementById("profit-category");
+
             categorySelect.innerHTML = '<option value="">Select Category</option>';
             lowCategorySelect.innerHTML = '<option value="">All Category</option>';
+            salesCategory.innerHTML = '<option value="">All Category</option>';
+
             data.forEach(category => {
                 let option = `<option value="${category}">${category}</option>`;
                 categorySelect.innerHTML += option;
                 lowCategorySelect.innerHTML += option;
+                salesCategory.innerHTML += option;
             });
         })
         .catch(error => console.error("Error fetching categories:", error));
